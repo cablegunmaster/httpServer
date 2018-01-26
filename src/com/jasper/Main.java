@@ -7,7 +7,7 @@ import com.jasper.view.View;
 public class Main {
 
     public static void main(String[] args) {
-        int portNumber = 80;
+        int portNumber = 8000;
 
         if (args.length > 0) {
             try {

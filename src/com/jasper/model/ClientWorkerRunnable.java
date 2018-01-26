@@ -2,12 +2,12 @@ package com.jasper.model;
 
 import com.jasper.controller.CommandController;
 import com.jasper.controller.Controller;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
 
@@ -87,14 +87,21 @@ public class ClientWorkerRunnable implements Runnable {
 
         } catch (SocketException e) {
             System.err.println("Disconnected client by a Socket error, probably disconnected by user.");
+            System.err.println(e);
+            e.printStackTrace();
         } catch (IOException e) {
             //report somewhere
-            e.printStackTrace();
             System.err.println("Disconnected client by Input output error");
+            System.err.println(e);
+            e.printStackTrace();
         } catch (Exception e) {
-            e.getCause();
             System.err.println("Disconnected client by a general exception.");
-            e.getStackTrace();
+            System.err.println(e);
+            e.printStackTrace();
+        } catch (Throwable e) {
+            System.err.println("Disconnected client by a Throwable exception!");
+            System.err.println(e);
+            e.printStackTrace();
         }
     }
 
