@@ -91,8 +91,7 @@ public class View {
         middleContainer = new JPanel();
         middleContainer.setLayout(new GridLayout(0, 2));
 
-
-        //retrieve the textareaScrollPane
+        //retrieve the incoming label
         JScrollPane receivingLogTextArea = setReceivingLogTextArea();
         JLabel serverLogLabel = new JLabel("Incoming Log");
         serverLogLabel.setPreferredSize(new Dimension(125, 100));
@@ -101,12 +100,10 @@ public class View {
         JLabel outgoingLoglabel = new JLabel("Outgoing Log:");
         JScrollPane outgoingLogPane = setOutgoingTextArea();
 
-
-        //Middle part of view.
         //retrieve the loggedInTextPane
-        JScrollPane loggedInTextArea = setLoggedInTextArea();
-        JLabel connectedUserLabel = new JLabel("Connected Users:");
-        connectedUserLabel.setPreferredSize(new Dimension(125, 100));
+//        JScrollPane loggedInTextArea = setLoggedInTextArea();
+//        JLabel connectedUserLabel = new JLabel("Connected Users:");
+//        connectedUserLabel.setPreferredSize(new Dimension(125, 100));
 
         //adds the Scrollpanel to the panel.
         middleContainer.add(serverLogLabel, BorderLayout.CENTER);
@@ -137,18 +134,18 @@ public class View {
         return jscrollpane;
     }
 
-    public JScrollPane setLoggedInTextArea() {
-        loggedInUsersTextArea = new JTextArea();
-        loggedInUsersTextArea.setLineWrap(false); //makes sure no line gets wrapped.
-        loggedInUsersTextArea.setWrapStyleWord(false);
-        loggedInUsersTextArea.setEditable(false);
-
-        jscrollpane = new JScrollPane(loggedInUsersTextArea);
-        jscrollpane.setVerticalScrollBarPolicy(
-                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        jscrollpane.setPreferredSize(new Dimension(300, 100));
-        return jscrollpane;
-    }
+//    public JScrollPane setLoggedInTextArea() {
+//        loggedInUsersTextArea = new JTextArea();
+//        loggedInUsersTextArea.setLineWrap(false); //makes sure no line gets wrapped.
+//        loggedInUsersTextArea.setWrapStyleWord(false);
+//        loggedInUsersTextArea.setEditable(false);
+//
+//        jscrollpane = new JScrollPane(loggedInUsersTextArea);
+//        jscrollpane.setVerticalScrollBarPolicy(
+//                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+//        jscrollpane.setPreferredSize(new Dimension(300, 100));
+//        return jscrollpane;
+//    }
 
     /**
      * Set the Log textarea combining the JScrollpane with the textarea.

@@ -1,18 +1,23 @@
-package com.jasper.model;
+package com.jasper.model.request;
 
-import com.jasper.model.requestenums.RequestType;
+import com.jasper.model.request.requestenums.RequestType;
+import com.jasper.model.request.requestenums.StatusCode;
+import java.io.File;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Model for a request to be send / used.
  */
 public class HttpRequest {
 
-    //standard a GET otherwise a post.
-    private RequestType requestMethod = RequestType.GET;
+    private RequestType requestMethod = null;
     private String requestpath = ""; //request path "/index.html"
     private String localPath = ""; //Local directory, should be set from a properties file.
+    private StatusCode statusCode = null;
 
-    HttpRequest() {
+    private File content = null; //file reference, for content the <HTML> etc of the request.
+
+    public HttpRequest() {
     }
 
     public void setRequestMethod(RequestType requestMethod) {
@@ -39,11 +44,49 @@ public class HttpRequest {
         this.localPath = localPath;
     }
 
+    public void setStatusCode(StatusCode statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public StatusCode getStatusCode() {
+        return statusCode;
+    }
+
     /**
      * Get the full request as a String.
      */
     @Override
     public String toString() {
-        return requestMethod.toString();
+        StringBuffer buffer = new StringBuffer();
+
+
+        byte[] s = null;
+
+        //TODO missing sending request numbers like 200, 404, 500 etc..
+        String content =
+                "<html>" +
+                        "<body>" +
+                        "<h1>This in a succesfull request</h1>" +
+                        "</body>" +
+                        "</html>";
+
+        buffer.append("HTTP/1.1 200 OK\r\n");
+
+        //read the amount of bytes;
+        byte[] contentInBytes = null;
+
+        try {
+            contentInBytes = content.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        buffer.append("Content-Length: " + contentInBytes.length + "\r\n");
+        buffer.append("Content-Type: text/html; charset=utf-8");
+        buffer.append("\r\n\r\n");
+        buffer.append(content);
+        buffer.append("\r\n\r\n");
+
+        return buffer.toString();
     }
 }

@@ -1,4 +1,4 @@
-package com.jasper;
+package com.jasper.main;
 
 import com.jasper.controller.Controller;
 import com.jasper.model.Model;
@@ -14,7 +14,7 @@ public class Main {
                 portNumber = Integer.parseInt(args[0]);
             } catch (Exception parseException) {
                 System.err.println("No valid portnumber found: returning to basic port 8081");
-                portNumber = 80; //assign one if none given.
+                portNumber = 8081; //assign one if none given.
             }
         }
 

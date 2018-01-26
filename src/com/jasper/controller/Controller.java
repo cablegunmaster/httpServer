@@ -26,9 +26,9 @@ public class Controller {
 
     /**
      * Java.Controller class which grabs all.
-     * @param m
-     * @param v
-     * @param portNumber
+     * @param m model
+     * @param v view
+     * @param portNumber portnumber
      */
     public Controller(Model m, View v, Integer portNumber) {
         this.model = m;
@@ -51,7 +51,7 @@ public class Controller {
     }
 
     /**
-     * Add a String to the log.
+     * Add a String to the Console log.
      * @param line String value put in the view.
      */
     public synchronized void addStringToLog(String line) {
@@ -63,12 +63,24 @@ public class Controller {
     }
 
     /**
-     * Clear the log.
+     * Add the content to the OUTPUT log
+     */
+    public synchronized void addStringToOutputLog(String line) {
+        view.getOutgoingTextArea().setText("");
+        view.getOutgoingTextArea().append(line + "\r\n");
+        int len = view.getOutgoingTextArea().getDocument().getLength();
+
+        view.getOutgoingTextArea().setCaretPosition(len);
+        view.refresh();
+    }
+
+    /**
+     * Clear the logs
+     * TODO should work with reset.
      */
     public synchronized void clearLog() {
         view.setReceivingLogTextArea();
         view.setOutgoingTextArea();
-        view.setLoggedInTextArea();
     }
 
     /**
