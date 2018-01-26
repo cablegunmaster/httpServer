@@ -92,7 +92,7 @@ public class ClientWorkerRunnable implements Runnable {
             System.err.println(e);
             e.printStackTrace();
         } finally {
-            System.out.println("END OF REQUEST");
+            System.out.println("End of request on [" + Thread.currentThread().getName()+ "]");
         }
     }
 

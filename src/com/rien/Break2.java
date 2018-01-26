@@ -1,11 +1,9 @@
 package com.rien;
 
 import java.io.BufferedOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.Charset;
-import java.util.Random;
 
 /**
  * User: rnentjes
