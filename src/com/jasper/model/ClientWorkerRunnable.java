@@ -34,6 +34,7 @@ public class ClientWorkerRunnable implements Runnable {
 
     @Override
     public void run() {
+        System.out.println("Connecting on [" + Thread.currentThread().getName()+ "]");
 
         try {
             isReceivingInput = true;
