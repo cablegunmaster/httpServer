@@ -2,6 +2,7 @@ package com.jasper.model;
 
 import com.jasper.controller.CommandController;
 import com.jasper.controller.Controller;
+import com.jasper.model.request.HttpRequest;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,7 +19,8 @@ public class ClientWorkerRunnable implements Runnable {
 
     protected Socket clientSocket;
     private Controller controller;
-    private OutputStream os;
+    private OutputStream out;
+    private InputStream in;
     private BufferedReader reader = null;
     private CommandController commandController;
     private boolean isReceivingInput;
@@ -34,56 +36,42 @@ public class ClientWorkerRunnable implements Runnable {
     public void run() {
 
         try {
-
             isReceivingInput = true;
-            InputStream inputStream = clientSocket.getInputStream();
-            os = clientSocket.getOutputStream();
-            //printWriter = new PrintWriter(os, true);
+            in = clientSocket.getInputStream();
+            out = clientSocket.getOutputStream();
 
+            HttpRequest request = new HttpRequest();
+            //TODO missing timeout.
             while (isReceivingInput()) {
-                String stringFromInput = readInputStream(inputStream); //Read input from stream.
+                String stringFromInput = readInputStream(in); //Read input from stream.
                 if (stringFromInput != null && stringFromInput.equals("")) {
                     controller.addStringToLog(stringFromInput); //add to screen
-                }else{
+
+                } else {
+                    commandController.procesCommand(this, stringFromInput, request);
                     isReceivingInput = false;
                 }
             }
 
-            byte[]s = null;
-            byte[]contentInBytes = null;
-
-            String content="\r\n\r\n" +
-                    "<html>" +
-                        "<body>" +
-                            "<h1>This is á succesfull request</h1>" +
-                        "</body>" +
-                    "</html>" +
-              "\r\n\r\n";
-
-            String t="HTTP/1.1 200 OK\r\n";
-            s=t.getBytes("UTF-8");
-            os.write(s);
-
-            contentInBytes = content.getBytes("UTF-8");
-            t="Content-Length: "+contentInBytes.length+"\r\n";
-            s=t.getBytes("UTF-8");
-            os.write(s);
-            t="Content-Type: text/html; charset=utf-8";
-            s=t.getBytes("UTF-8");
-            os.write(s);
-            os.write(contentInBytes);
-
+            //send request.
+            out.write(request.toString().getBytes("UTF-8"));
+            controller.addStringToOutputLog(request.toString());
             controller.addStringToLog("Succesfully disconnected client.");
             controller.getModel().removeConnection(this);
 
             try {
-                if(clientSocket.isConnected()) {
+                if (clientSocket.isConnected()) {
+                    out.flush();
+                    out.close();
                     clientSocket.close();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                controller.addStringToLog("Error closing the socket");
+            } finally {
+                clientSocket.close();
+                controller.addStringToLog("Error closing the socket");
             }
-
 
         } catch (SocketException e) {
             System.err.println("Disconnected client by a Socket error, probably disconnected by user.");
