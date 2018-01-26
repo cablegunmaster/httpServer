@@ -57,7 +57,7 @@ public class HttpRequest {
      */
     @Override
     public String toString() {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
 
         byte[] s = null;
 
@@ -80,7 +80,12 @@ public class HttpRequest {
             e.printStackTrace();
         }
 
-        buffer.append("Content-Length: ").append(contentInBytes.length).append("\r\n");
+        Integer contentLength = 0;
+        if (contentInBytes != null) {
+            contentLength = contentInBytes.length;
+        }
+
+        buffer.append("Content-Length: ").append(contentLength).append("\r\n");
         buffer.append("Content-Type: text/html; charset=utf-8");
         buffer.append("\r\n\r\n");
         buffer.append(content);

@@ -56,7 +56,7 @@ public class ClientWorkerRunnable implements Runnable {
             //send request.
             out.write(request.toString().getBytes("UTF-8"));
             controller.addStringToOutputLog(request.toString());
-            controller.addStringToLog("Succesfully disconnected client.");
+            controller.addStringToLog("Successfully  disconnected client.");
             controller.getModel().removeConnection(this);
 
             try {
