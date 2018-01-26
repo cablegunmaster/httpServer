@@ -1,6 +1,9 @@
 package com.jasper.controller;
 
 import com.jasper.model.ClientWorkerRunnable;
+import com.jasper.model.request.HttpRequest;
+import com.jasper.model.request.requestenums.RequestType;
+
 /**
  * Created by jasper wil.lankhorst on 12-3-2017.
  */
@@ -15,37 +18,31 @@ CommandController {
 
     /**
      * Command to be processed by the server.
+     *
      * @param runnable Runnable client.
      * @param input    String of input from a client.
      */
-    public void procesCommand(ClientWorkerRunnable runnable, String input) {
-        String[] pieces = input.split(" ", 3);
-        String command = null;
-        String player = null;
-        String rest = null;
+    public void procesCommand(ClientWorkerRunnable runnable,
+                                     String input,
+                                     HttpRequest request) {
 
-        if (pieces.length >= 1) {
-            command = pieces[0];
-        } else {
-            command = input;
-        }
+        //GET request.
+        if (input.contains("GET") || input.contains("POST")) {
+            request.setRequestMethod(RequestType.GET);
 
-        if (pieces.length >= 2) {
-            player = pieces[1];
-        }
-
-        if (pieces.length >= 3) {
-            rest = pieces[2];
-        }
-
-        switch (command) {
-            //Show list of users.
-            case "":
-                break;
-            default:
-                break;
+            //here we get the path.
+            //Ex. 'GET / HTTP/1.1'
+            String[] command = input.split(" ", 3); //split on spaces.
+            if (command.length == 3) {
+                String path = command[1]; //getPath;
+                if (path.equals("/")) {
+                    request.setRequestpath("index.html");
+                }
+            }
+        }else{
+            //should be a status Errorcode not a valid request.
+            //request
         }
     }
-
 
 }
