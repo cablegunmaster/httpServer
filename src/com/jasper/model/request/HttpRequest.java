@@ -59,14 +59,13 @@ public class HttpRequest {
     public String toString() {
         StringBuffer buffer = new StringBuffer();
 
-
         byte[] s = null;
 
         //TODO missing sending request numbers like 200, 404, 500 etc..
         String content =
                 "<html>" +
                         "<body>" +
-                        "<h1>This in a succesfull request</h1>" +
+                        "<h1>This is á successful request</h1>" +
                         "</body>" +
                         "</html>";
 
@@ -81,7 +80,7 @@ public class HttpRequest {
             e.printStackTrace();
         }
 
-        buffer.append("Content-Length: " + contentInBytes.length + "\r\n");
+        buffer.append("Content-Length: ").append(contentInBytes.length).append("\r\n");
         buffer.append("Content-Type: text/html; charset=utf-8");
         buffer.append("\r\n\r\n");
         buffer.append(content);

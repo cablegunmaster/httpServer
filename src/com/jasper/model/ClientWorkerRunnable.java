@@ -90,6 +90,8 @@ public class ClientWorkerRunnable implements Runnable {
             System.err.println("Disconnected client by a Throwable exception!");
             System.err.println(e);
             e.printStackTrace();
+        } finally {
+            System.out.println("END OF REQUEST");
         }
     }
 

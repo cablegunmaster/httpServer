@@ -1,5 +1,6 @@
 package com.rien;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -23,7 +24,7 @@ public class Break1 {
 
         try{
             Socket socket = new Socket("localhost", port);
-            OutputStream out =socket.getOutputStream();
+            OutputStream out = new BufferedOutputStream(socket.getOutputStream());
             int count = 1;
 
             while(count > 0) {
