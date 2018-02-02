@@ -19,7 +19,7 @@ public class Break2 {
         try{
             int count = 0;
 
-            while(count++ < 10000) {
+            while(count++ < 1000) {
                 System.out.println("Connection "+count);
 
                 Socket socket = new Socket("localhost", port);
@@ -33,6 +33,5 @@ public class Break2 {
             e.printStackTrace();
             System.exit(1);
         }
-
     }
 }

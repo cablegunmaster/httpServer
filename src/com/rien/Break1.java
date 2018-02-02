@@ -17,6 +17,9 @@ public class Break1 {
         Random random = new Random(System.nanoTime());
 
         try{
+
+            System.out.println("Start break#1");
+
             Socket socket = new Socket("localhost", port);
             OutputStream out = new BufferedOutputStream(socket.getOutputStream(), 256);
 
@@ -27,9 +30,10 @@ public class Break1 {
                 }
             }
         } catch  (IOException e) {
+            System.out.println("Request denied.");
+
             e.printStackTrace();
             System.exit(1);
         }
-
     }
 }
