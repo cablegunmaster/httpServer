@@ -31,8 +31,11 @@ public class MultiThreadedServer implements Runnable {
         openServerSocket();
 
         while (!isStopped()) {
+
             Socket clientSocket = awaitIncomingConnection();
-            sendRequest(clientSocket);
+            if(!isStopped()) {
+                sendRequest(clientSocket);
+            }
         }
         controller.addStringToLog("[ OK ] Server Thread exiting....");
     }
@@ -41,7 +44,13 @@ public class MultiThreadedServer implements Runnable {
         Socket clientSocket = null;
         try {
             controller.addStringToLog("[ OK ] Server is awaiting connections...");
+
+            this.serverSocket.setReuseAddress(true);
             clientSocket = this.serverSocket.accept();
+
+            clientSocket.setSoTimeout(500); //timeout to make a clientsocket Idle.
+            clientSocket.setSoLinger(true, 30000); //timeout to close the socket.
+
         } catch (SocketException e) {
             isStopped = true;
             clientSocket = null;

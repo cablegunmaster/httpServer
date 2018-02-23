@@ -24,7 +24,7 @@ als de header groter is dan X aantal (x nog opzoeken )dan krijg je een 413
   than the server is willing or able to process."
 https://httpstatuses.com/413
 
-Headers bevatten /r/n als einde van de regel.
+Headers bevatten \r\n als einde van de regel.
 
 Value length van een Header, als deze langer is dan X of ongeldige karakters bevat (uitzoeken welke kunnen) 
 als langer dan toegestaan (Header value mismatch exception ) response terugsturen met status code XXX.
@@ -44,8 +44,8 @@ Uitvoering: Accept socket, niet uitlezen (overslaan) en gelijk 503 status code t
 ##response
 Een header status met een response status code.
 Content-length (als er content is)
-Header regel eindigt met /r/n
-Headers eindigen met /r/n/r/n
+Header regel eindigt met \r\n
+Headers eindigen met \r\n\r\n
 
 Bron:
 https://tools.ietf.org/html/rfc7230

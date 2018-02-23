@@ -3,7 +3,6 @@ package com.jasper.model;
 import com.jasper.controller.CommandController;
 import com.jasper.controller.Controller;
 import com.jasper.model.request.HttpRequest;
-
 import com.jasper.model.request.requestenums.RequestType;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,7 +24,7 @@ public class ClientWorkerRunnable implements Runnable {
     private InputStream in;
     private BufferedReader reader = null;
     private CommandController commandController;
-    private AtomicBoolean isReceivingInput= new AtomicBoolean(true);
+    private AtomicBoolean isReceivingInput = new AtomicBoolean(true);
     private boolean isTimedOut;
 
     ClientWorkerRunnable(Socket clientSocket, Controller controller) {
@@ -36,7 +35,7 @@ public class ClientWorkerRunnable implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("Connecting on [" + Thread.currentThread().getName()+ "]");
+        System.out.println("Connecting on [" + Thread.currentThread().getName() + "]");
 
         try {
             in = clientSocket.getInputStream();
@@ -62,27 +61,17 @@ public class ClientWorkerRunnable implements Runnable {
             controller.addStringToLog("Successfully  disconnected client.");
             controller.getModel().removeConnection(this);
 
-            try {
-                out.flush();
-                out.close();
-                clientSocket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-                controller.addStringToLog("Error closing the socket");
-            } finally {
-                clientSocket.close();
-                controller.addStringToLog("Error closing the socket");
-            }
+
 
         } catch (SocketException e) {
             System.err.println("Disconnected client by a Socket error, probably disconnected by user.");
-            System.err.println(e);
-            e.printStackTrace();
+            //System.err.println(e);
+            //e.printStackTrace();
         } catch (IOException e) {
             //report somewhere
             System.err.println("Disconnected client by Input output error");
-            System.err.println(e);
-            e.printStackTrace();
+            //System.err.println(e);
+            //e.printStackTrace();
         } catch (Exception e) {
             System.err.println("Disconnected client by a general exception.");
             System.err.println(e);
@@ -92,7 +81,17 @@ public class ClientWorkerRunnable implements Runnable {
             System.err.println(e);
             e.printStackTrace();
         } finally {
-            System.out.println("End of request on [" + Thread.currentThread().getName()+ "]");
+            System.out.println("End of request on [" + Thread.currentThread().getName() + "]");
+
+            try {
+                in.close();
+                out.flush();
+                out.close();
+                clientSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+                controller.addStringToLog("Error closing the socket");
+            }
         }
     }
 
@@ -114,26 +113,26 @@ public class ClientWorkerRunnable implements Runnable {
         RequestType requestType = null;
 
         while ((c = reader.read()) != -1) {
-            response.append( Character.toChars(c) );
+            response.append(Character.toChars(c));
             System.out.println(response);
 
             //When request length is 7 check if valid request, keep going if it is.
-            if(response.length() < 7){
+            if (response.length() < 7) {
                 //check request is valid.
 
                 String requestTypeIncoming = response.toString();
                 //Go through all requestTypes.
-                for(RequestType request : RequestType.values()){
+                for (RequestType request : RequestType.values()) {
 
                     //start with these names
                     String[] inputString = requestTypeIncoming.split(" ");
-                    if(request.name().startsWith(requestTypeIncoming.toUpperCase()) || inputString.length == 2){
-                        if(inputString[0] != null && inputString.length == 2) {
+                    if (request.name().startsWith(requestTypeIncoming.toUpperCase()) || inputString.length == 2) {
+                        if (inputString[0] != null && inputString.length == 2) {
                             requestType = RequestType.valueOf(inputString[0]);
                             break;
                         }
 
-                    }else{
+                    } else {
                         //no valid input found.
                         System.out.println("Invalid request found");
                         break;
@@ -141,7 +140,7 @@ public class ClientWorkerRunnable implements Runnable {
                 }
             }
 
-            if(requestType != null || response.length() > 8){
+            if (requestType != null || response.length() > 8) {
                 break;
             }
         }
