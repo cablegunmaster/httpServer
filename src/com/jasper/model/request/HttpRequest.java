@@ -15,8 +15,6 @@ public class HttpRequest {
     private String localPath = ""; //Local directory, should be set from a properties file.
     private StatusCode statusCode = null;
 
-    private File content = null; //file reference, for content the <HTML> etc of the request.
-
     public HttpRequest() {
     }
 

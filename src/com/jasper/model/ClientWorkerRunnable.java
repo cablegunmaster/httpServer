@@ -1,9 +1,9 @@
 package com.jasper.model;
 
-import com.jasper.controller.CommandController;
 import com.jasper.controller.Controller;
+import com.jasper.model.request.RequestParser;
 import com.jasper.model.request.HttpRequest;
-import com.jasper.model.request.requestenums.RequestType;
+import com.jasper.model.request.requestenums.StatusCode;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +11,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by Jasper Lankhorst on 20-11-2016.
@@ -23,14 +22,10 @@ public class ClientWorkerRunnable implements Runnable {
     private OutputStream out;
     private InputStream in;
     private BufferedReader reader = null;
-    private CommandController commandController;
-    private AtomicBoolean isReceivingInput = new AtomicBoolean(true);
-    private boolean isTimedOut;
 
     ClientWorkerRunnable(Socket clientSocket, Controller controller) {
         this.clientSocket = clientSocket;
         this.controller = controller;
-        commandController = controller.getCommandController();
     }
 
     @Override
@@ -42,26 +37,27 @@ public class ClientWorkerRunnable implements Runnable {
             out = clientSocket.getOutputStream();
 
             HttpRequest request = new HttpRequest();
-            while (isReceivingInput()) {
+            //Becomes more like read headers before reading and responding to the rest.
+            String stringFromInput = readInputStream(in, request); //Read input from stream.
 
-                //Becomes more like read headers before reading and responding to the rest.
-                String stringFromInput = readInputStream(in); //Read input from stream.
-
-                if (stringFromInput != null && stringFromInput.equals("")) {
-                    controller.addStringToLog(stringFromInput); //add to screen
-                } else {
-                    commandController.procesCommand(this, stringFromInput, request);
-                    isReceivingInput.set(false);
-                }
+            if (stringFromInput.equals("")) {
+                controller.addStringToLog(stringFromInput); //add to screen
+            } else {
+                new RequestParser(controller).procesCommand(this, stringFromInput, request);
             }
 
             //send request.
             out.write(request.toString().getBytes("UTF-8"));
             controller.addStringToOutputLog(request.toString());
-            controller.addStringToLog("Successfully  disconnected client.");
+
+            //if not error.
+            if(request.getStatusCode() == StatusCode.OK) {
+                controller.addStringToLog("[Succes] parsed client");
+            } else {
+                controller.addStringToLog("[Error]  disconnected client.");
+            }
+
             controller.getModel().removeConnection(this);
-
-
 
         } catch (SocketException e) {
             System.err.println("Disconnected client by a Socket error, probably disconnected by user.");
@@ -95,57 +91,43 @@ public class ClientWorkerRunnable implements Runnable {
         }
     }
 
-    private boolean isTimedOut() {
-        return isTimedOut;
-    }
+    private String readInputStream(InputStream inputStream, HttpRequest request) throws IOException {
 
-    private boolean isReceivingInput() {
-        return isReceivingInput.get();
-    }
-
-    private String readInputStream(InputStream inputStream) throws IOException {
-        int c;
         if (reader == null) {
             reader = new BufferedReader(new InputStreamReader(inputStream));
         }
 
         StringBuilder response = new StringBuilder();
-        RequestType requestType = null;
+        Boolean isReadingRequest = true;
 
-        while ((c = reader.read()) != -1) {
+
+        //Do all reading from socket errors here.
+
+        while (isReadingRequest) {
+
+            int c = reader.read();
             response.append(Character.toChars(c));
-            System.out.println(response);
 
-            //When request length is 7 check if valid request, keep going if it is.
-            if (response.length() < 7) {
-                //check request is valid.
+            //Request a error state when the stream is closed on http1.1?
 
-                String requestTypeIncoming = response.toString();
-                //Go through all requestTypes.
-                for (RequestType request : RequestType.values()) {
+            //Parameter variable length of request. 7K
+            //413 Entity too large
+            if(response.length() > 8192){
+                return "413";
+            }
 
-                    //start with these names
-                    String[] inputString = requestTypeIncoming.split(" ");
-                    if (request.name().startsWith(requestTypeIncoming.toUpperCase()) || inputString.length == 2) {
-                        if (inputString[0] != null && inputString.length == 2) {
-                            requestType = RequestType.valueOf(inputString[0]);
-                            break;
-                        }
-
-                    } else {
-                        //no valid input found.
-                        System.out.println("Invalid request found");
-                        break;
-                    }
+            if(response.length() > 4 ){
+                //get the last part.
+                String lastPart = response.substring(response.length() - 4 , response.length());
+                if(lastPart.contains("\r\n\r\n")){
+                    isReadingRequest = false; // reading completed succesfully
                 }
             }
-
-            if (requestType != null || response.length() > 8) {
-                break;
-            }
+                //URI LENGTH
+                //Note: Servers ought to be cautious about depending on URI lengths above 255 bytes, because some older client or proxy
+                //implementations might not properly support these lengths.
         }
 
-        //Check next part the content length when length is wrong return 400 statuscode.
         return response.toString();
     }
 

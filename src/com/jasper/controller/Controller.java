@@ -20,7 +20,6 @@ public class Controller {
     private Controller controller;
     private int portnumber;
     private Thread multiThreadedServerThread;
-    private CommandController commandController;
 
     private static Boolean restartProces = false;
 
@@ -34,7 +33,6 @@ public class Controller {
         this.model = m;
         this.view = v;
         this.controller = this;
-        this.commandController = new CommandController(this);
 
         portnumber = portNumber;
         setListeners(); //all listeners on 1 function.
@@ -177,9 +175,4 @@ public class Controller {
     public View getView() {
         return view;
     }
-
-    public CommandController getCommandController() {
-        return commandController;
-    }
-
 }
