@@ -2,7 +2,6 @@ package com.jasper.model.request;
 
 import com.jasper.model.request.requestenums.RequestType;
 import com.jasper.model.request.requestenums.StatusCode;
-import java.io.File;
 import java.io.UnsupportedEncodingException;
 
 /**
@@ -51,10 +50,12 @@ public class HttpRequest {
     }
 
     /**
-     * Get the full request as a String.
+     * Output of the whole file, the full request as a String to be send back to the client.
+     * TODO improve this toString function to be able to send back an extra support.
      */
     @Override
     public String toString() {
+
         StringBuilder buffer = new StringBuilder();
 
         byte[] s = null;

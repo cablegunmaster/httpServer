@@ -1,8 +1,8 @@
 package com.jasper.model;
 
 import com.jasper.controller.Controller;
-import com.jasper.model.request.RequestParser;
 import com.jasper.model.request.HttpRequest;
+import com.jasper.model.request.RequestParser;
 import com.jasper.model.request.requestenums.StatusCode;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -38,13 +38,7 @@ public class ClientWorkerRunnable implements Runnable {
 
             HttpRequest request = new HttpRequest();
             //Becomes more like read headers before reading and responding to the rest.
-            String stringFromInput = readInputStream(in, request); //Read input from stream.
-
-            if (stringFromInput.equals("")) {
-                controller.addStringToLog(stringFromInput); //add to screen
-            } else {
-                new RequestParser(controller).procesCommand(this, stringFromInput, request);
-            }
+            request = readInputStream(in, request); //Read input from stream.
 
             //send request.
             out.write(request.toString().getBytes("UTF-8"));
@@ -91,7 +85,14 @@ public class ClientWorkerRunnable implements Runnable {
         }
     }
 
-    private String readInputStream(InputStream inputStream, HttpRequest request) throws IOException {
+    /**
+     * Read and parse characters from the stream, at the same time.
+     * @param inputStream
+     * @param request
+     * @return whole request?
+     * @throws IOException
+     */
+    private HttpRequest readInputStream(InputStream inputStream, HttpRequest request) throws IOException {
 
         if (reader == null) {
             reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -100,35 +101,32 @@ public class ClientWorkerRunnable implements Runnable {
         StringBuilder response = new StringBuilder();
         Boolean isReadingRequest = true;
 
+        RequestParser requestParser = new RequestParser();
 
-        //Do all reading from socket errors here.
-
-        while (isReadingRequest) {
+        while (isReadingRequest && !reader.ready()) {
 
             int c = reader.read();
             response.append(Character.toChars(c));
 
             //Request a error state when the stream is closed on http1.1?
 
-            //Parameter variable length of request. 7K
-            //413 Entity too large
-            if(response.length() > 8192){
-                return "413";
-            }
+            requestParser.parseRequest(response.toString(), request);
 
-            if(response.length() > 4 ){
+            //Content-length, you can find the end length, only in STATE X?
+            if(response.length() > 4){
                 //get the last part.
                 String lastPart = response.substring(response.length() - 4 , response.length());
                 if(lastPart.contains("\r\n\r\n")){
                     isReadingRequest = false; // reading completed succesfully
                 }
             }
-                //URI LENGTH
-                //Note: Servers ought to be cautious about depending on URI lengths above 255 bytes, because some older client or proxy
-                //implementations might not properly support these lengths.
         }
 
-        return response.toString();
+        if (response.toString().equals("")) {
+            controller.addStringToLog(response.toString()); //show request on screen.
+        }
+
+        return request;
     }
 
 }

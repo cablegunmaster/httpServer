@@ -17,9 +17,8 @@ public class Controller {
     private Model model;
     private View view;
     private MultiThreadedServer multiThreadedServer;
-    private Controller controller;
-    private int portnumber;
     private Thread multiThreadedServerThread;
+    private int portnumber;
 
     private static Boolean restartProces = false;
 
@@ -32,11 +31,10 @@ public class Controller {
     public Controller(Model m, View v, Integer portNumber) {
         this.model = m;
         this.view = v;
-        this.controller = this;
 
         portnumber = portNumber;
         setListeners(); //all listeners on 1 function.
-        controller.startServer(portnumber);
+        startServer(portnumber);
     }
 
     /**
@@ -87,15 +85,15 @@ public class Controller {
      */
     public synchronized void startServer(Integer portNumber) {
 
-        multiThreadedServer = new MultiThreadedServer(portNumber, controller); //gets view to send log messages.
+        multiThreadedServer = new MultiThreadedServer(portNumber, this); //gets view to send log messages.
 
         if (multiThreadedServerThread == null) {
             //add lines to Textarea view.
-            controller.addStringToLog("Starting up server. PID: " + ManagementFactory.getRuntimeMXBean().getName());
+            addStringToLog("Starting up server. PID: " + ManagementFactory.getRuntimeMXBean().getName());
             multiThreadedServerThread = new Thread(multiThreadedServer);
             multiThreadedServerThread.start();
 
-            controller.addStringToLog("[ OK ] Server is started on portnumber: " + portnumber);
+            addStringToLog("[ OK ] Server is started on portnumber: " + portnumber);
         }
 
     }
