@@ -8,6 +8,10 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
+/**
+ * https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
+ * 5.1.2 Request-URI
+ */
 public class readURITest {
 
     private RequestParser parser;
@@ -19,17 +23,23 @@ public class readURITest {
         parser = new RequestParser();
     }
 
+    /**
+     * Check a valid request.
+     */
     @Test
     public void setHttpRequestWithValidUrl() {
-        String stringToTest = "GET /index.html";
+        String stringToTest = "GET /index.html h";
 
         parser.setParseState(ParseState.READING_URI);
         parser.parseRequest(stringToTest, httpRequest);
 
-        assertTrue("No url yet found", httpRequest.getRequestMethod() == httpRequest.getRequestMethod());
-        assertTrue("Reading Method still not yet finished", parser.getParseState().isReadingHttpVersion());
+        assertTrue("URL index page found", httpRequest.getRequestpath() != null);
+        assertTrue("Set to Reading HTTP version", parser.getParseState().isReadingHttpVersion());
     }
 
+    /**
+     * Check to see which Chars are invalid.
+     */
     @Test
     public void setHttpRequestWithInvalidEntity() {
         String stringToTest = "GET /@%@#%*@#()";
@@ -38,28 +48,29 @@ public class readURITest {
         parser.parseRequest(stringToTest, httpRequest);
 
         assertTrue("URL Invalid", httpRequest.getRequestMethod() == null);
-        assertTrue("Reading Method still not yet finished", parser.getParseState().isReadingMethod());
+        assertTrue("Set to ERROR", parser.getParseState().isErrorState());
     }
 
     @Test
-    public void setHttpRequestWithNoEntityExpectingIndex() {
+    public void setHttpRequestWithNoEntityExpectingStillReading() {
         String stringToTest = "GET /";
 
         parser.setParseState(ParseState.READING_URI);
         parser.parseRequest(stringToTest, httpRequest);
 
-        assertTrue("url found", httpRequest.getRequestpath().equals("index.html"));
-        assertTrue("Reading Method still not yet finished", parser.getParseState().isReadingHttpVersion());
+        assertTrue("url found but not yet finished. ", httpRequest.getRequestpath().equals("/"));
+        assertTrue("Set to Reading HTTP URI", parser.getParseState().isReadingURI());
     }
 
+    //One space is only allowed.
     @Test
     public void setHttpRequestWithSpaces() {
-        String stringToTest = "GET   ";
+        String stringToTest = "GET  ";
 
-        parser.setParseState(ParseState.READING_URI);
+        parser.setParseState(ParseState.READING_METHOD);
         parser.parseRequest(stringToTest, httpRequest);
 
         assertTrue("No url yet found", httpRequest.getRequestMethod() == null);
-        assertTrue("Reading Method still not yet finished", parser.getParseState().isReadingMethod());
+        assertTrue("Reading Method set to ERROR", parser.getParseState().isErrorState());
     }
 }

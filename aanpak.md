@@ -1,5 +1,10 @@
 #HttpServer aanpak
 Aanpak van de HttpServer. 
+
+Per regel dit gebruiken om het uit te lezen.
+https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
+Request-Line   = Method SP Request-URI SP HTTP-Version CRLF
+
 ##Request
 
 ###Timeout

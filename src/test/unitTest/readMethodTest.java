@@ -12,6 +12,9 @@ import static org.junit.Assert.assertTrue;
  * Test to see if the unit:
  * ReadMethod would actually return a RequestType.
  *
+ * Conform to: https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
+ * 5.1.1 Method
+ *
  * To test if the transition :
  *  READ_METHOD to READ_URI works.
  *  READ_METHOD to ERROR works.

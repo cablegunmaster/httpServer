@@ -43,13 +43,12 @@ public class RequestParser {
             readMethod(inputString, request);
         }
 
-        if(parseState.isReadingURI()) {
+        if (parseState.isReadingURI()) {
+            parseUri(inputString, request);
+        }
 
-//            if(){
-//
-//            }
-//            uri =
-//            parseUri(uri,request);
+        if (parseState.isReadingHttpVersion()) {
+            parseHttpMethod(inputString, request);
         }
 
         //URI LENGTH
@@ -91,17 +90,64 @@ public class RequestParser {
     }
 
     /**
-     * InputString it only the URI
-     * @param uri
-     * @param request
+     * HTTP/1.1 or HTTP/2.0 or HTTP/1.0 or HTTP/0.9
+     * Consists of HTTP[/]MajorVersion.Minorversion.
+     *
+     * @param inputString the third space from the httpVersion.
+     * @param request     HttpRequest.
      */
-    private void parseUri(String uri, HttpRequest request) {
+    private void parseHttpMethod(String inputString, HttpRequest request) {
+
+        String[] splittedUri = inputString.split(" ");
+
+        if (splittedUri.length >= 3) {
+            String httpVersion = splittedUri[2];
+
+            //check the HTTP  forward slash , and major minor is a number with no front zero.
+
+            if (httpVersion.endsWith("/r/n") && !parseState.isErrorState()) {
+                parseState = ParseState.READING_HEADER_KEY;
+            }
+        }
+    }
+
+    /**
+     * InputString it only the URI, should check if it has invalid characters in it.
+     *
+     * @param inputString the input of the String.
+     * @param request     the request that is going on.
+     */
+    private void parseUri(String inputString, HttpRequest request) {
+
+        String[] splittedUri = inputString.split(" ");
+
+        //length is always 2.
+        if (splittedUri.length >= 2) {
+            String uri = splittedUri[1];
+
+            //most likely urls who are longer as 255 chars are invalid.
+            if (uri.length() > 255) {
+                request.setStatusCode(StatusCode.URI_TOO_LONG);
+                parseState = ParseState.ERROR; //414 URI Too Long
+            }
+
+            //make a check for HTTP , HTTPS, should be bigger to check appropiately, for valid chars.
+            if (uri.startsWith("/") || uri.startsWith("H")) {
+                request.setRequestpath(uri);
+            }
+
+            //if ready for next part and no error is found.
+            if (splittedUri.length == 3 && !parseState.isErrorState()) {
+                parseState = ParseState.READING_HTTP_VERSION;
+            }
+        }
     }
 
     /**
      * Once its found to be in a RequestType
      * Checks if its starting with until it found a valid RequestType
      * Transition to Error, or READ_URI [parseState].
+     *
      * @param inputString
      * @param request
      */
@@ -114,7 +160,7 @@ public class RequestParser {
             String[] inputSplit = inputString.split(" ");
 
             //error if its not the same.
-            if(inputSplit.length == 1 && requestTypeItem.name().startsWith(inputString.toUpperCase())){
+            if (inputSplit.length == 1 && requestTypeItem.name().startsWith(inputString.toUpperCase())) {
                 startsWithRequestTypeFound = true;
             }
 
@@ -131,7 +177,7 @@ public class RequestParser {
             }
         }
 
-        if(!startsWithRequestTypeFound){
+        if (!startsWithRequestTypeFound) {
             request.setStatusCode(StatusCode.BAD_REQUEST);
             parseState = ParseState.ERROR;
         }
