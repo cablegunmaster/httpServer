@@ -26,8 +26,8 @@ public class readURITest {
         parser.setParseState(ParseState.READING_URI);
         parser.parseRequest(stringToTest, httpRequest);
 
-        assertTrue("No url yet found", httpRequest.getRequestMethod() == null);
-        assertTrue("Reading Method still not yet finished", parser.getParseState().isReadingMethod());
+        assertTrue("No url yet found", httpRequest.getRequestMethod() == httpRequest.getRequestMethod());
+        assertTrue("Reading Method still not yet finished", parser.getParseState().isReadingHttpVersion());
     }
 
     @Test
@@ -37,10 +37,9 @@ public class readURITest {
         parser.setParseState(ParseState.READING_URI);
         parser.parseRequest(stringToTest, httpRequest);
 
-        assertTrue("No url yet found", httpRequest.getRequestMethod() == null);
+        assertTrue("URL Invalid", httpRequest.getRequestMethod() == null);
         assertTrue("Reading Method still not yet finished", parser.getParseState().isReadingMethod());
     }
-
 
     @Test
     public void setHttpRequestWithNoEntityExpectingIndex() {

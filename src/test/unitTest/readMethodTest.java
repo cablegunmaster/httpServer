@@ -9,8 +9,12 @@ import org.junit.Test;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Test to see if the unit Read method would actually return a method type.
- * To test if the transition from Read_method to read URI works.
+ * Test to see if the unit:
+ * ReadMethod would actually return a RequestType.
+ *
+ * To test if the transition :
+ *  READ_METHOD to READ_URI works.
+ *  READ_METHOD to ERROR works.
  */
 public class readMethodTest {
 
