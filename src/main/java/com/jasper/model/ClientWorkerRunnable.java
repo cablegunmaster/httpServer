@@ -103,7 +103,7 @@ public class ClientWorkerRunnable implements Runnable {
 
         RequestParser requestParser = new RequestParser();
 
-        while (isReadingRequest && !reader.ready()) {
+        while (isReadingRequest && reader.ready()) {
 
             int c = reader.read();
             response.append(Character.toChars(c));
