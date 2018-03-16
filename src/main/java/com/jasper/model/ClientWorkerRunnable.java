@@ -37,14 +37,11 @@ public class ClientWorkerRunnable implements Runnable {
             out = clientSocket.getOutputStream();
 
             HttpRequest request = new HttpRequest();
-            //Becomes more like read headers before reading and responding to the rest.
             request = readInputStream(in, request); //Read input from stream.
 
-            //send request.
-            out.write(request.toString().getBytes("UTF-8"));
+            out.write(request.toString().getBytes("UTF-8"));  //send request.
             controller.addStringToOutputLog(request.toString());
 
-            //if not error.
             if(request.getStatusCode() == StatusCode.OK) {
                 controller.addStringToLog("[Succes] parsed client");
             } else {
@@ -105,21 +102,8 @@ public class ClientWorkerRunnable implements Runnable {
 
         while (isReadingRequest && reader.ready()) {
 
-            int c = reader.read();
-            response.append(Character.toChars(c));
-
-            //Request a error state when the stream is closed on http1.1?
-
-            requestParser.parseRequest(response.toString(), request);
-
-            //Content-length, you can find the end length, only in STATE X?
-            if(response.length() > 4){
-                //get the last part.
-                String lastPart = response.substring(response.length() - 4 , response.length());
-                if(lastPart.contains("\r\n\r\n")){
-                    isReadingRequest = false; // reading completed succesfully
-                }
-            }
+            char c = (char) reader.read();
+            requestParser.nextCharacter(c);
         }
 
         if (response.toString().equals("")) {

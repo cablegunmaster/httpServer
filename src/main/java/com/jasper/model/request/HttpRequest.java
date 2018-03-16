@@ -1,8 +1,11 @@
 package com.jasper.model.request;
 
 import com.jasper.model.request.requestenums.RequestType;
+import com.jasper.model.request.requestenums.State;
 import com.jasper.model.request.requestenums.StatusCode;
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Model for a request to be send / used.
@@ -10,9 +13,17 @@ import java.io.UnsupportedEncodingException;
 public class HttpRequest {
 
     private RequestType requestMethod = null;
-    private String requestpath = ""; //request path "/index.html"
-    private String localPath = ""; //Local directory, should be set from a properties file.
+    private String requestpath = null; //request path "/index.html"
+    private String localPath = null; //Local directory, should be set from a properties file.
     private StatusCode statusCode = null;
+    private Long httpVersion;
+
+    private State state = State.READ_METHOD;
+    private StringBuilder method = new StringBuilder();
+    private Map<String, String> headers = new HashMap<>();
+
+    private StringBuilder headerName = new StringBuilder();
+    private StringBuilder headerValue = new StringBuilder();
 
     public HttpRequest() {
     }
@@ -47,6 +58,50 @@ public class HttpRequest {
 
     public StatusCode getStatusCode() {
         return statusCode;
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State status) {
+        this.state = status;
+    }
+
+    public StringBuilder getMethod() {
+        return method;
+    }
+
+    public void setMethod(StringBuilder method) {
+        this.method = method;
+    }
+
+    public void setHttpVersion(long httpVersion) {
+        this.httpVersion = httpVersion;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public void setHeaders(Map<String, String> headers) {
+        this.headers = headers;
+    }
+
+    public StringBuilder getHeaderName() {
+        return headerName;
+    }
+
+    public void setHeaderName(StringBuilder headerName) {
+        this.headerName = headerName;
+    }
+
+    public StringBuilder getHeaderValue() {
+        return headerValue;
+    }
+
+    public void setHeaderValue(StringBuilder headerValue) {
+        this.headerValue = headerValue;
     }
 
     /**

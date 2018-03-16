@@ -1,24 +1,13 @@
 package com.jasper.model.request;
 
+import com.jasper.model.request.requestenums.State;
 import java.util.HashMap;
 import java.util.Map;
 
 public class RequestParserExample {
 
-    private enum Status {
-        READ_METHOD,
-        READ_URI,
-        READ_HTTP,
-        READ_HEADER_NAME,
-        READ_HEADER_VALUE,
-        READ_BODY,
-        DONE,
-        ERROR,
-        ;
-    }
-
     public class Request {
-        private Status status = Status.READ_METHOD;
+        private State status = State.READ_METHOD;
         private StringBuilder method = new StringBuilder();
         private Map<String, String> headers = new HashMap<>();
 
@@ -28,7 +17,7 @@ public class RequestParserExample {
 
     private Request request = new Request();
     private char[] buffer = new char[4];
-    private int bufferIndex;
+    private int bufferIndex = 0;
 
     private boolean hasSpace() {
         return buffer[bufferIndex] == ' ';
@@ -48,11 +37,12 @@ public class RequestParserExample {
         // buffer remove first, buffer.append(c)
         buffer[bufferIndex] = c;
         bufferIndex = bufferIndex % buffer.length;
+        bufferIndex++;
 
         switch(request.status) {
             case READ_METHOD:
                 if (hasSpace()) {
-                    request.status = Status.READ_URI;
+                    request.status = State.READ_URI;
                 } else {
                     request.method.append(c);
                 }

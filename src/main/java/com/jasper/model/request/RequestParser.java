@@ -1,7 +1,7 @@
 package com.jasper.model.request;
 
-import com.jasper.model.request.requestenums.ParseState;
 import com.jasper.model.request.requestenums.RequestType;
+import com.jasper.model.request.requestenums.State;
 import com.jasper.model.request.requestenums.StatusCode;
 
 /**
@@ -9,84 +9,72 @@ import com.jasper.model.request.requestenums.StatusCode;
  */
 public class RequestParser {
 
-    private ParseState parseState;
+    private HttpRequest request = new HttpRequest();
+    private char[] buffer = new char[4];
+    private int bufferIndex;
 
     public RequestParser() {
-        parseState = ParseState.READING_METHOD;
-    }
-
-    public ParseState getParseState() {
-        return parseState;
-    }
-
-    public void setParseState(ParseState parseState) {
-        this.parseState = parseState;
     }
 
     /**
      * Input to be processed and checked.
-     *
-     * @param inputString inputString from a client.
-     * @param request     HttpRequest object which contains the statuscode.
      */
-    public void parseRequest(String inputString, HttpRequest request) {
+    public void nextCharacter(char c) {
+
+        buffer[bufferIndex] = c;
+        bufferIndex = bufferIndex % buffer.length;
 
         //Parameter variable length of request. 7K
         //413 Entity too large
-        if (inputString.length() > 8192) {
+        if (bufferIndex > 8192) {
             request.setStatusCode(StatusCode.PAYLOAD_TO_LARGE);
             return;
         }
 
-        //might be an switch
-        if (parseState.isReadingMethod()) {
-            readMethod(inputString, request);
-        }
-
-        if (parseState.isReadingURI()) {
-            parseUri(inputString, request);
-        }
-
-        if (parseState.isReadingHttpVersion()) {
-            parseHttpMethod(inputString, request);
-        }
-
-        //URI LENGTH
-        //Note: Servers ought to be cautious about depending on URI lengths above 255 bytes, because some older client or proxy
-        //implementations might not properly support these lengths.
-
-        /*if (requestType != null || response.length() > 8) {
-            request.setState();
-            request.setStatusCode();//some error.
-        }
-
-        if (request.getState().equals(RequestState.READING_HEADER_KEY) || request.getState().equals(RequestState.READING_HEADER_VALUE)) {
-            int length = response.length();
-
-            //check /r/n/r/n is found.
-            if () {
-                isReadingRequest = false;
-            }
-        }
-
-        //GET request.
-        //TODO get first line only for this part.
-        if (input.contains("GET") || input.contains("POST")) {
-            request.setRequestMethod(RequestType.GET);
-
-            //here we get the path.
-            //Ex. 'GET / HTTP/1.1'
-            String[] command = input.split(" ", 3); //split on spaces.
-            if (command.length == 3) {
-                String path = command[1]; //getPath;
-                if (path.equals("/")) {
-                    request.setRequestpath("index.html");
+        switch (request.getState()) {
+            case READ_METHOD:
+                if (hasSpace()) {
+                    request.setState(State.READ_URI);
+                    readMethod(request.getMethod().toString());
+                    request.getMethod().setLength(0); //clean builder.
+                } else {
+                    request.getMethod().append(c);
                 }
-            }
-        }else{
-            //should be a status Errorcode not a valid request.
-            //request
-        }*/
+                break;
+            case READ_URI:
+                if (hasSpace()) {
+                    request.setState(State.READ_HTTP);
+                    readUri(request.getMethod().toString());
+                    request.getMethod().setLength(0);
+                } else {
+                    request.getMethod().append(c);
+                }
+                break;
+            case READ_HTTP:
+                if (hasSpace()) {
+                    request.setState(State.READ_HEADER_NAME);
+                    readHTTP(request.getMethod().toString());
+                    request.getMethod().setLength(0);
+                } else {
+                    request.getMethod().append(c);
+                }
+                break;
+            case READ_HEADER_NAME:
+                break;
+            case READ_HEADER_VALUE:
+                if (hasNewline()) {
+                    if (hasDoubleNewline()) {
+                        // end headers
+                        // -> DONE
+                    } else {
+                        // end header
+                        // -> READ_HEADER_NAME
+                    }
+                }
+                break;
+            case ERROR:
+                //Stop reading, cancel further working on it.
+        }
     }
 
     /**
@@ -94,93 +82,83 @@ public class RequestParser {
      * Consists of HTTP[/]MajorVersion.Minorversion.
      *
      * @param inputString the third space from the httpVersion.
-     * @param request     HttpRequest.
      */
-    private void parseHttpMethod(String inputString, HttpRequest request) {
+    private void readHTTP(String inputString) {
+        //check the HTTP  forward slash , and major minor is a number with no front zero.
+        boolean validHttp = false;
 
-        String[] splittedUri = inputString.split(" ");
+        if (inputString.startsWith("HTTP/")) {
+            String[] split = inputString.split("/", 2);
+            String version = split[1];
 
-        if (splittedUri.length >= 3) {
-            String httpVersion = splittedUri[2];
-
-            //check the HTTP  forward slash , and major minor is a number with no front zero.
-
-            if (httpVersion.endsWith("/r/n") && !parseState.isErrorState()) {
-                parseState = ParseState.READING_HEADER_KEY;
+            if (version != null && (version.equals("1.1") || version.equals("1.0"))) {
+                try {
+                    request.setHttpVersion(Long.parseLong(version));
+                    validHttp = true;
+                } catch (NumberFormatException ex) {
+                    validHttp = false;
+                    request.setStatusCode(StatusCode.HTTP_VERSION_NOT_SUPPORTED);
+                }
             }
+        }
+
+        if (!validHttp) {
+            request.setState(State.ERROR);
         }
     }
 
     /**
+     * https://www.ietf.org/rfc/rfc3986.txt Supports for now a simplified version of the RFC.
+     * Not included IPV6.
      * InputString it only the URI, should check if it has invalid characters in it.
      *
-     * @param inputString the input of the String.
-     * @param request     the request that is going on.
+     * @param uri the input of the String.
      */
-    private void parseUri(String inputString, HttpRequest request) {
+    private void readUri(String uri) {
 
-        String[] splittedUri = inputString.split(" ");
+        //TODO make entity valid, and conform to some basic rules.
 
-        //length is always 2.
-        if (splittedUri.length >= 2) {
-            String uri = splittedUri[1];
+        //make a check for HTTP , HTTPS,
+        if (uri.startsWith("/") || uri.startsWith("HTTP") || uri.startsWith("HTTPS")) {
+            request.setRequestpath(uri);
+        }
 
-            //most likely urls who are longer as 255 chars are invalid.
-            if (uri.length() > 255) {
-                request.setStatusCode(StatusCode.URI_TOO_LONG);
-                parseState = ParseState.ERROR; //414 URI Too Long
-            }
-
-            //make a check for HTTP , HTTPS, should be bigger to check appropiately, for valid chars.
-            if (uri.startsWith("/") || uri.startsWith("H")) {
-                request.setRequestpath(uri);
-            }
-
-            //if ready for next part and no error is found.
-            if (splittedUri.length == 3 && !parseState.isErrorState()) {
-                parseState = ParseState.READING_HTTP_VERSION;
-            }
+        //most likely urls who are longer as 255 chars are invalid.
+        if (uri.length() > 255) {
+            request.setStatusCode(StatusCode.URI_TOO_LONG);
+            request.setState(State.ERROR); //414 URI Too Long
         }
     }
 
     /**
      * Once its found to be in a RequestType
-     * Checks if its starting with until it found a valid RequestType
-     * Transition to Error, or READ_URI [parseState].
+     * Checks if its a valid RequestType.
      *
-     * @param inputString
-     * @param request
+     * @param inputString first part of the input String.
      */
-    private void readMethod(String inputString, HttpRequest request) {
-
-        //Go through all requestTypes, per letter.
-        boolean startsWithRequestTypeFound = false;
-
-        for (RequestType requestTypeItem : RequestType.values()) {
-            String[] inputSplit = inputString.split(" ");
-
-            //error if its not the same.
-            if (inputSplit.length == 1 && requestTypeItem.name().startsWith(inputString.toUpperCase())) {
-                startsWithRequestTypeFound = true;
-            }
-
-            if (inputSplit[0] != null &&
-                    requestTypeItem.name().startsWith(inputSplit[0].toUpperCase()) &&
-                    inputSplit.length >= 2) {
-
-                //set RequestMethod.
-                RequestType requestType = RequestType.valueOf(inputSplit[0]);
-                request.setRequestMethod(requestType);
-                parseState = ParseState.READING_URI;
-                startsWithRequestTypeFound = true;
-                break;
-            }
-        }
-
-        if (!startsWithRequestTypeFound) {
+    private void readMethod(String inputString) {
+        try {
+            request.setRequestMethod(RequestType.valueOf(inputString));
+        } catch (IllegalArgumentException ex) {
             request.setStatusCode(StatusCode.BAD_REQUEST);
-            parseState = ParseState.ERROR;
+            request.setState(State.ERROR);
         }
     }
 
+    private boolean hasSpace() {
+        return buffer[bufferIndex] == ' ';
+    }
+
+    private boolean hasNewline() {
+        return buffer[bufferIndex] == '\n' && buffer[(bufferIndex + 3) % 4] == '\r';
+    }
+
+    private boolean hasDoubleNewline() {
+        return buffer[bufferIndex] == '\n' && buffer[(bufferIndex + 3) % 4] == '\r' &&
+                buffer[(bufferIndex + 2) % 4] == '\n' && buffer[(bufferIndex + 1) % 4] == '\r';
+    }
+
+    public HttpRequest getRequest() {
+        return request;
+    }
 }

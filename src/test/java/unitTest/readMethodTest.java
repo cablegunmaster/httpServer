@@ -1,6 +1,5 @@
 package unitTest;
 
-import com.jasper.model.request.HttpRequest;
 import com.jasper.model.request.RequestParser;
 import com.jasper.model.request.requestenums.RequestType;
 import org.junit.Before;
@@ -22,11 +21,9 @@ import static org.junit.Assert.assertTrue;
 public class readMethodTest {
 
     private RequestParser parser;
-    private HttpRequest httpRequest;
 
     @Before
     public void createParser() {
-        httpRequest = new HttpRequest();
         parser = new RequestParser();
     }
 
@@ -34,30 +31,39 @@ public class readMethodTest {
     public void requestMethodIsNotSetAndStillReading() {
         String stringToTest = "GE";
 
-        parser.parseRequest(stringToTest, httpRequest);
+        for (int i = 0; i < stringToTest.length(); i++){
+            char c = stringToTest.charAt(i);
+            parser.nextCharacter(c);
+        }
 
-        assertTrue("No method yet found", httpRequest.getRequestMethod() == null);
-        assertTrue("Reading Method still not yet finished", parser.getParseState().isReadingMethod());
+        assertTrue("No method yet found", parser.getRequest().getRequestMethod() == null);
+        assertTrue("Reading Method still not yet finished", parser.getRequest().getState().isReadingMethod());
     }
 
     @Test
     public void requestMethodIsSetTestAlmost() {
         String stringToTest = "GET";
 
-        parser.parseRequest(stringToTest, httpRequest);
+        for (int i = 0; i < stringToTest.length(); i++){
+            char c = stringToTest.charAt(i);
+            parser.nextCharacter(c);
+        }
 
-        assertTrue("No method yet found", httpRequest.getRequestMethod() == null);
-        assertTrue("Reading Method still not yet finished", parser.getParseState().isReadingMethod());
+        assertTrue("No method yet found", parser.getRequest().getRequestMethod() == null);
+        assertTrue("Reading Method still not yet finished", parser.getRequest().getState().isReadingMethod());
     }
 
     @Test
     public void stillReading1LetterTest() {
         String stringToTest = "O";
 
-        parser.parseRequest(stringToTest, httpRequest);
+        for (int i = 0; i < stringToTest.length(); i++){
+            char c = stringToTest.charAt(i);
+            parser.nextCharacter(c);
+        }
 
-        assertTrue("No method yet found", httpRequest.getRequestMethod() == null);
-        assertTrue("Reading Method still not yet finished", parser.getParseState().isReadingMethod());
+        assertTrue("No method yet found", parser.getRequest().getRequestMethod() == null);
+        assertTrue("Reading Method still not yet finished", parser.getRequest().getState().isReadingMethod());
     }
 
 
@@ -65,39 +71,51 @@ public class readMethodTest {
     public void requestMethodIsSetWithGETTest() {
         String stringToTest = "GET /";
 
-        parser.parseRequest(stringToTest, httpRequest);
+        for (int i = 0; i < stringToTest.length(); i++){
+            char c = stringToTest.charAt(i);
+            parser.nextCharacter(c);
+        }
 
-        assertTrue("Request method should be set to GET ", httpRequest.getRequestMethod().equals(RequestType.GET));
-        assertTrue("Next State should be set as READING URI when found.", parser.getParseState().isReadingURI());
+        assertTrue("Request method should be set to GET ", parser.getRequest().getRequestMethod().equals(RequestType.GET));
+        assertTrue("Next State should be set as READING URI when found.", parser.getRequest().getState().isReadingURI());
     }
 
     @Test
     public void requestMethodIsSetWithPOSTTest() {
         String stringToTest = "POST /";
 
-        parser.parseRequest(stringToTest, httpRequest);
+        for (int i = 0; i < stringToTest.length(); i++){
+            char c = stringToTest.charAt(i);
+            parser.nextCharacter(c);
+        }
 
-        assertTrue("Request method should be set to POST ", httpRequest.getRequestMethod().equals(RequestType.POST));
-        assertTrue("Next State should be set as READING URI when found.", parser.getParseState().isReadingURI());
+        assertTrue("Request method should be set to POST ",  parser.getRequest().getRequestMethod().equals(RequestType.POST));
+        assertTrue("Next State should be set as READING URI when found.", parser.getRequest().getState().isReadingURI());
     }
 
     @Test
     public void invalidOneLetterRequestMethod() {
         String stringToTest = "Z";
 
-        parser.parseRequest(stringToTest, httpRequest);
+        for (int i = 0; i < stringToTest.length(); i++){
+            char c = stringToTest.charAt(i);
+            parser.nextCharacter(c);
+        }
 
-        assertTrue("Invalid request is found no requestType is set ", httpRequest.getRequestMethod() == null);
-        assertTrue("next State should be set as STILL READING?", parser.getParseState().isErrorState());
+        assertTrue("Invalid request is found no requestType is set ",parser.getRequest().getRequestMethod() == null);
+        assertTrue("next State should be set as STILL READING", parser.getRequest().getState().isReadingMethod());
     }
 
     @Test
     public void invalidRequestMethod() {
-        String stringToTest = "OMG";
+        String stringToTest = "OMG ";
 
-        parser.parseRequest(stringToTest, httpRequest);
+        for (int i = 0; i < stringToTest.length(); i++){
+            char c = stringToTest.charAt(i);
+            parser.nextCharacter(c);
+        }
 
-        assertTrue("Invalid request is found no requestType is set ", httpRequest.getRequestMethod() == null);
-        assertTrue("next State should be set as STILL READING?", parser.getParseState().isErrorState());
+        assertTrue("Invalid request is found no requestType is set ", parser.getRequest().getRequestMethod() == null);
+        assertTrue("next State should be set as Error", parser.getRequest().getState().isErrorState());
     }
 }

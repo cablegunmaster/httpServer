@@ -1,8 +1,6 @@
 package unitTest;
 
-import com.jasper.model.request.HttpRequest;
 import com.jasper.model.request.RequestParser;
-import com.jasper.model.request.requestenums.ParseState;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,11 +13,9 @@ import static org.junit.Assert.assertTrue;
 public class readURITest {
 
     private RequestParser parser;
-    private HttpRequest httpRequest;
 
     @Before
     public void createParser() {
-        httpRequest = new HttpRequest();
         parser = new RequestParser();
     }
 
@@ -30,11 +26,13 @@ public class readURITest {
     public void setHttpRequestWithValidUrl() {
         String stringToTest = "GET /index.html h";
 
-        parser.setParseState(ParseState.READING_URI);
-        parser.parseRequest(stringToTest, httpRequest);
+        for (int i = 0; i < stringToTest.length(); i++) {
+            char c = stringToTest.charAt(i);
+            parser.nextCharacter(c);
+        }
 
-        assertTrue("URL index page found", httpRequest.getRequestpath() != null);
-        assertTrue("Set to Reading HTTP version", parser.getParseState().isReadingHttpVersion());
+        assertTrue("URL index page found", parser.getRequest().getRequestpath() != null);
+        assertTrue("Set to Reading HTTP version", parser.getRequest().getState().isReadingHttpVersion());
     }
 
     /**
@@ -44,22 +42,26 @@ public class readURITest {
     public void setHttpRequestWithInvalidEntity() {
         String stringToTest = "GET /@%@#%*@#()";
 
-        parser.setParseState(ParseState.READING_URI);
-        parser.parseRequest(stringToTest, httpRequest);
+        for (int i = 0; i < stringToTest.length(); i++) {
+            char c = stringToTest.charAt(i);
+            parser.nextCharacter(c);
+        }
 
-        assertTrue("URL Invalid", httpRequest.getRequestMethod() == null);
-        assertTrue("Set to ERROR", parser.getParseState().isErrorState());
+        assertTrue("URL Invalid", parser.getRequest().getRequestMethod() == null);
+        assertTrue("Set to ERROR", parser.getRequest().getState().isErrorState());
     }
 
     @Test
     public void setHttpRequestWithNoEntityExpectingStillReading() {
         String stringToTest = "GET /";
 
-        parser.setParseState(ParseState.READING_URI);
-        parser.parseRequest(stringToTest, httpRequest);
+        for (int i = 0; i < stringToTest.length(); i++) {
+            char c = stringToTest.charAt(i);
+            parser.nextCharacter(c);
+        }
 
-        assertTrue("url found but not yet finished. ", httpRequest.getRequestpath().equals("/"));
-        assertTrue("Set to Reading HTTP URI", parser.getParseState().isReadingURI());
+        assertTrue("", parser.getRequest().getRequestpath() == null);
+        assertTrue("url reading methos is set but not yet finished.", parser.getRequest().getState().isReadingURI());
     }
 
     //One space is only allowed.
@@ -67,10 +69,12 @@ public class readURITest {
     public void setHttpRequestWithSpaces() {
         String stringToTest = "GET  ";
 
-        parser.setParseState(ParseState.READING_METHOD);
-        parser.parseRequest(stringToTest, httpRequest);
+        for (int i = 0; i < stringToTest.length(); i++) {
+            char c = stringToTest.charAt(i);
+            parser.nextCharacter(c);
+        }
 
-        assertTrue("No url yet found", httpRequest.getRequestMethod() == null);
-        assertTrue("Reading Method set to ERROR", parser.getParseState().isErrorState());
+        assertTrue("No url yet found", parser.getRequest().getRequestpath() == null);
+        assertTrue("Reading Method set to ERROR", parser.getRequest().getState().isErrorState());
     }
 }
