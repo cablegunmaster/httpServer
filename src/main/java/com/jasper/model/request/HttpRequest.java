@@ -1,7 +1,9 @@
 package com.jasper.model.request;
 
+import com.jasper.model.request.requestenums.Protocol;
 import com.jasper.model.request.requestenums.RequestType;
 import com.jasper.model.request.requestenums.State;
+import com.jasper.model.request.requestenums.StateUrl;
 import com.jasper.model.request.requestenums.StatusCode;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
@@ -12,18 +14,33 @@ import java.util.Map;
  */
 public class HttpRequest {
 
-    private RequestType requestMethod = null;
-    private String requestpath = null; //request path "/index.html"
-    private String localPath = null; //Local directory, should be set from a properties file.
-    private StatusCode statusCode = null;
-    private Long httpVersion;
-
     private State state = State.READ_METHOD;
-    private StringBuilder method = new StringBuilder();
-    private Map<String, String> headers = new HashMap<>();
+    private StringBuilder stateBuilder = new StringBuilder();
+    private StatusCode statusCode = null; //status code of request.
 
+    //Method variables.
+    private RequestType requestMethod = null;    //Method GET / POST
+
+    //URL variables.
+    private StateUrl stateUrl = StateUrl.READ_AUTHORITY;
+    private StringBuilder stateUrlBuilder = new StringBuilder();
+    private Protocol protocol = null;
+    private String authority; //is host +":" +  port
+    private String host = ""; //name of website, minus Protocol or port
+    private Integer port = 80; //80 is default port.
+    private String path = "";
+    private String query = ""; //everything behind the question mark
+    private String filename = ""; //path + query.
+    private String ref = ""; //Bookmark with # which part of the page it should put as top.
+    private Map<String,String> queryValues = new HashMap<>();
+
+    //Headers.
+    private Map<String, String> headers = new HashMap<>();
     private StringBuilder headerName = new StringBuilder();
     private StringBuilder headerValue = new StringBuilder();
+
+    //HttpVersion number.
+    private Long httpVersion;
 
     public HttpRequest() {
     }
@@ -34,22 +51,6 @@ public class HttpRequest {
 
     public RequestType getRequestMethod() {
         return requestMethod;
-    }
-
-    public String getRequestpath() {
-        return requestpath;
-    }
-
-    public void setRequestpath(String requestpath) {
-        this.requestpath = requestpath;
-    }
-
-    public String getLocalPath() {
-        return localPath;
-    }
-
-    public void setLocalPath(String localPath) {
-        this.localPath = localPath;
     }
 
     public void setStatusCode(StatusCode statusCode) {
@@ -68,12 +69,100 @@ public class HttpRequest {
         this.state = status;
     }
 
-    public StringBuilder getMethod() {
-        return method;
+    public void setStateUrl(StateUrl stateUrl) {
+        this.stateUrl = stateUrl;
     }
 
-    public void setMethod(StringBuilder method) {
-        this.method = method;
+    public StateUrl getStateUrl() {
+        return stateUrl;
+    }
+
+    public StringBuilder getStateBuilder() {
+        return stateBuilder;
+    }
+
+    public StringBuilder getStateUrlBuilder() {
+        return stateUrlBuilder;
+    }
+
+    public void setStateUrlBuilder(StringBuilder stateUrlBuilder) {
+        this.stateUrlBuilder = stateUrlBuilder;
+    }
+
+    public void setStateBuilder(StringBuilder stateBuilder) {
+        this.stateBuilder = stateBuilder;
+    }
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(Protocol protocol) {
+        this.protocol = protocol;
+    }
+
+    public String getAuthority() {
+        return authority;
+    }
+
+    public void setAuthority(String authority) {
+        this.authority = authority;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public Integer getPort() {
+        return port;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public String getQuery() {
+        return query;
+    }
+
+    public void setQuery(String query) {
+        this.query = query;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
+    public String getRef() {
+        return ref;
+    }
+
+    public void setRef(String ref) {
+        this.ref = ref;
+    }
+
+    public Long getHttpVersion() {
+        return httpVersion;
+    }
+
+    public void setHttpVersion(Long httpVersion) {
+        this.httpVersion = httpVersion;
     }
 
     public void setHttpVersion(long httpVersion) {
@@ -103,6 +192,7 @@ public class HttpRequest {
     public void setHeaderValue(StringBuilder headerValue) {
         this.headerValue = headerValue;
     }
+
 
     /**
      * Output of the whole file, the full request as a String to be send back to the client.
@@ -146,5 +236,13 @@ public class HttpRequest {
         buffer.append("\r\n\r\n");
 
         return buffer.toString();
+    }
+
+    public Map<String, String> getQueryValues() {
+        return queryValues;
+    }
+
+    public void setQueryValues(Map<String, String> queryValues) {
+        this.queryValues = queryValues;
     }
 }

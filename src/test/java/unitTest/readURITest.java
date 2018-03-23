@@ -31,7 +31,7 @@ public class readURITest {
             parser.nextCharacter(c);
         }
 
-        assertTrue("URL index page found", parser.getRequest().getRequestpath() != null);
+        assertTrue("URL index page found", parser.getRequest().getgetRequestpath() != null);
         assertTrue("Set to Reading HTTP version", parser.getRequest().getState().isReadingHttpVersion());
     }
 
