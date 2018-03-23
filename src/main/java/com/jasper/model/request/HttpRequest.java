@@ -93,7 +93,7 @@ public class HttpRequest {
         this.stateBuilder = stateBuilder;
     }
 
-    public String getProtocol() {
+    public Protocol getProtocol() {
         return protocol;
     }
 
