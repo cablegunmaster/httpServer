@@ -22,16 +22,16 @@ public class HttpRequest {
     private RequestType requestMethod = null;    //Method GET / POST
 
     //URL variables.
-    private StateUrl stateUrl = StateUrl.READ_AUTHORITY;
+    private StateUrl stateUrl = StateUrl.READ_PROTOCOL;
     private StringBuilder stateUrlBuilder = new StringBuilder();
     private Protocol protocol = null;
-    private String authority; //is host +":" +  port
-    private String host = ""; //name of website, minus Protocol or port
+    private String authority = null; //is host +":" +  port
+    private String host = null; //name of website, minus Protocol or port
     private Integer port = 80; //80 is default port.
-    private String path = "";
-    private String query = ""; //everything behind the question mark
-    private String filename = ""; //path + query.
-    private String ref = ""; //Bookmark with # which part of the page it should put as top.
+    private String path = null;
+    private String query = null; //everything behind the question mark
+    private String filename = null; //path + query.
+    private String ref = null; //Bookmark with # which part of the page it should put as top.
     private Map<String,String> queryValues = new HashMap<>();
 
     //Headers.
