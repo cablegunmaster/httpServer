@@ -1,4 +1,4 @@
-package com.jasper.model.request.requestenums;
+package com.jasper.model.httpenums;
 
 /**
  * States for reading Request.

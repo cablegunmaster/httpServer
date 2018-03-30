@@ -1,4 +1,4 @@
-package com.jasper.model.request.requestenums;
+package com.jasper.model.httpenums;
 
 /**
  * Created by Jasper Lankhorst on 20-11-2016.

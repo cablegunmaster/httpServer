@@ -1,10 +1,10 @@
-package com.jasper.model.request;
+package com.jasper.model;
 
-import com.jasper.model.request.requestenums.Protocol;
-import com.jasper.model.request.requestenums.RequestType;
-import com.jasper.model.request.requestenums.State;
-import com.jasper.model.request.requestenums.StateUrl;
-import com.jasper.model.request.requestenums.StatusCode;
+import com.jasper.model.httpenums.Protocol;
+import com.jasper.model.httpenums.RequestType;
+import com.jasper.model.httpenums.State;
+import com.jasper.model.httpenums.StateUrl;
+import com.jasper.model.httpenums.StatusCode;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;

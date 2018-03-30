@@ -33,7 +33,6 @@ public class readURITest {
             parser.nextCharacter(c);
         }
 
-        //assertTrue("URL index page found", parser.getRequest().getgetRequestpath() != null);
         assertTrue("Set to Reading HTTP version", parser.getRequest().getState().isReadingHttpVersion());
     }
 
@@ -42,7 +41,7 @@ public class readURITest {
      */
     @Test
     public void setHttpRequestWithInvalidEntity() {
-        String stringToTest = "GET /@%@#%*@#()";
+        String stringToTest = "GET /@%@#%*@#() ";
 
         for (int i = 0; i < stringToTest.length(); i++) {
             char c = stringToTest.charAt(i);
@@ -88,7 +87,7 @@ public class readURITest {
             parser.nextCharacter(c);
         }
 
-        assertTrue("error state found:"+ parser.getRequest().getStateUrl().name(), parser.getRequest().getPath() != null);
+        assertTrue("error state found:" + parser.getRequest().getStateUrl().name(), parser.getRequest().getPath() != null);
         assertTrue("get name=value", parser.getRequest().getQuery().equals("name=value"));
         assertTrue("port is 8080", parser.getRequest().getPort() == 8080);
         assertTrue("Reading Method set to ERROR", parser.getRequest().getState().isReadingHttpVersion());
@@ -104,7 +103,7 @@ public class readURITest {
             parser.nextCharacter(c);
         }
 
-        assertTrue("error state found:"+ parser.getRequest().getStateUrl().name(), parser.getRequest().getPath() != null);
+        assertTrue("error state found:" + parser.getRequest().getStateUrl().name(), parser.getRequest().getPath() != null);
         assertTrue("get name=value", parser.getRequest().getQuery().equals("name=value"));
         assertTrue("Reading Method set to ERROR", parser.getRequest().getState().isReadingHttpVersion());
     }
@@ -118,7 +117,7 @@ public class readURITest {
             parser.nextCharacter(c);
         }
 
-        assertTrue("error state found:"+ parser.getRequest().getStateUrl().name(), parser.getRequest().getPath() != null);
+        assertTrue("error state found:" + parser.getRequest().getStateUrl().name(), parser.getRequest().getPath() != null);
         assertTrue("get name=value&test=false", parser.getRequest().getQuery().equals("name=value&test=false"));
         assertTrue("Reading Method set to ERROR", parser.getRequest().getState().isReadingHttpVersion());
     }
@@ -140,8 +139,8 @@ public class readURITest {
     }
 
     /**
-     *  One space is only allowed, no URI found otherwise.
-     //(HTTP Protocol is very strict.)on what it receives.
+     * One space is only allowed, no URI found otherwise.
+     * //(HTTP Protocol is very strict.)on what it receives.
      */
     @Test
     public void setHttpRequestWithSpaces() {

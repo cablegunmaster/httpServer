@@ -1,7 +1,7 @@
 package unitTest;
 
 import com.jasper.model.request.RequestParser;
-import com.jasper.model.request.requestenums.RequestType;
+import com.jasper.model.httpenums.RequestType;
 import org.junit.Before;
 import org.junit.Test;
 

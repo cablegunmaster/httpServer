@@ -1,9 +1,8 @@
 package com.jasper.model;
 
 import com.jasper.controller.Controller;
-import com.jasper.model.request.HttpRequest;
 import com.jasper.model.request.RequestParser;
-import com.jasper.model.request.requestenums.StatusCode;
+import com.jasper.model.httpenums.StatusCode;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
