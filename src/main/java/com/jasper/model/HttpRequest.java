@@ -23,7 +23,6 @@ public class HttpRequest {
 
     //URL variables.
     private StateUrl stateUrl = StateUrl.READ_PROTOCOL;
-    private StringBuilder stateUrlBuilder = new StringBuilder();
     private Protocol protocol = null;
     private String authority = null; //is host +":" +  port
     private String host = null; //name of website, minus Protocol or port
@@ -79,14 +78,6 @@ public class HttpRequest {
 
     public StringBuilder getStateBuilder() {
         return stateBuilder;
-    }
-
-    public StringBuilder getStateUrlBuilder() {
-        return stateUrlBuilder;
-    }
-
-    public void setStateUrlBuilder(StringBuilder stateUrlBuilder) {
-        this.stateUrlBuilder = stateUrlBuilder;
     }
 
     public void setStateBuilder(StringBuilder stateBuilder) {
