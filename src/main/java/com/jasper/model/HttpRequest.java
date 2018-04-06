@@ -39,10 +39,7 @@ public class HttpRequest {
     private StringBuilder headerValue = new StringBuilder();
 
     //HttpVersion number.
-    private Long httpVersion;
-
-    public HttpRequest() {
-    }
+    private Double httpVersion;
 
     public void setRequestMethod(RequestType requestMethod) {
         this.requestMethod = requestMethod;
@@ -50,14 +47,6 @@ public class HttpRequest {
 
     public RequestType getRequestMethod() {
         return requestMethod;
-    }
-
-    public void setStatusCode(StatusCode statusCode) {
-        this.statusCode = statusCode;
-    }
-
-    public StatusCode getStatusCode() {
-        return statusCode;
     }
 
     public State getState() {
@@ -78,6 +67,14 @@ public class HttpRequest {
 
     public StringBuilder getStateBuilder() {
         return stateBuilder;
+    }
+
+    public void setStatusCode(StatusCode statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public StatusCode getStatusCode() {
+        return statusCode;
     }
 
     public void setStateBuilder(StringBuilder stateBuilder) {
@@ -148,15 +145,15 @@ public class HttpRequest {
         this.ref = ref;
     }
 
-    public Long getHttpVersion() {
+    public Double getHttpVersion() {
         return httpVersion;
     }
 
-    public void setHttpVersion(Long httpVersion) {
+    public void setHttpVersion(Double httpVersion) {
         this.httpVersion = httpVersion;
     }
 
-    public void setHttpVersion(long httpVersion) {
+    public void setHttpVersion(double httpVersion) {
         this.httpVersion = httpVersion;
     }
 
@@ -182,51 +179,6 @@ public class HttpRequest {
 
     public void setHeaderValue(StringBuilder headerValue) {
         this.headerValue = headerValue;
-    }
-
-
-    /**
-     * Output of the whole file, the full request as a String to be send back to the client.
-     * TODO improve this toString function to be able to send back an extra support.
-     */
-    @Override
-    public String toString() {
-
-        StringBuilder buffer = new StringBuilder();
-
-        byte[] s = null;
-
-        //TODO missing sending request numbers like 200, 404, 500 etc..
-        String content =
-                "<html>" +
-                        "<body>" +
-                        "<h1>This is á successful request</h1>" +
-                        "</body>" +
-                        "</html>";
-
-        buffer.append("HTTP/1.1 200 OK\r\n");
-
-        //read the amount of bytes;
-        byte[] contentInBytes = null;
-
-        try {
-            contentInBytes = content.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-        Integer contentLength = 0;
-        if (contentInBytes != null) {
-            contentLength = contentInBytes.length;
-        }
-
-        buffer.append("Content-Length: ").append(contentLength).append("\r\n");
-        buffer.append("Content-Type: text/html; charset=utf-8");
-        buffer.append("\r\n\r\n");
-        buffer.append(content);
-        buffer.append("\r\n\r\n");
-
-        return buffer.toString();
     }
 
     public Map<String, String> getQueryValues() {

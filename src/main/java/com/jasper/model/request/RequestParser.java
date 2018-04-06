@@ -12,27 +12,23 @@ import com.jasper.model.httpenums.StatusCode;
  */
 public class RequestParser {
 
-    private HttpRequest request = new HttpRequest();
-
-    private char[] buffer = new char[4];
-    private int bufferIndex = -1;
     private final static Integer BUFFER_SIZE_CACHE = 8192;
+
+
     private StringBuilder stateUrlBuilder = new StringBuilder();
+    private BufferCheck bufferCheck = new BufferCheck();
+    private HttpRequest request = new HttpRequest();
     private int bufferSize = 0;
+
     private String queryKey = null;
     private String queryValue = null;
-
-    public RequestParser() {
-    }
 
     /**
      * Input to be processed and checked.
      */
     public void nextCharacter(char c) {
 
-        bufferIndex++; //Size of request.
-        bufferIndex = bufferIndex % buffer.length;
-        buffer[bufferIndex] = c;
+        bufferCheck.addToBuffer(c);
         bufferSize++;
 
         if (bufferSize > BUFFER_SIZE_CACHE) {
@@ -42,7 +38,7 @@ public class RequestParser {
 
         switch (request.getState()) {
             case READ_METHOD:
-                if (hasSpace()) {
+                if (bufferCheck.hasSpace()) {
                     request.setState(State.READ_URI);
                     readMethod(request.getStateBuilder().toString());
                     request.getStateBuilder().setLength(0); //re-use builder.
@@ -51,24 +47,21 @@ public class RequestParser {
                 }
                 break;
             case READ_URI:
-                if (hasSpace()) {
+                if (bufferCheck.hasSpace()) {
                     readUri(request);
-
                     request.setState(State.READ_HTTP);
                     request.getStateBuilder().setLength(0);
-
                     if (request.getPath() == null) {
                         request.setState(State.ERROR);
                     }
-
                 } else {
                     request.getStateBuilder().append(c);
-                    getStateUrlBuilder().append(c);
+                    stateUrlBuilder.append(c);
                     readUri(request);
                 }
                 break;
             case READ_HTTP:
-                if (hasSpace()) {
+                if (bufferCheck.hasSpace() || bufferCheck.hasNewline()) {
                     request.setState(State.READ_HEADER_NAME);
                     readHTTP(request.getStateBuilder().toString());
                     request.getStateBuilder().setLength(0);
@@ -79,8 +72,8 @@ public class RequestParser {
             case READ_HEADER_NAME:
                 break;
             case READ_HEADER_VALUE:
-                if (hasNewline()) {
-                    if (hasDoubleNewline()) {
+                if (bufferCheck.hasNewline()) {
+                    if (bufferCheck.hasDoubleNewline()) {
                         // end headers
                         // -> DONE
                     } else {
@@ -91,6 +84,7 @@ public class RequestParser {
                 break;
             case ERROR:
                 //Stop reading, cancel further working on it.
+                break;
         }
     }
 
@@ -106,11 +100,11 @@ public class RequestParser {
 
         if (inputString.startsWith("HTTP/")) {
             String[] split = inputString.split("/", 2);
-            String version = split[1];
+            String version = split[1].substring(0,3);
 
             if (version != null && (version.equals("1.1") || version.equals("1.0"))) {
                 try {
-                    request.setHttpVersion(Long.parseLong(version));
+                    request.setHttpVersion(Double.parseDouble(version));
                     validHttp = true;
                 } catch (NumberFormatException ex) {
                     request.setStatusCode(StatusCode.HTTP_VERSION_NOT_SUPPORTED);
@@ -138,10 +132,10 @@ public class RequestParser {
         switch (request.getStateUrl()) {
             case READ_PROTOCOL:
                 //absolute URL.
-                if (hasDoubleForwardSlash()) {
+                if (bufferCheck.hasDoubleForwardSlash()) {
                     try {
-                        input = getStateUrlBuilder().toString();
-                        getStateUrlBuilder().setLength(0); //re-use builder.
+                        input = stateUrlBuilder.toString();
+                        stateUrlBuilder.setLength(0); //re-use builder.
                         request.setProtocol(Protocol.valueOf(input.substring(0, input.length() - 3).toUpperCase())); //minus "://" symbol.
 
                         request.setStateUrl(StateUrl.READ_AUTHORITY);
@@ -155,37 +149,36 @@ public class RequestParser {
                 if (startWithForwardSlashInBuilder()) {
                     //Relative uses basic HTTP. (input from .htaccess file if https / http should be used)
                     request.setProtocol(Protocol.HTTP);
-                    getStateUrlBuilder().setLength(0); //re-use builder.
+                    stateUrlBuilder.setLength(0); //re-use builder.
                     request.setStateUrl(StateUrl.READ_PATH);
                 }
                 break;
             case READ_AUTHORITY:
-
                 //check if it has a port.
-                if (hasSemiColon()) {
-                    input = getStateUrlBuilder().toString(); //no builder flush.
+                if (bufferCheck.hasSemiColon()) {
+                    input = stateUrlBuilder.toString(); //no builder flush.
                     request.setHost(input.substring(0, input.length() - 1)); //everything minus ':'
 
                     request.setStateUrl(StateUrl.READ_PORT);
                 }
 
-                if (hasForwardSlash()) {
-                    input = getStateUrlBuilder().toString(); //no builder flush.
+                if (bufferCheck.hasForwardSlash()) {
+                    input = stateUrlBuilder.toString(); //no builder flush.
 
                     if (!input.equals("")) {
                         request.setHost(input.substring(0, input.length() - 1)); //everything minus '/'
                     }
 
-                    getStateUrlBuilder().setLength(0); //re-use builder.
+                    stateUrlBuilder.setLength(0); //re-use builder.
                     request.getStateBuilder().append("/"); //add the forward slash.
                     request.setStateUrl(StateUrl.READ_PATH);
                 }
                 break;
             case READ_PORT:
-                if (hasForwardSlash()) {
+                if (bufferCheck.hasForwardSlash()) {
 
                     try {
-                        input = getStateUrlBuilder().toString();
+                        input = stateUrlBuilder.toString();
                         input = input.replace(request.getHost() + ":", ""); //remove host.
                         int portNumber = Integer.parseInt(input.substring(0, input.length() - 1));
 
@@ -196,7 +189,7 @@ public class RequestParser {
                             request.setState(State.ERROR);
                         }
 
-                        getStateUrlBuilder().setLength(0); //re-use builder.
+                        stateUrlBuilder.setLength(0); //re-use builder.
                         request.getStateBuilder().append("/"); //add the forward slash.
 
                         request.setStateUrl(StateUrl.READ_PATH);
@@ -207,31 +200,24 @@ public class RequestParser {
                 }
                 break;
             case READ_PATH:
-                if (hasHash() || hasQuestionMark() || hasSpace()) {
+                if (bufferCheck.hasHash() || bufferCheck.hasQuestionMark() || bufferCheck.hasSpace()) {
+                    request.setPath( "/" + stateUrlBuilder.toString());
+                    stateUrlBuilder.setLength(0); //re-use builder.
 
-                    input = getStateUrlBuilder().toString();
-
-                    if (input.equals("")) {
-                        input = "/"; //relative path fix?
-                    }
-
-                    request.setPath(input);
-                    getStateUrlBuilder().setLength(0); //re-use builder.
-
-                    if (hasHash()) {
+                    if (bufferCheck.hasHash()) {
                         request.setStateUrl(StateUrl.READ_FRAGMENT);
                     }
 
-                    if (hasQuestionMark()) {
+                    if (bufferCheck.hasQuestionMark()) {
                         request.setStateUrl(StateUrl.READ_QUERY_KEY);
                     }
                 }
                 break;
             case READ_QUERY_KEY:
-                if (hasEqualsymbol()) {
-                    queryKey = getStateUrlBuilder().toString();
+                if (bufferCheck.hasEqualsymbol()) {
+                    queryKey = stateUrlBuilder.toString();
                     request.getQueryValues().put(queryKey, "");
-                    getStateUrlBuilder().setLength(0); //re-use builder.
+                    stateUrlBuilder.setLength(0); //re-use builder.
                     request.setStateUrl(StateUrl.READ_QUERY_VALUE);
                 }
 
@@ -239,9 +225,9 @@ public class RequestParser {
                 readQueryEndOfLineOrHashState();
                 break;
             case READ_QUERY_VALUE:
-                if (hasDelimiter() || hasSpace()) {
+                if (bufferCheck.hasDelimiter() || bufferCheck.hasSpace()) {
                     if (queryKey != null) {
-                        input = getStateUrlBuilder().toString();
+                        input = stateUrlBuilder.toString();
                         request.getQueryValues().get(queryKey);
                         request.getQueryValues().put(queryKey, input);
 
@@ -250,16 +236,16 @@ public class RequestParser {
                         }
                     }
 
-                    getStateUrlBuilder().setLength(0); //re-use builder.
+                    stateUrlBuilder.setLength(0); //re-use builder.
                     request.setStateUrl(StateUrl.READ_QUERY_KEY);
                 }
                 readQueryEndOfLineOrHashState();
                 break;
             case READ_FRAGMENT:
-                if (hasSpace()) {
-                    input = getStateUrlBuilder().toString();
+                if (bufferCheck.hasSpace()) {
+                    input = stateUrlBuilder.toString();
                     request.setRef(input);
-                    getStateUrlBuilder().setLength(0); //re-use builder.
+                    stateUrlBuilder.setLength(0); //re-use builder.
                 }
                 break;
         }
@@ -281,28 +267,11 @@ public class RequestParser {
             request.setStatusCode(StatusCode.URI_TOO_LONG);
             request.setState(State.ERROR); //414 URI Too Long
         }
-//
-        //ULR invalid 404 statuscode.
     }
 
-    private boolean startWithForwardSlashInBuilder() {
-        return getStateUrlBuilder().toString().startsWith("/");
-    }
 
-    public void readQueryEndOfLineOrHashState() {
-        //End of line or Hash
-        if (hasSpace() || hasHash()) {
-            request.setFilename(request.getPath() + request.getQuery()); //combine everything.
-            getStateUrlBuilder().setLength(0); //re-use builder.
-
-            if (hasHash()) {
-                request.setStateUrl(StateUrl.READ_FRAGMENT);
-            }
-        }
-    }
-
-    public StringBuilder getStateUrlBuilder() {
-        return stateUrlBuilder;
+    public HttpRequest getRequest() {
+        return request;
     }
 
     /**
@@ -320,49 +289,19 @@ public class RequestParser {
         }
     }
 
-    private boolean hasSpace() {
-        return buffer[bufferIndex] == ' ';
+    private boolean startWithForwardSlashInBuilder() {
+        return stateUrlBuilder.toString().startsWith("/");
     }
 
-    private boolean hasNewline() {
-        return buffer[bufferIndex] == '\n' && buffer[(bufferIndex + 3) % 4] == '\r';
-    }
+    private void readQueryEndOfLineOrHashState() {
+        //End of line or Hash
+        if (bufferCheck.hasSpace() || bufferCheck.hasHash()) {
+            request.setFilename(request.getPath() + request.getQuery()); //combine everything.
+            stateUrlBuilder.setLength(0); //re-use builder.
 
-    private boolean hasDoubleNewline() {
-        return buffer[bufferIndex] == '\n' && buffer[(bufferIndex + 3) % 4] == '\r' &&
-                buffer[(bufferIndex + 2) % 4] == '\n' && buffer[(bufferIndex + 1) % 4] == '\r';
-    }
-
-    public HttpRequest getRequest() {
-        return request;
-    }
-
-    public boolean hasForwardSlash() {
-        return buffer[bufferIndex] == '/';
-    }
-
-    public boolean hasDoubleForwardSlash() {
-        return buffer[bufferIndex] == '/' && buffer[(bufferIndex + 3) % 4] == '/' ||
-                buffer[(bufferIndex + 2) % 4] == '/' && buffer[(bufferIndex + 1) % 4] == '/';
-    }
-
-    public boolean hasSemiColon() {
-        return buffer[bufferIndex] == ':';
-    }
-
-    private boolean hasHash() {
-        return buffer[bufferIndex] == '#';
-    }
-
-    private boolean hasQuestionMark() {
-        return buffer[bufferIndex] == '?';
-    }
-
-    private boolean hasEqualsymbol() {
-        return buffer[bufferIndex] == '=';
-    }
-
-    private boolean hasDelimiter() {
-        return buffer[bufferIndex] == '&' || buffer[bufferIndex] == ';';
+            if (bufferCheck.hasHash()) {
+                request.setStateUrl(StateUrl.READ_FRAGMENT);
+            }
+        }
     }
 }

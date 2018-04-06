@@ -27,11 +27,8 @@ public class MultiThreadedServer implements Runnable {
 
     @Override
     public void run() {
-        isStopped = false;
         openServerSocket();
-
         while (!isStopped()) {
-
             Socket clientSocket = awaitIncomingConnection();
             if(!isStopped()) {
                 sendRequest(clientSocket);
@@ -56,7 +53,6 @@ public class MultiThreadedServer implements Runnable {
             clientSocket = null;
         } catch (IOException e) {
             isStopped = true;
-            clientSocket = null;
             throw new RuntimeException("[ Error ] accepting client connection", e);
         }
         return clientSocket;
@@ -64,7 +60,6 @@ public class MultiThreadedServer implements Runnable {
 
     private void sendRequest(Socket clientSocket) {
         if (clientSocket != null && controller != null) {
-            //Connecting client.
             controller.addStringToLog("Connection made..");
 
             ClientWorkerRunnable clientWorkerRunnable = new ClientWorkerRunnable(clientSocket, controller);

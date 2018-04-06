@@ -1,6 +1,6 @@
 package com.jasper.model;
 
-import java.io.IOException;
+import com.jasper.model.request.RequestHandler;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,74 +11,32 @@ import java.util.List;
  */
 public class Model {
 
-    private List<ClientWorkerRunnable> connections = new ArrayList<ClientWorkerRunnable>(); //all connections.
-    private List<String> currentUserList; //string of users.
-    private HashMap<String, String> duelList = new HashMap<>();
-
-    /**
-     * Reset the connections.
-     */
-    public void resetConnections() {
-        if (connections.size() > 0) {
-            for (ClientWorkerRunnable connection : connections) {
-                if (connection.clientSocket.isConnected()) {
-
-                    try {
-                        connection.clientSocket.close();
-                        connection.clientSocket = null;
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            }
-
-            connections = new ArrayList<ClientWorkerRunnable>();
-        }
-    }
-
-    public Model() {
-    }
-
-    /**
-     * Gives back a list of all connected users.
-     * @return List<String>
-     */
-    public List<String> getConnectedPersons() {
-        return currentUserList;
-    }
-
-    /**
-     * Remove a ClientWorkerRunnable from the list of currentConnections.
-     * @param connection to be killed.
-     */
-    public synchronized void removeConnection(ClientWorkerRunnable connection) {
-        connections.remove(connection);
-    }
+    private List<ClientWorkerRunnable> connections = new ArrayList<>();
+    private HashMap<String, RequestHandler> getMap;
+    private HashMap<String, RequestHandler> postMap;
 
     /**
      * Get the current connections.
+     *
      * @return List of all connections<ClientWorkerRunnable> containing
      */
     public List<ClientWorkerRunnable> getConnections() {
         return connections;
     }
 
-
-    /**
-     * @return the duelList
-     */
-    public synchronized HashMap<String, String> getDuelList() {
-        return duelList;
+    public void setGetMapping(HashMap<String, RequestHandler> getMap) {
+        this.getMap = getMap;
     }
 
-    /**
-     * Duel consist of a player who starts the duel and the player it wants to duel.
-     * @param playerFrom a String containing the player.
-     * @param game       the game like TicTacToe
-     * @param playerTo   the player String which is actually online
-     */
-    public synchronized void insertDuel(String playerFrom, String game, String playerTo) {
-        duelList.put(playerFrom + ":" + game, playerTo);
+    public void setPostMapping(HashMap<String, RequestHandler> postMap) {
+        this.postMap = postMap;
+    }
+
+    public HashMap getGetMap() {
+        return getMap;
+    }
+
+    public HashMap getPostMap() {
+        return postMap;
     }
 }

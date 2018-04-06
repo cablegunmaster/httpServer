@@ -1,5 +1,6 @@
 package unitTest;
 
+import com.jasper.model.httpenums.RequestType;
 import com.jasper.model.request.RequestParser;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -62,7 +63,20 @@ public class readURITest {
         }
 
         assertTrue("", parser.getRequest().getPath() == null);
-        assertTrue("url reading methos is set but not yet finished.", parser.getRequest().getState().isReadingURI());
+        assertTrue("url reading method is set but not yet finished.", parser.getRequest().getState().isReadingURI());
+    }
+
+    @Test
+    public void setHttpRequestWithNoPath() {
+        String stringToTest = "GET http://localhost:8080/ ";
+
+        for (int i = 0; i < stringToTest.length(); i++) {
+            char c = stringToTest.charAt(i);
+            parser.nextCharacter(c);
+        }
+
+        assertTrue("", parser.getRequest().getPath().equals("/"));
+        assertTrue("url reading method is set and finished.", parser.getRequest().getState().isReadingHttpVersion());
     }
 
     @Test
@@ -92,7 +106,6 @@ public class readURITest {
         assertTrue("port is 8080", parser.getRequest().getPort() == 8080);
         assertTrue("Reading Method set to ERROR", parser.getRequest().getState().isReadingHttpVersion());
     }
-
 
     @Test
     public void setHttpRequestWithEntityDoneReadingAndGETVariable() {

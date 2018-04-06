@@ -1,25 +1,33 @@
 package com.jasper.main;
 
-import com.jasper.controller.Controller;
-import com.jasper.model.Model;
-import com.jasper.view.View;
+
 
 public class Main {
 
     public static void main(String[] args) {
-        int portNumber = 8000;
 
-        if (args.length > 0) {
-            try {
-                portNumber = Integer.parseInt(args[0]);
-            } catch (Exception parseException) {
-                System.err.println("No valid portnumber found: returning to basic port 8081");
-                portNumber = 8081; //assign one if none given.
-            }
-        }
+        Server server = new Server(8080);
 
-        Model model = new Model();
-        View view = new View();
-        new Controller(model, view, portNumber);
+        server.get("/hello", (req, res) -> {
+            res.write("Hello World1");
+        });
+
+        server.get("/index.html", (req, res) -> {
+            res.write("Hello World INDEX.html");
+        });
+
+        server.get("/", (req, res) -> {
+            res.write("Hello World same as index.html?");
+        });
+
+        server.get("/hello/test/*", (req,res) ->{
+            res.write("Hello World2!");
+        });
+
+        server.post("/store", (req,res) ->{
+            res.write("Hello World3");
+        });
+
+        server.start();
     }
 }

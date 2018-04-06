@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.util.HashMap;
 
 /**
  * Created by Jasper Lankhorst on 17-11-2016.
@@ -24,15 +25,17 @@ public class Controller {
 
     /**
      * Java.Controller class which grabs all.
-     * @param m model
-     * @param v view
      * @param portNumber portnumber
      */
-    public Controller(Model m, View v, Integer portNumber) {
-        this.model = m;
-        this.view = v;
+    public Controller(Integer portNumber, HashMap getMap, HashMap postMap) {
+        this.model = new Model();
+        this.view  = new View();
+
+        model.setGetMapping(getMap);
+        model.setPostMapping(postMap);
 
         portnumber = portNumber;
+
         setListeners(); //all listeners on 1 function.
         startServer(portnumber);
     }
@@ -72,7 +75,6 @@ public class Controller {
 
     /**
      * Clear the logs
-     * TODO should work with reset.
      */
     public synchronized void clearLog() {
         view.setReceivingLogTextArea();
@@ -164,6 +166,14 @@ public class Controller {
      */
     public void addConnection(ClientWorkerRunnable clientWorkerRunnable) {
         model.getConnections().add(clientWorkerRunnable);
+    }
+
+    /**
+     * Remove 'clientWorkerRunnable' connections to the list.
+     * @param clientWorkerRunnable
+     */
+    public void removeConnection(ClientWorkerRunnable clientWorkerRunnable) {
+        model.getConnections().remove(clientWorkerRunnable);
     }
 
     public Model getModel() {
