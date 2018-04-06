@@ -32,4 +32,8 @@ public enum StatusCode {
     public String getDescription() {
         return description;
     }
+
+    public String getStatusCodeNumber() {
+        return statusCodeNumber;
+    }
 }

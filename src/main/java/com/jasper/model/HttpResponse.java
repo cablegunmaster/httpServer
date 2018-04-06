@@ -61,7 +61,7 @@ public class HttpResponse {
             e.printStackTrace();
         }
 
-        response.append("HTTP/1.1 ").append(getStatusCode()).append(getStatusCode().getDescription()).append(LINE_END);
+        response.append("HTTP/1.1 ").append(getStatusCode().getStatusCodeNumber()).append(getStatusCode().getDescription()).append(LINE_END);
 
         Integer contentLength = 0;
         if (contentInBytes != null) {
