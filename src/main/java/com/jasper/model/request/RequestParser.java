@@ -13,8 +13,6 @@ import com.jasper.model.httpenums.StatusCode;
 public class RequestParser {
 
     private final static Integer BUFFER_SIZE_CACHE = 8192;
-
-
     private StringBuilder stateUrlBuilder = new StringBuilder();
     private BufferCheck bufferCheck = new BufferCheck();
     private HttpRequest request = new HttpRequest();
@@ -100,7 +98,7 @@ public class RequestParser {
 
         if (inputString.startsWith("HTTP/")) {
             String[] split = inputString.split("/", 2);
-            String version = split[1].substring(0,3);
+            String version = split[1].substring(0, 3);
 
             if (version != null && (version.equals("1.1") || version.equals("1.0"))) {
                 try {
@@ -201,7 +199,7 @@ public class RequestParser {
                 break;
             case READ_PATH:
                 if (bufferCheck.hasHash() || bufferCheck.hasQuestionMark() || bufferCheck.hasSpace()) {
-                    request.setPath( "/" + stateUrlBuilder.toString());
+                    request.setPath("/" + stateUrlBuilder.toString());
                     stateUrlBuilder.setLength(0); //re-use builder.
 
                     if (bufferCheck.hasHash()) {

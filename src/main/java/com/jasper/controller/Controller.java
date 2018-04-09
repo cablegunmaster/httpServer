@@ -1,8 +1,11 @@
 package com.jasper.controller;
 
 import com.jasper.model.ClientWorkerRunnable;
+import com.jasper.model.HttpRequest;
+import com.jasper.model.HttpResponse;
 import com.jasper.model.Model;
 import com.jasper.model.MultiThreadedServer;
+import com.jasper.model.request.RequestHandler;
 import com.jasper.view.View;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,7 +30,9 @@ public class Controller {
      * Java.Controller class which grabs all.
      * @param portNumber portnumber
      */
-    public Controller(Integer portNumber, HashMap getMap, HashMap postMap) {
+    public Controller(Integer portNumber,
+                      HashMap<String, RequestHandler> getMap,
+                      HashMap<String, RequestHandler> postMap) {
         this.model = new Model();
         this.view  = new View();
 

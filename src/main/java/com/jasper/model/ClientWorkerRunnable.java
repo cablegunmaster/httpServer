@@ -121,7 +121,12 @@ public class ClientWorkerRunnable implements Runnable {
             }
 
         } else {
-            response.setStatusCode(StatusCode.BAD_REQUEST);
+
+            if(request.getStatusCode() != null){
+                response.setStatusCode(request.getStatusCode());
+            }else{
+                response.setStatusCode(StatusCode.BAD_REQUEST);
+            }
         }
 
         response.buildResponse();

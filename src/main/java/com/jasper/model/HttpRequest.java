@@ -5,7 +5,6 @@ import com.jasper.model.httpenums.RequestType;
 import com.jasper.model.httpenums.State;
 import com.jasper.model.httpenums.StateUrl;
 import com.jasper.model.httpenums.StatusCode;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +30,7 @@ public class HttpRequest {
     private String query = null; //everything behind the question mark
     private String filename = null; //path + query.
     private String ref = null; //Bookmark with # which part of the page it should put as top.
-    private Map<String,String> queryValues = new HashMap<>();
+    private Map<String, String> queryValues = new HashMap<>();
 
     //Headers.
     private Map<String, String> headers = new HashMap<>();

@@ -21,7 +21,7 @@ public class HttpResponse {
         return statusCode;
     }
 
-    public void write(String s) throws UnsupportedEncodingException {
+    public void write(String s) {
         body.append(s);
     }
 
@@ -37,7 +37,7 @@ public class HttpResponse {
         this.httpVersion = httpVersion;
     }
 
-    public void buildResponse(){
+    public void buildResponse() {
         response = toString();
     }
 
