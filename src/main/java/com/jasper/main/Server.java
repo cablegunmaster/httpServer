@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 public class Server {
 
-    private int port = 8080;
+    private int port = 8081;
 
     private HashMap<String, RequestHandler> getMap = new HashMap<>();
     private HashMap<String, RequestHandler> postMap = new HashMap<>();
