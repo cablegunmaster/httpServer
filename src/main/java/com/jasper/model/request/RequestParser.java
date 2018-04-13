@@ -100,7 +100,7 @@ public class RequestParser {
             String[] split = inputString.split("/", 2);
             String version = split[1].substring(0, 3);
 
-            if (version != null && (version.equals("1.1") || version.equals("1.0"))) {
+            if (version.equals("1.1") || version.equals("1.0"))) {
                 try {
                     request.setHttpVersion(Double.parseDouble(version));
                     validHttp = true;
