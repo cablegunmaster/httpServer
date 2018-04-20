@@ -45,8 +45,8 @@ public class MultiThreadedServer implements Runnable {
             this.serverSocket.setReuseAddress(true);
             clientSocket = this.serverSocket.accept();
 
-            clientSocket.setSoTimeout(500); //timeout to make a clientsocket Idle.
-            clientSocket.setSoLinger(true, 30000); //timeout to close the socket.
+            clientSocket.setSoTimeout(2); //timeout to make a clientsocket Idle.
+            clientSocket.setSoLinger(true, 10000); //timeout to close the socket.
 
         } catch (SocketException e) {
             isStopped = true;

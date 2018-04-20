@@ -1,9 +1,9 @@
 package com.jasper.model;
 
 import com.jasper.model.request.RequestHandler;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by Jasper Lankhorst on 17-11-2016.
@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class Model {
 
-    private List<ClientWorkerRunnable> connections = new ArrayList<>();
+    private CopyOnWriteArrayList<ClientWorkerRunnable> connections = new CopyOnWriteArrayList<>();
     private HashMap<String, RequestHandler> getMap;
     private HashMap<String, RequestHandler> postMap;
 
