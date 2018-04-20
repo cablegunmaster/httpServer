@@ -5,6 +5,7 @@ import com.jasper.model.request.RequestParser;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -35,15 +36,20 @@ public class readHeadersTest {
                 "Connection: keep-alive\r\n" +
                 "Cookie: PHPSESSID=r2t5uvjq435r4q7ib3vtdjq120\r\n" +
                 "Pragma: no-cache\r\n" +
-                "Cache-Control: no-cache\r\n\r\n";
+                "Cache-Control: no-cache" +
+                "\r\n\r\n";
 
         for (int i = 0; i < stringToTest.length(); i++){
             char c = stringToTest.charAt(i);
             parser.nextCharacter(c);
         }
 
-        assertTrue("Method GET  found", parser.getRequest().getRequestMethod().equals(RequestType.GET));
+        assertEquals("Method GET  found", parser.getRequest().getRequestMethod(), RequestType.GET);
         assertTrue("State:" + parser.getRequest().getState().name() +
                 "",  parser.getRequest().getState().isDone());
+        assertEquals(11, parser.getRequest().getHeaders().size());
+        assertEquals("no-cache",parser.getRequest().getHeaders().get("Pragma"));
+        assertEquals("Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR " +
+                "3.5.30729)",parser.getRequest().getHeaders().get("User-Agent"));
     }
 }

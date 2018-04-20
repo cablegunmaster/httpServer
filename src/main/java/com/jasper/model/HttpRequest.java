@@ -8,6 +8,8 @@ import com.jasper.model.httpenums.StatusCode;
 import java.util.HashMap;
 import java.util.Map;
 
+import static jdk.nashorn.internal.objects.NativeString.trim;
+
 /**
  * Model for a request to be send / used.
  */
@@ -160,8 +162,8 @@ public class HttpRequest {
         return headers;
     }
 
-    public void setHeaders(Map<String, String> headers) {
-        this.headers = headers;
+    public void addHeader(String headerName, String headerValue) {
+        this.headers.put(removeSemicolon(headerName), trim(removeRN(headerValue)));
     }
 
     public StringBuilder getHeaderName() {
@@ -186,5 +188,14 @@ public class HttpRequest {
 
     public void setQueryValues(Map<String, String> queryValues) {
         this.queryValues = queryValues;
+    }
+
+    private String removeRN(String inputString ){
+        return inputString.replaceAll("(\r\n|\n)", "");
+    }
+
+    private String removeSemicolon(String inputString ){
+        //$ means last part of string.
+        return inputString.replaceAll(":$", "");
     }
 }

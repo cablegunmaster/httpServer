@@ -18,6 +18,8 @@ public class RequestParser {
     private HttpRequest request = new HttpRequest();
     private int bufferSize = 0;
 
+    private String headerName = null;
+    private String headerValue = null;
     private String queryKey = null;
     private String queryValue = null;
 
@@ -68,16 +70,31 @@ public class RequestParser {
                 }
                 break;
             case READ_HEADER_NAME:
+                request.getStateBuilder().append(c);
+
+                //found ":"
+                if (bufferCheck.hasSemiColon()) {
+                    request.setState(State.READ_HEADER_VALUE);
+                    headerName = request.getStateBuilder().toString();
+                    request.getStateBuilder().setLength(0);
+                }
+
+                //found /r/n request parsing DONE
+                if (bufferCheck.hasNewline()) {
+                    request.getStateBuilder().setLength(0);
+                    request.setState(State.DONE);
+                }
                 break;
             case READ_HEADER_VALUE:
+                request.getStateBuilder().append(c);
+                //new line found.
                 if (bufferCheck.hasNewline()) {
-                    if (bufferCheck.hasDoubleNewline()) {
-                        // end headers
-                        // -> DONE
-                    } else {
-                        // end header
-                        // -> READ_HEADER_NAME
+                    headerValue = request.getStateBuilder().toString();
+                    if(headerName != null){
+                        request.addHeader(headerName,headerValue);
                     }
+                    request.getStateBuilder().setLength(0);
+                    request.setState(State.READ_HEADER_NAME);
                 }
                 break;
             case ERROR:
@@ -100,7 +117,7 @@ public class RequestParser {
             String[] split = inputString.split("/", 2);
             String version = split[1].substring(0, 3);
 
-            if (version.equals("1.1") || version.equals("1.0"))) {
+            if (version.equals("1.1") || version.equals("1.0")) {
                 try {
                     request.setHttpVersion(Double.parseDouble(version));
                     validHttp = true;

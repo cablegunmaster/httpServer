@@ -38,7 +38,7 @@ public class Main {
 
         //these 2 calls / and index.html should it be the same?
         server.get("/index.html", (req, res) -> {
-            String[] names = req.getParameter("name"); //RFC doorlezen.
+            //String[] names = req.getParameter("name"); //RFC doorlezen.
             res.write("Hello World INDEX.html");
         });
 
