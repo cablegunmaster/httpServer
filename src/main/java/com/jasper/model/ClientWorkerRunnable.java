@@ -2,6 +2,7 @@ package com.jasper.model;
 
 import com.jasper.controller.Controller;
 import com.jasper.model.httpenums.RequestType;
+import com.jasper.model.httpenums.State;
 import com.jasper.model.httpenums.StatusCode;
 import com.jasper.model.request.RequestHandler;
 import com.jasper.model.request.RequestParser;
@@ -83,9 +84,13 @@ public class ClientWorkerRunnable implements Runnable {
         }
 
         RequestParser requestParser = new RequestParser();
-        while (reader.ready()) {
+        State state = requestParser.getRequest().getState();
+
+        while(!state.isErrorState() &&
+              !state.isDone()){
             char c = (char) reader.read();
             requestParser.nextCharacter(c);
+            state = requestParser.getRequest().getState();
         }
 
         return requestParser.getRequest();
