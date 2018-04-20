@@ -224,11 +224,11 @@ public class RequestParser {
                     }
 
                     if (bufferCheck.hasQuestionMark()) {
-                        request.setStateUrl(StateUrl.READ_QUERY_KEY);
+                        request.setStateUrl(StateUrl.READ_QUERY_NAME);
                     }
                 }
                 break;
-            case READ_QUERY_KEY:
+            case READ_QUERY_NAME:
                 if (bufferCheck.hasEqualsymbol()) {
                     queryKey = stateUrlBuilder.toString();
                     request.getQueryValues().put(queryKey, "");
@@ -252,7 +252,7 @@ public class RequestParser {
                     }
 
                     stateUrlBuilder.setLength(0); //re-use builder.
-                    request.setStateUrl(StateUrl.READ_QUERY_KEY);
+                    request.setStateUrl(StateUrl.READ_QUERY_NAME);
                 }
                 readQueryEndOfLineOrHashState();
                 break;
@@ -264,7 +264,6 @@ public class RequestParser {
                 }
                 break;
         }
-
 
         //TODO make entity valid, and conform to some basic rules.
         //Basically recreating URL class.

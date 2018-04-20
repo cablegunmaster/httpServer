@@ -7,6 +7,7 @@ public class HttpResponse {
 
     private final static String LINE_END = "\r\n";
     private final static String DOUBLE_LINE_END = "\r\n\r\n";
+    private final static String SPACE = " ";
 
     private String response = null;
     private StringBuilder body = new StringBuilder();
@@ -61,7 +62,10 @@ public class HttpResponse {
             e.printStackTrace();
         }
 
-        response.append("HTTP/1.1 ").append(getStatusCode().getStatusCodeNumber()).append(getStatusCode().getDescription()).append(LINE_END);
+        response.append("HTTP/1.1 ")
+                .append(getStatusCode().getStatusCodeNumber())
+                .append(SPACE)
+                .append(getStatusCode().getDescription()).append(LINE_END);
 
         Integer contentLength = 0;
         if (contentInBytes != null) {
