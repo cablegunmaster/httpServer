@@ -12,6 +12,7 @@ public enum StatusCode {
     NOT_FOUND("404", "Not Found"),
     METHOD_NOT_ALLOWED("405", "Method Not Allowed"),
     REQUEST_TIMEOUT("408", "Request Timeout"),
+    LENGTH_REQUIRED("411", "Length Required"),
     PAYLOAD_TO_LARGE("413", "Payload Too Large"),
     URI_TOO_LONG("414", "URI Too Long"),
     INTERNAL_SERVER_ERROR("500", "Internal Server Error"),

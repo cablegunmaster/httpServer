@@ -17,4 +17,12 @@ public enum RequestType {
     OPTIONS,
     TRACE,
     PATCH;
+
+    public boolean isGetRequest(){
+        return this == RequestType.GET;
+    }
+
+    public boolean ispostRequest(){
+        return this == RequestType.POST;
+    }
 }

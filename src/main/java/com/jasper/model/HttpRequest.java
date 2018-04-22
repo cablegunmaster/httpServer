@@ -29,10 +29,12 @@ public class HttpRequest {
     private String host = null; //name of website, minus Protocol or port
     private Integer port = 80; //80 is default port.
     private String path = null;
-    private String query = null; //everything behind the question mark
+    private String query = null; //everything behind the question mark on GET request
     private String filename = null; //path + query.
     private String ref = null; //Bookmark with # which part of the page it should put as top.
-    private Map<String, String> queryValues = new HashMap<>();
+
+    private Map<String, String> queryGET = new HashMap<>(); //for GET Request
+    private Map<String, String> queryPOST = new HashMap<>();
 
     //Headers.
     private Map<String, String> headers = new HashMap<>();
@@ -182,12 +184,20 @@ public class HttpRequest {
         this.headerValue = headerValue;
     }
 
-    public Map<String, String> getQueryValues() {
-        return queryValues;
+    public Map<String, String> getQueryGET() {
+        return queryGET;
     }
 
-    public void setQueryValues(Map<String, String> queryValues) {
-        this.queryValues = queryValues;
+    public void setQueryGET(Map<String, String> queryGET) {
+        this.queryGET = queryGET;
+    }
+
+    public Map<String, String> getQueryPOST() {
+        return queryPOST;
+    }
+
+    public void setQueryPOST(Map<String, String> queryPOST) {
+        this.queryPOST = queryPOST;
     }
 
     private String removeRN(String inputString ){

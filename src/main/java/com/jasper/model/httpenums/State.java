@@ -13,34 +13,35 @@ public enum State {
     DONE,
     ERROR;
 
-    public boolean isReadingMethod(){
-        return this == State.READ_METHOD;
-    }
-    public boolean isReadingURI(){
-        return this == State.READ_URI;
+    public boolean isReadingMethod() {
+        return this == READ_METHOD;
     }
 
-    public boolean isReadingHttpVersion(){
-        return this == State.READ_HTTP;
+    public boolean isReadingURI() {
+        return this == READ_URI;
+    }
+
+    public boolean isReadingHttpVersion() {
+        return this == READ_HTTP;
     }
 
     public boolean isReadingHeaderName() {
-        return this == State.READ_HEADER_NAME;
+        return this == READ_HEADER_NAME;
     }
 
     public boolean isReadingHeaderValue() {
-        return this == State.READ_HEADER_VALUE;
+        return this == READ_HEADER_VALUE;
     }
 
     public boolean isReadingBody() {
-        return this == State.READ_BODY;
+        return this == READ_BODY;
     }
 
     public boolean isDone() {
-        return this == State.DONE;
+        return this == DONE;
     }
 
     public boolean isErrorState() {
-        return this == State.ERROR;
+        return this == ERROR;
     }
 }

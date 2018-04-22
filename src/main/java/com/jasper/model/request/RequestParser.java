@@ -1,27 +1,30 @@
 package com.jasper.model.request;
 
 import com.jasper.model.HttpRequest;
-import com.jasper.model.httpenums.Protocol;
-import com.jasper.model.httpenums.RequestType;
-import com.jasper.model.httpenums.State;
-import com.jasper.model.httpenums.StateUrl;
-import com.jasper.model.httpenums.StatusCode;
+import com.jasper.model.httpenums.*;
 
 /**
  * Created by jasper wil.lankhorst on 12-3-2017.
  */
 public class RequestParser {
 
-    private final static Integer BUFFER_SIZE_CACHE = 8192;
     private StringBuilder stateUrlBuilder = new StringBuilder();
     private BufferCheck bufferCheck = new BufferCheck();
     private HttpRequest request = new HttpRequest();
+    private PostState postState = PostState.READ_POST_NAME;
+
+    private final static Integer BUFFER_SIZE_CACHE = 8192;
     private int bufferSize = 0;
 
     private String headerName = null;
     private String headerValue = null;
-    private String queryKey = null;
+    private String getQueryKey = null;
     private String queryValue = null;
+
+    private String postQueryKey = null;
+    private String postQueryValue = null;
+    private int postSize = 0;
+    Integer totalBodySize = null;
 
     /**
      * Input to be processed and checked.
@@ -82,7 +85,12 @@ public class RequestParser {
                 //found /r/n request parsing DONE
                 if (bufferCheck.hasNewline()) {
                     request.getStateBuilder().setLength(0);
-                    request.setState(State.DONE);
+
+                    if (request.getRequestMethod().isGetRequest()) {
+                        request.setState(State.DONE);
+                    } else if (request.getRequestMethod().ispostRequest()) {
+                        request.setState(State.READ_BODY);
+                    }
                 }
                 break;
             case READ_HEADER_VALUE:
@@ -90,11 +98,64 @@ public class RequestParser {
                 //new line found.
                 if (bufferCheck.hasNewline()) {
                     headerValue = request.getStateBuilder().toString();
-                    if(headerName != null){
-                        request.addHeader(headerName,headerValue);
+                    if (headerName != null) {
+                        request.addHeader(headerName, headerValue);
                     }
                     request.getStateBuilder().setLength(0);
                     request.setState(State.READ_HEADER_NAME);
+                }
+                break;
+            case READ_BODY:
+                //TODO needs to be helped with CONTENT-length?
+                request.getStateBuilder().append(c);
+                postSize++;
+
+                if (totalBodySize == null) {
+                    if (request.getHeaders().get("Content-Length") == null) {
+                        request.setState(State.ERROR);
+                        request.setStatusCode(StatusCode.LENGTH_REQUIRED);
+                    } else {
+                        String bodySizeString = request.getHeaders().get("Content-Length");
+                        if (bodySizeString != null) {
+                            totalBodySize = Integer.parseInt(bodySizeString);
+                        }
+                    }
+                }
+
+
+                if (postSize <= totalBodySize) {
+
+                    if (postState.isPostValue()) {
+                        if (bufferCheck.hasDelimiter()) {
+                            postQueryValue = request.getStateBuilder().toString();
+                            postState = PostState.READ_POST_NAME;
+                            request.getQueryPOST().put(postQueryKey, postQueryValue);
+                            request.getStateBuilder().setLength(0);
+                        }
+                    }
+
+                    if (postState.isPostName()) {
+                        if (bufferCheck.hasEqualsymbol()) {
+                            postQueryKey = request.getStateBuilder().toString();
+                            postState = PostState.READ_POST_VALUE;
+                            request.getStateBuilder().setLength(0);
+                        }
+                    }
+
+                    if (postSize == totalBodySize) {
+                        postQueryValue = request.getStateBuilder().toString();
+                        request.getQueryPOST().put(postQueryKey, postQueryValue);
+                        request.getStateBuilder().setLength(0);
+
+                        //TODO does this always end with newline?
+                        request.setState(State.DONE);
+
+
+                    } else if (postSize > totalBodySize) {
+                        request.setStatusCode(StatusCode.PAYLOAD_TO_LARGE);
+                        request.setState(State.ERROR);
+                    }
+
                 }
                 break;
             case ERROR:
@@ -230,7 +291,7 @@ public class RequestParser {
                 break;
             case READ_QUERY_NAME:
                 if (bufferCheck.hasEqualsymbol()) {
-                    queryKey = stateUrlBuilder.toString();
+                    getQueryKey = stateUrlBuilder.toString();
                     stateUrlBuilder.setLength(0); //re-use builder.
                     request.setStateUrl(StateUrl.READ_QUERY_VALUE);
                 }
@@ -248,14 +309,14 @@ public class RequestParser {
                 break;
             case READ_QUERY_VALUE:
                 if (bufferCheck.hasDelimiter() || bufferCheck.hasSpace()) {
-                    if (queryKey != null) {
+                    if (getQueryKey != null) {
                         input = stateUrlBuilder.toString();
-                        request.getQueryValues().get(queryKey);
-                        request.getQueryValues().put(queryKey, input);
+                        request.getQueryGET().get(getQueryKey);
+                        request.getQueryGET().put(getQueryKey, input);
 
                         request.setQuery(request.getQuery() == null
-                                ? queryKey + input :
-                                request.getQuery() + queryKey + input);
+                                ? getQueryKey + input :
+                                request.getQuery() + getQueryKey + input);
                     }
 
                     stateUrlBuilder.setLength(0); //re-use builder.

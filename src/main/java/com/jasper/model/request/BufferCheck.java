@@ -16,7 +16,7 @@ public class BufferCheck {
     }
 
     public boolean hasNewline() {
-        return buffer[bufferIndex] == '\n' && buffer[(bufferIndex + 3) % 4] == '\r';
+        return (buffer[bufferIndex] == '\n' && buffer[(bufferIndex + 3) % 4] == '\r') || buffer[bufferIndex] == '\n';
     }
 
     public boolean hasDoubleNewline() {
