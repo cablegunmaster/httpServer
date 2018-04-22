@@ -231,13 +231,20 @@ public class RequestParser {
             case READ_QUERY_NAME:
                 if (bufferCheck.hasEqualsymbol()) {
                     queryKey = stateUrlBuilder.toString();
-                    request.getQueryValues().put(queryKey, "");
                     stateUrlBuilder.setLength(0); //re-use builder.
                     request.setStateUrl(StateUrl.READ_QUERY_VALUE);
                 }
 
                 //End of line or Hash
-                readQueryEndOfLineOrHashState();
+                if (bufferCheck.hasSpace() || bufferCheck.hasHash()) {
+                    request.setFilename(request.getPath() + request.getQuery()); //combine everything.
+                    stateUrlBuilder.setLength(0); //re-use builder.
+
+                    if (bufferCheck.hasHash()) {
+                        request.setStateUrl(StateUrl.READ_FRAGMENT);
+                    }
+                }
+
                 break;
             case READ_QUERY_VALUE:
                 if (bufferCheck.hasDelimiter() || bufferCheck.hasSpace()) {
@@ -246,15 +253,24 @@ public class RequestParser {
                         request.getQueryValues().get(queryKey);
                         request.getQueryValues().put(queryKey, input);
 
-                        if (request.getQuery() == null) {
-                            request.setQuery(queryKey + input);
-                        }
+                        request.setQuery(request.getQuery() == null
+                                ? queryKey + input :
+                                request.getQuery() + queryKey + input);
                     }
 
                     stateUrlBuilder.setLength(0); //re-use builder.
                     request.setStateUrl(StateUrl.READ_QUERY_NAME);
                 }
-                readQueryEndOfLineOrHashState();
+
+                if (bufferCheck.hasSpace() || bufferCheck.hasHash()) {
+                    request.setFilename(request.getPath() + request.getQuery()); //combine everything.
+                    stateUrlBuilder.setLength(0); //re-use builder.
+
+                    if (bufferCheck.hasHash()) {
+                        request.setStateUrl(StateUrl.READ_FRAGMENT);
+                    }
+                }
+
                 break;
             case READ_FRAGMENT:
                 if (bufferCheck.hasSpace()) {
@@ -309,13 +325,5 @@ public class RequestParser {
 
     private void readQueryEndOfLineOrHashState() {
         //End of line or Hash
-        if (bufferCheck.hasSpace() || bufferCheck.hasHash()) {
-            request.setFilename(request.getPath() + request.getQuery()); //combine everything.
-            stateUrlBuilder.setLength(0); //re-use builder.
-
-            if (bufferCheck.hasHash()) {
-                request.setStateUrl(StateUrl.READ_FRAGMENT);
-            }
-        }
     }
 }
