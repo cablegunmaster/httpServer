@@ -69,7 +69,7 @@ public class ClientWorkerRunnable implements Runnable {
                 clientSocket.close();
             } catch (IOException e) {
                 e.printStackTrace();
-                controller.addStringToLog("Error closing the socket");
+                controller.addStringToLog("[ Error ] IOException, socket is closed");
             }
         }
     }
