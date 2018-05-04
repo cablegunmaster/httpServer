@@ -1,7 +1,15 @@
 package com.jasper.model.request;
 
 import com.jasper.model.HttpRequest;
-import com.jasper.model.httpenums.*;
+import com.jasper.model.httpenums.PostState;
+import com.jasper.model.httpenums.Protocol;
+import com.jasper.model.httpenums.RequestType;
+import com.jasper.model.httpenums.State;
+import com.jasper.model.httpenums.StateUrl;
+import com.jasper.model.httpenums.StatusCode;
+
+import static com.jasper.model.httpenums.State.ERROR;
+import static com.jasper.model.httpenums.StatusCode.BAD_REQUEST;
 
 /**
  * Created by jasper wil.lankhorst on 12-3-2017.
@@ -24,7 +32,7 @@ public class RequestParser {
     private String postQueryKey = null;
     private String postQueryValue = null;
     private int postSize = 0;
-    Integer totalBodySize = null;
+    Integer totalBodySize = 0;
 
     /**
      * Input to be processed and checked.
@@ -35,7 +43,8 @@ public class RequestParser {
         bufferSize++;
 
         if (bufferSize > BUFFER_SIZE_CACHE) {
-            request.setStatusCode(StatusCode.PAYLOAD_TO_LARGE); //413
+            request.setStatusCode(StatusCode.PAYLOAD_TO_LARGE);
+            request.setState(ERROR);//413
             return;
         }
 
@@ -55,12 +64,19 @@ public class RequestParser {
                     request.setState(State.READ_HTTP);
                     request.getStateBuilder().setLength(0);
                     if (request.getPath() == null) {
-                        request.setState(State.ERROR);
+                        request.setState(ERROR);
                     }
                 } else {
-                    request.getStateBuilder().append(c);
-                    stateUrlBuilder.append(c);
-                    readUri(request);
+                    String validUricharactersInGeneral = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()" +
+                            "*+,;=`.";
+                    if(validUricharactersInGeneral.contains(Character.toString(c))) {
+                        request.getStateBuilder().append(c);
+                        stateUrlBuilder.append(c);
+                        readUri(request);
+                    }else{
+                        request.setState(ERROR);
+                        request.setStatusCode(BAD_REQUEST);
+                    }
                 }
                 break;
             case READ_HTTP:
@@ -89,7 +105,12 @@ public class RequestParser {
                     if (request.getRequestMethod().isGetRequest()) {
                         request.setState(State.DONE);
                     } else if (request.getRequestMethod().ispostRequest()) {
-                        request.setState(State.READ_BODY);
+                        if (request.getHeaders().containsKey("Content-Length")) {
+                            request.setState(State.READ_BODY);
+                        } else {
+                            request.setState(ERROR);
+                            request.setStatusCode(StatusCode.LENGTH_REQUIRED);
+                        }
                     }
                 }
                 break;
@@ -110,9 +131,9 @@ public class RequestParser {
                 request.getStateBuilder().append(c);
                 postSize++;
 
-                if (totalBodySize == null) {
+                if (totalBodySize == 0) {
                     if (request.getHeaders().get("Content-Length") == null) {
-                        request.setState(State.ERROR);
+                        request.setState(ERROR);
                         request.setStatusCode(StatusCode.LENGTH_REQUIRED);
                     } else {
                         String bodySizeString = request.getHeaders().get("Content-Length");
@@ -123,7 +144,7 @@ public class RequestParser {
                 }
 
 
-                if (postSize <= totalBodySize) {
+                if (postSize < totalBodySize) {
 
                     if (postState.isPostValue()) {
                         if (bufferCheck.hasDelimiter()) {
@@ -142,21 +163,17 @@ public class RequestParser {
                         }
                     }
 
-                    if (postSize == totalBodySize) {
-                        postQueryValue = request.getStateBuilder().toString();
-                        request.getQueryPOST().put(postQueryKey, postQueryValue);
-                        request.getStateBuilder().setLength(0);
-
-                        //TODO does this always end with newline?
-                        request.setState(State.DONE);
-
-
-                    } else if (postSize > totalBodySize) {
-                        request.setStatusCode(StatusCode.PAYLOAD_TO_LARGE);
-                        request.setState(State.ERROR);
-                    }
-
+                } else if (postSize == totalBodySize) {
+                    postQueryValue = request.getStateBuilder().toString();
+                    request.getQueryPOST().put(postQueryKey, postQueryValue);
+                    request.getStateBuilder().setLength(0);
+                    request.setState(State.DONE);
+                } else if (postSize > totalBodySize) {
+                    request.setStatusCode(StatusCode.PAYLOAD_TO_LARGE);
+                    request.setState(ERROR);
                 }
+
+
                 break;
             case ERROR:
                 //Stop reading, cancel further working on it.
@@ -189,7 +206,7 @@ public class RequestParser {
         }
 
         if (!validHttp) {
-            request.setState(State.ERROR);
+            request.setState(ERROR);
         }
     }
 
@@ -216,8 +233,8 @@ public class RequestParser {
 
                         request.setStateUrl(StateUrl.READ_AUTHORITY);
                     } catch (IllegalArgumentException ex) {
-                        request.setState(State.ERROR);
-                        request.setStatusCode(StatusCode.BAD_REQUEST); //400 if its a wrong request.
+                        request.setState(ERROR);
+                        request.setStatusCode(BAD_REQUEST); //400 if its a wrong request.
                     }
                 }
 
@@ -261,8 +278,8 @@ public class RequestParser {
                         if (portNumber >= 80) {
                             request.setPort(portNumber); //everything minus "/"
                         } else {
-                            request.setStatusCode(StatusCode.BAD_REQUEST);
-                            request.setState(State.ERROR);
+                            request.setStatusCode(BAD_REQUEST);
+                            request.setState(ERROR);
                         }
 
                         stateUrlBuilder.setLength(0); //re-use builder.
@@ -270,8 +287,8 @@ public class RequestParser {
 
                         request.setStateUrl(StateUrl.READ_PATH);
                     } catch (IllegalArgumentException ex) {
-                        request.setStatusCode(StatusCode.BAD_REQUEST); //400 if its a wrong request.
-                        request.setState(State.ERROR);
+                        request.setStatusCode(BAD_REQUEST); //400 if its a wrong request.
+                        request.setState(ERROR);
                     }
                 }
                 break;
@@ -356,7 +373,7 @@ public class RequestParser {
         //most likely urls who are longer as 255 chars are invalid.
         if (request.getStateBuilder().length() > 255) {
             request.setStatusCode(StatusCode.URI_TOO_LONG);
-            request.setState(State.ERROR); //414 URI Too Long
+            request.setState(ERROR); //414 URI Too Long
         }
     }
 
@@ -375,8 +392,8 @@ public class RequestParser {
         try {
             request.setRequestMethod(RequestType.valueOf(inputString));
         } catch (IllegalArgumentException ex) {
-            request.setStatusCode(StatusCode.BAD_REQUEST);
-            request.setState(State.ERROR);
+            request.setStatusCode(BAD_REQUEST);
+            request.setState(ERROR);
         }
     }
 

@@ -1,5 +1,6 @@
 package unitTest;
 
+import com.jasper.model.HttpRequest;
 import com.jasper.model.httpenums.State;
 import com.jasper.model.httpenums.StateUrl;
 import com.jasper.model.request.RequestParser;
@@ -28,9 +29,13 @@ public class readGETTest {
             parser.nextCharacter(c);
         }
 
-        assertNotNull("error state found:" + parser.getRequest().getStateUrl().name(), parser.getRequest().getPath());
-        assertEquals("get name=value", "name=value", parser.getRequest().getQuery());
-        assertTrue("Reading Method set to ERROR", parser.getRequest().getState().isReadingHttpVersion());
+        HttpRequest request = parser.getRequest();
+        StateUrl stateUrl = request.getStateUrl();
+        State state = request.getState();
+
+        assertNotNull("error state found:" + stateUrl.name(),request.getPath());
+        assertEquals("get name=value", "name=value", request.getQuery());
+        assertTrue("Reading Method set to ERROR", state.isReadingHttpVersion());
     }
 
     @Test
@@ -46,8 +51,12 @@ public class readGETTest {
             parser.nextCharacter(c);
         }
 
-        assertNotNull("State found:" + parser.getRequest().getStateUrl().name(), parser.getRequest().getPath());
-        assertEquals("GET REQUEST: 'name=value&test=false'", "name=value&test=false", parser.getRequest().getQuery());
-        assertTrue("Reading Method set to ERROR", parser.getRequest().getState().isReadingHttpVersion());
+        HttpRequest request = parser.getRequest();
+        StateUrl stateUrl = request.getStateUrl();
+        State state = request.getState();
+
+        assertNotNull("State found:" + stateUrl.name(), parser.getRequest().getPath());
+        assertEquals("GET REQUEST: 'name=value&test=false'", "name=value&test=false", request.getQuery());
+        assertTrue("Reading Method set to ERROR", state.isReadingHttpVersion());
     }
 }

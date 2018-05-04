@@ -1,5 +1,7 @@
 package unitTest;
 
+import com.jasper.model.HttpRequest;
+import com.jasper.model.httpenums.State;
 import com.jasper.model.request.RequestParser;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -35,8 +37,10 @@ public class readURITest {
             char c = stringToTest.charAt(i);
             parser.nextCharacter(c);
         }
+        HttpRequest request = parser.getRequest();
+        State state = request.getState();
 
-        assertTrue("Set to Reading HTTP version", parser.getRequest().getState().isReadingHttpVersion());
+        assertTrue("Set to Reading HTTP version", state.isReadingHttpVersion());
     }
 
     /**
@@ -51,8 +55,11 @@ public class readURITest {
             parser.nextCharacter(c);
         }
 
-        assertNull("URL Invalid", parser.getRequest().getRequestMethod());
-        assertTrue("Set to ERROR", parser.getRequest().getState().isErrorState());
+        HttpRequest request = parser.getRequest();
+        State state = request.getState();
+
+        assertTrue("URL Invalid", request.getRequestMethod().isGetRequest());
+        assertTrue("Set to ERROR", state.isErrorState());
     }
 
     @Test
@@ -64,8 +71,11 @@ public class readURITest {
             parser.nextCharacter(c);
         }
 
-        assertNull("", parser.getRequest().getPath());
-        assertTrue("url reading method is set but not yet finished.", parser.getRequest().getState().isReadingURI());
+        HttpRequest request = parser.getRequest();
+        State state = request.getState();
+
+        assertNull("", request.getPath());
+        assertTrue("url reading method is set but not yet finished.", state.isReadingURI());
     }
 
     @Test
@@ -77,8 +87,11 @@ public class readURITest {
             parser.nextCharacter(c);
         }
 
-        assertEquals("Path is relative", "/", parser.getRequest().getPath());
-        assertTrue("url reading method is set and finished.", parser.getRequest().getState().isReadingHttpVersion());
+        HttpRequest request = parser.getRequest();
+        State state = request.getState();
+
+        assertEquals("Path is relative", "/", request.getPath());
+        assertTrue("url reading method is set and finished.", state.isReadingHttpVersion());
     }
 
     @Test
@@ -90,8 +103,11 @@ public class readURITest {
             parser.nextCharacter(c);
         }
 
-        assertNotNull("Relative url found", parser.getRequest().getPath());
-        assertTrue("Reading Method set to ERROR", parser.getRequest().getState().isReadingHttpVersion());
+        HttpRequest request = parser.getRequest();
+        State state = request.getState();
+
+        assertNotNull("Relative url found", request.getPath());
+        assertTrue("Reading Method set to ERROR", state.isReadingHttpVersion());
     }
 
     @Test
@@ -103,10 +119,13 @@ public class readURITest {
             parser.nextCharacter(c);
         }
 
-        assertNotNull("error state found:" + parser.getRequest().getStateUrl().name(), parser.getRequest().getPath());
-        assertEquals("get name=value", "name=value", parser.getRequest().getQuery());
-        assertEquals("port is 8080", 8080, (int) parser.getRequest().getPort());
-        assertTrue("Reading Method set to ERROR", parser.getRequest().getState().isReadingHttpVersion());
+        HttpRequest request = parser.getRequest();
+        State state = request.getState();
+
+        assertNotNull("error state found:" + request.getStateUrl().name(),request.getPath());
+        assertEquals("get name=value", "name=value", request.getQuery());
+        assertEquals("port is 8080", 8080, (int) request.getPort());
+        assertTrue("Reading Method set to ERROR", state.isReadingHttpVersion());
     }
 
     //used as an example for the variables.
@@ -138,7 +157,10 @@ public class readURITest {
             parser.nextCharacter(c);
         }
 
-        assertNull("No url yet found", parser.getRequest().getPath());
-        assertTrue("Reading Method set to ERROR", parser.getRequest().getState().isErrorState());
+        HttpRequest request = parser.getRequest();
+        State state = request.getState();
+
+        assertNull("No url yet found", request.getPath());
+        assertTrue("Reading Method set to ERROR", state.isErrorState());
     }
 }

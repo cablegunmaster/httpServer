@@ -1,10 +1,14 @@
 package unitTest;
 
+import com.jasper.model.HttpRequest;
+import com.jasper.model.httpenums.State;
 import com.jasper.model.request.RequestParser;
 import com.jasper.model.httpenums.RequestType;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -36,8 +40,11 @@ public class readMethodTest {
             parser.nextCharacter(c);
         }
 
-        assertTrue("No method yet found", parser.getRequest().getRequestMethod() == null);
-        assertTrue("Reading Method still not yet finished", parser.getRequest().getState().isReadingMethod());
+        HttpRequest request = parser.getRequest();
+        State state = request.getState();
+
+        assertNull("No method yet found", request.getRequestMethod());
+        assertTrue("Reading Method still not yet finished", state.isReadingMethod());
     }
 
     @Test
@@ -49,8 +56,11 @@ public class readMethodTest {
             parser.nextCharacter(c);
         }
 
-        assertTrue("No method yet found", parser.getRequest().getRequestMethod() == null);
-        assertTrue("Reading Method still not yet finished", parser.getRequest().getState().isReadingMethod());
+        HttpRequest request = parser.getRequest();
+        State state = request.getState();
+
+        assertNull("No method yet found", request.getRequestMethod());
+        assertTrue("Reading Method still not yet finished", state.isReadingMethod());
     }
 
     @Test
@@ -62,8 +72,11 @@ public class readMethodTest {
             parser.nextCharacter(c);
         }
 
-        assertTrue("No method yet found", parser.getRequest().getRequestMethod() == null);
-        assertTrue("Reading Method still not yet finished", parser.getRequest().getState().isReadingMethod());
+        HttpRequest request = parser.getRequest();
+        State state = request.getState();
+
+        assertNull("No method yet found", request.getRequestMethod());
+        assertTrue("Reading Method still not yet finished", state.isReadingMethod());
     }
 
 
@@ -76,8 +89,11 @@ public class readMethodTest {
             parser.nextCharacter(c);
         }
 
-        assertTrue("Request method should be set to GET ", parser.getRequest().getRequestMethod().equals(RequestType.GET));
-        assertTrue("Next State should be set as READING URI when found.", parser.getRequest().getState().isReadingURI());
+        HttpRequest request = parser.getRequest();
+        State state = request.getState();
+
+        assertEquals("Request method should be set to GET ", request.getRequestMethod(), RequestType.GET);
+        assertTrue("Next State should be set as READING URI when found.", state.isReadingURI());
     }
 
     @Test
@@ -89,8 +105,11 @@ public class readMethodTest {
             parser.nextCharacter(c);
         }
 
-        assertTrue("Request method should be set to POST ",  parser.getRequest().getRequestMethod().equals(RequestType.POST));
-        assertTrue("Next State should be set as READING URI when found.", parser.getRequest().getState().isReadingURI());
+        HttpRequest request = parser.getRequest();
+        State state = request.getState();
+
+        assertEquals("Request method should be set to POST ", request.getRequestMethod(), RequestType.POST);
+        assertTrue("Next State should be set as READING URI when found.", state.isReadingURI());
     }
 
     @Test
@@ -102,8 +121,11 @@ public class readMethodTest {
             parser.nextCharacter(c);
         }
 
-        assertTrue("Invalid request is found no requestType is set ",parser.getRequest().getRequestMethod() == null);
-        assertTrue("next State should be set as STILL READING", parser.getRequest().getState().isReadingMethod());
+        HttpRequest request = parser.getRequest();
+        State state = request.getState();
+
+        assertNull("Invalid request is found no requestType is set ", request.getRequestMethod());
+        assertTrue("next State should be set as STILL READING", state.isReadingMethod());
     }
 
     @Test
@@ -115,7 +137,10 @@ public class readMethodTest {
             parser.nextCharacter(c);
         }
 
-        assertTrue("Invalid request is found no requestType is set ", parser.getRequest().getRequestMethod() == null);
-        assertTrue("next State should be set as Error", parser.getRequest().getState().isErrorState());
+        HttpRequest request = parser.getRequest();
+        State state = request.getState();
+
+        assertNull("Invalid request is found no requestType is set ", request.getRequestMethod());
+        assertTrue("next State should be set as Error", state.isErrorState());
     }
 }

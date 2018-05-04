@@ -15,12 +15,14 @@ import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.SocketException;
 
+import static com.jasper.model.httpenums.StatusCode.BAD_REQUEST;
+
 /**
  * Created by Jasper Lankhorst on 20-11-2016.
  */
 public class ClientWorkerRunnable implements Runnable {
 
-    protected Socket clientSocket;
+    private Socket clientSocket;
     private Controller controller;
     private OutputStream out;
     private InputStream in;
@@ -49,9 +51,9 @@ public class ClientWorkerRunnable implements Runnable {
             //report somewhere
             System.err.println("Disconnected client by Input output error");
         } catch (Exception e) {
+            e.printStackTrace();
             System.err.println("Disconnected client by a general exception.");
             System.err.println(e);
-            e.printStackTrace();
         } catch (Throwable e) {
             System.err.println("Disconnected client by a Throwable exception!");
             System.err.println(e);
@@ -78,25 +80,34 @@ public class ClientWorkerRunnable implements Runnable {
      * @param inputStream
      * @throws IOException
      */
-    private HttpRequest readInputStream(InputStream inputStream) throws IOException {
+    private HttpRequest readInputStream(InputStream inputStream) {
         if (reader == null) {
             reader = new BufferedReader(new InputStreamReader(inputStream));
         }
 
         RequestParser requestParser = new RequestParser();
+        HttpRequest request = requestParser.getRequest();
         State state = requestParser.getRequest().getState();
 
         while(!state.isErrorState() &&
               !state.isDone()){
-            char c = (char) reader.read();
-            requestParser.nextCharacter(c);
-            state = requestParser.getRequest().getState();
+
+            try {
+                request = requestParser.getRequest();
+                char c = (char) reader.read();
+                requestParser.nextCharacter(c);
+                state = request.getState();
+            }catch(IOException ex){
+                request.setState(State.ERROR);
+                request.setStatusCode(BAD_REQUEST);
+                break;
+            }
         }
 
-        return requestParser.getRequest();
+        return request;
     }
 
-    public void handleHandlers(HttpRequest request, HttpResponse response) throws UnsupportedEncodingException {
+    private void handleHandlers(HttpRequest request, HttpResponse response) throws UnsupportedEncodingException {
 
         if (!request.getState().isErrorState()) {
 
@@ -130,7 +141,7 @@ public class ClientWorkerRunnable implements Runnable {
             if(request.getStatusCode() != null){
                 response.setStatusCode(request.getStatusCode());
             }else{
-                response.setStatusCode(StatusCode.BAD_REQUEST);
+                response.setStatusCode(BAD_REQUEST);
             }
         }
 
