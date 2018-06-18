@@ -32,6 +32,11 @@ public class Main {
         //Database bouwen.
         //10 Request afhandelen met 1 thread, non blocking threads.
 
+        server.socket("/chat", (req, res) -> {
+            //read out request.
+            //send back with response?
+        });
+
         server.get("/hello", (req, res) -> {
             res.write("Hello World1@#$%&#@(%)@#&ëäï");
         });

@@ -1,10 +1,10 @@
 package com.jasper.model.httpenums;
 
 /**
- * Viewed on 16/0/2018
- * https://developer.mozilla.org/nl/docs/Web/HTTP/Status
+ * Viewed on 16/0/2018 https://developer.mozilla.org/nl/docs/Web/HTTP/Status
  */
 public enum StatusCode {
+    SWITCHING_PROTOCOL("101", "Switching Protocols"),
     OK("200", "OK"),
     ACCEPTED("202", "Accepted"),
     BAD_REQUEST("400", "Bad Request"),

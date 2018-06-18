@@ -6,6 +6,9 @@ import com.jasper.model.httpenums.State;
 import com.jasper.model.httpenums.StatusCode;
 import com.jasper.model.request.RequestHandler;
 import com.jasper.model.request.RequestParser;
+import com.jasper.model.response.HttpResponse;
+import com.jasper.model.response.HttpResponseHandler;
+import com.jasper.model.response.SocketSwitchingResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,13 +39,12 @@ public class ClientWorkerRunnable implements Runnable {
     @Override
     public void run() {
         System.out.println("Connecting on [" + Thread.currentThread().getName() + "]");
-        HttpResponse httpResponse = new HttpResponse();
 
+        HttpResponseHandler responseHandler = null;
         try {
             in = clientSocket.getInputStream();
             out = clientSocket.getOutputStream();
-
-            handleHandlers(readInputStream(in), httpResponse);
+            responseHandler = handleHandlers(readInputStream(in));
 
             controller.removeConnection(this);
         } catch (SocketException e) {
@@ -62,7 +64,11 @@ public class ClientWorkerRunnable implements Runnable {
             System.out.println("End of request on [" + Thread.currentThread().getName() + "]");
 
             try {
-                out.write(httpResponse.getResponse().getBytes("UTF-8"));
+
+                if (responseHandler != null) {
+                    out.write(responseHandler.getResponse().getBytes("UTF-8"));
+                }
+
                 in.close();
                 out.flush();
                 out.close();
@@ -89,15 +95,15 @@ public class ClientWorkerRunnable implements Runnable {
         HttpRequest request = requestParser.getRequest();
         State state = requestParser.getRequest().getState();
 
-        while(!state.isErrorState() &&
-              !state.isDone()){
+        while (!state.isErrorState() &&
+                !state.isDone()) {
 
             try {
                 request = requestParser.getRequest();
                 char c = (char) reader.read();
                 requestParser.nextCharacter(c);
                 state = request.getState();
-            }catch(IOException ex){
+            } catch (IOException ex) {
                 request.setState(State.ERROR);
                 request.setStatusCode(BAD_REQUEST);
                 break;
@@ -107,7 +113,17 @@ public class ClientWorkerRunnable implements Runnable {
         return request;
     }
 
-    private void handleHandlers(HttpRequest request, HttpResponse response) throws UnsupportedEncodingException {
+    private HttpResponseHandler handleHandlers(HttpRequest request) throws UnsupportedEncodingException {
+
+        HttpResponseHandler response;
+        switch (request.getStatusCode()) {
+            case SWITCHING_PROTOCOL:
+                response = new SocketSwitchingResponse();
+                break;
+            default:
+                response = new HttpResponse();
+                break;
+        }
 
         if (!request.getState().isErrorState()) {
 
@@ -120,7 +136,7 @@ public class ClientWorkerRunnable implements Runnable {
                     }
                 }
 
-            } else{
+            } else {
                 response.setStatusCode(StatusCode.NOT_FOUND);
             }
 
@@ -138,13 +154,15 @@ public class ClientWorkerRunnable implements Runnable {
 
         } else {
 
-            if(request.getStatusCode() != null){
+            if (request.getStatusCode() != null) {
                 response.setStatusCode(request.getStatusCode());
-            }else{
+            } else {
                 response.setStatusCode(BAD_REQUEST);
             }
         }
 
         response.buildResponse();
+
+        return response;
     }
 }

@@ -69,11 +69,11 @@ public class RequestParser {
                 } else {
                     String validUricharactersInGeneral = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()" +
                             "*+,;=`.";
-                    if(validUricharactersInGeneral.contains(Character.toString(c))) {
+                    if (validUricharactersInGeneral.contains(Character.toString(c))) {
                         request.getStateBuilder().append(c);
                         stateUrlBuilder.append(c);
                         readUri(request);
-                    }else{
+                    } else {
                         request.setState(ERROR);
                         request.setStatusCode(BAD_REQUEST);
                     }
@@ -127,11 +127,12 @@ public class RequestParser {
                 }
                 break;
             case READ_BODY:
-                //TODO needs to be helped with CONTENT-length?
                 request.getStateBuilder().append(c);
                 postSize++;
 
                 if (totalBodySize == 0) {
+
+                    //if header value is empty.
                     if (request.getHeaders().get("Content-Length") == null) {
                         request.setState(ERROR);
                         request.setStatusCode(StatusCode.LENGTH_REQUIRED);
@@ -143,9 +144,7 @@ public class RequestParser {
                     }
                 }
 
-
                 if (postSize < totalBodySize) {
-
                     if (postState.isPostValue()) {
                         if (bufferCheck.hasDelimiter()) {
                             postQueryValue = request.getStateBuilder().toString();
@@ -164,16 +163,16 @@ public class RequestParser {
                     }
 
                 } else if (postSize == totalBodySize) {
+
                     postQueryValue = request.getStateBuilder().toString();
                     request.getQueryPOST().put(postQueryKey, postQueryValue);
                     request.getStateBuilder().setLength(0);
                     request.setState(State.DONE);
+
                 } else if (postSize > totalBodySize) {
                     request.setStatusCode(StatusCode.PAYLOAD_TO_LARGE);
                     request.setState(ERROR);
                 }
-
-
                 break;
             case ERROR:
                 //Stop reading, cancel further working on it.
@@ -182,8 +181,7 @@ public class RequestParser {
     }
 
     /**
-     * HTTP/1.1 or HTTP/2.0 or HTTP/1.0 or HTTP/0.9
-     * Consists of HTTP[/]MajorVersion.Minorversion.
+     * HTTP/1.1 or HTTP/2.0 or HTTP/1.0 or HTTP/0.9 Consists of HTTP[/]MajorVersion.Minorversion.
      *
      * @param inputString the third space from the httpVersion.
      */
@@ -211,10 +209,8 @@ public class RequestParser {
     }
 
     /**
-     * https://www.ietf.org/rfc/rfc3986.txt Supports for now a simplified version of the RFC.
-     * Not included IPV6.
-     * InputString it only the URI, should check if it has invalid characters in it.
-     * TODO entity checking %20 spaces and extra entitys.
+     * https://www.ietf.org/rfc/rfc3986.txt Supports for now a simplified version of the RFC. Not included IPV6. InputString it only the
+     * URI, should check if it has invalid characters in it. TODO entity checking %20 spaces and extra entitys.
      *
      * @param request the input of the String.
      */
@@ -340,6 +336,7 @@ public class RequestParser {
                     request.setStateUrl(StateUrl.READ_QUERY_NAME);
                 }
 
+                //End of line or hash
                 if (bufferCheck.hasSpace() || bufferCheck.hasHash()) {
                     request.setFilename(request.getPath() + request.getQuery()); //combine everything.
                     stateUrlBuilder.setLength(0); //re-use builder.
@@ -383,8 +380,7 @@ public class RequestParser {
     }
 
     /**
-     * Once its found to be in a RequestType
-     * Checks if its a valid RequestType.
+     * Once its found to be in a RequestType Checks if its a valid RequestType.
      *
      * @param inputString first part of the input String.
      */
@@ -399,9 +395,5 @@ public class RequestParser {
 
     private boolean startWithForwardSlashInBuilder() {
         return stateUrlBuilder.toString().startsWith("/");
-    }
-
-    private void readQueryEndOfLineOrHashState() {
-        //End of line or Hash
     }
 }

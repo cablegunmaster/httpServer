@@ -1,8 +1,6 @@
 package com.jasper.controller;
 
 import com.jasper.model.ClientWorkerRunnable;
-import com.jasper.model.HttpRequest;
-import com.jasper.model.HttpResponse;
 import com.jasper.model.Model;
 import com.jasper.model.MultiThreadedServer;
 import com.jasper.model.request.RequestHandler;

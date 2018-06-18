@@ -200,11 +200,11 @@ public class HttpRequest {
         this.queryPOST = queryPOST;
     }
 
-    private String removeRN(String inputString ){
+    private String removeRN(String inputString) {
         return inputString.replaceAll("(\r\n|\n)", "");
     }
 
-    private String removeSemicolon(String inputString ){
+    private String removeSemicolon(String inputString) {
         //$ means last part of string.
         return inputString.replaceAll(":$", "");
     }

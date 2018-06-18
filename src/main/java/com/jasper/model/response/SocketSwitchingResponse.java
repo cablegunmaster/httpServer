@@ -3,7 +3,22 @@ package com.jasper.model.response;
 import com.jasper.model.httpenums.StatusCode;
 import java.io.UnsupportedEncodingException;
 
-public class SocketResponse extends HttpResponseHandler {
+/**
+ * Response for the Socket switching when the upgrade is requested Going from HTTP to websocket protocol,
+ * bidirectioneel binair protcol.
+ */
+public class SocketSwitchingResponse extends HttpResponseHandler {
+
+    String websocketAccept;
+
+    //TODO if response need modiciations?
+    public String getWebsocketAcceptString() {
+        return websocketAccept;
+    }
+
+    public void setWebsocketAcceptString(String websocketAccept) {
+        this.websocketAccept = websocketAccept;
+    }
 
     /**
      * Output of the socket response. To send back an socket response??
@@ -32,11 +47,14 @@ public class SocketResponse extends HttpResponseHandler {
             contentLength = contentInBytes.length;
         }
 
-        response.append("Content-Length: ").append(contentLength).append(LINE_END);
-        response.append("Content-Type: text/html; charset=utf-8");
-        response.append(DOUBLE_LINE_END);
-        response.append(getBody());
-        response.append(DOUBLE_LINE_END);
+        //first version keep it simple:
+        response.append("Upgrade: WebSocket").append(LINE_END)
+                .append("Connection: Upgrade").append(LINE_END)
+                .append("Sec-WebSocket-Protocol: chat").append(LINE_END)
+                .append("Sec-WebSocket-Accept:").append(getWebsocketAcceptString()).append(LINE_END)
+                .append(DOUBLE_LINE_END)
+                .append(getBody())
+                .append(DOUBLE_LINE_END);
 
         return response.toString();
     }

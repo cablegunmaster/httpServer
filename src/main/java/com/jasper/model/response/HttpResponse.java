@@ -1,55 +1,15 @@
-package com.jasper.model;
+package com.jasper.model.response;
 
-import com.jasper.model.httpenums.StatusCode;
 import java.io.UnsupportedEncodingException;
-import org.omg.CORBA.portable.ResponseHandler;
 
-public class HttpResponse implements ResponseHandler {
-
-    private final static String LINE_END = "\r\n";
-    private final static String DOUBLE_LINE_END = "\r\n\r\n";
-    private final static String SPACE = " ";
-
-    private String response = null;
-    private StringBuilder body = new StringBuilder();
-    private StatusCode statusCode = null; //status code of request.
-    private double httpVersion = 1.1;
-
-    public void setStatusCode(StatusCode statusCode) {
-        this.statusCode = statusCode;
-    }
-
-    public StatusCode getStatusCode() {
-        return statusCode;
-    }
-
-    public void write(String s) {
-        body.append(s);
-    }
-
-    private String getBody() {
-        return body.toString();
-    }
-
-    public double getHttpVersion() {
-        return httpVersion;
-    }
-
-    public void setHttpVersion(double httpVersion) {
-        this.httpVersion = httpVersion;
-    }
-
-    public void buildResponse() {
-        response = toString();
-    }
-
-    public String getResponse() {
-        return response;
-    }
+/**
+ * Http response object for sending back a HTTP response for GET or POST.
+ */
+public class HttpResponse extends HttpResponseHandler {
 
     /**
-     * Output of the whole file, the full request as a String to be send back to the client.
-     * TODO improve this toString function to be able to send back an extra support.
+     * Output of the whole file, the full request as a String to be send back to the client. TODO improve this toString function to be able
+     * to send back an extra support.
      */
     @Override
     public String toString() {
