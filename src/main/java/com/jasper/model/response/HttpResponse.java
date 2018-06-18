@@ -2,8 +2,9 @@ package com.jasper.model;
 
 import com.jasper.model.httpenums.StatusCode;
 import java.io.UnsupportedEncodingException;
+import org.omg.CORBA.portable.ResponseHandler;
 
-public class HttpResponse {
+public class HttpResponse implements ResponseHandler {
 
     private final static String LINE_END = "\r\n";
     private final static String DOUBLE_LINE_END = "\r\n\r\n";
