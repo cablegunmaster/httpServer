@@ -1,4 +1,4 @@
-package com.rien;
+package integrationTest.rien;
 
 import java.io.BufferedOutputStream;
 import java.io.OutputStream;
@@ -10,7 +10,7 @@ import java.nio.charset.Charset;
  * Date: 26-1-18
  * Time: 13:53
  */
-public class Break3 {
+public class Break2 {
     public final static Charset UTF8 = Charset.forName("UTF-8");
 
     public static void main(String[] args) {
@@ -19,7 +19,7 @@ public class Break3 {
         try{
             int count = 0;
 
-            while(count++ < 5) {
+            while(count++ < 1000) {
                 System.out.println("Connection "+count);
 
                 Socket socket = new Socket("localhost", port);
@@ -27,7 +27,7 @@ public class Break3 {
                 out.write('X');
             }
 
-            System.out.println("Server did ok! But why is my computer so busy!?");
+            System.out.println("Server did ok!");
         } catch  (Throwable e) {
             System.out.println(e);
             e.printStackTrace();

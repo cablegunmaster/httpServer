@@ -1,4 +1,4 @@
-package com.rien;
+package integrationTest.rien;
 
 import java.io.OutputStream;
 import java.net.Socket;

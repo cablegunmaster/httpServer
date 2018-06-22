@@ -11,10 +11,10 @@ import java.net.SocketException;
  */
 public class MultiThreadedServer implements Runnable {
 
-    private int serverPort = 80;
+    private int serverPort;
     private ServerSocket serverSocket = null;
     private static boolean isStopped = false;
-    private Controller controller = null;
+    private Controller controller;
 
     public MultiThreadedServer(int port, Controller controller) {
         this.serverPort = port;
@@ -44,10 +44,6 @@ public class MultiThreadedServer implements Runnable {
 
             this.serverSocket.setReuseAddress(true);
             clientSocket = this.serverSocket.accept();
-
-            clientSocket.setSoTimeout(5000); //timeout to make a clientsocket Idle.
-            clientSocket.setSoLinger(true, 10000); //timeout to close the socket.
-
         } catch (SocketException e) {
             isStopped = true;
             clientSocket = null;
@@ -62,9 +58,9 @@ public class MultiThreadedServer implements Runnable {
         if (clientSocket != null && controller != null) {
             controller.addStringToLog("Connection made..");
 
-            ClientWorkerRunnable clientWorkerRunnable = new ClientWorkerRunnable(clientSocket, controller);
-            controller.addConnection(clientWorkerRunnable);
-            Thread t = new Thread(clientWorkerRunnable);
+            Client client = new Client(clientSocket, controller);
+            controller.addConnection(client);
+            Thread t = new Thread(client);
             t.start();
         }
     }

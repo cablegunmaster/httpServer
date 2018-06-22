@@ -1,6 +1,6 @@
 package com.jasper.controller;
 
-import com.jasper.model.ClientWorkerRunnable;
+import com.jasper.model.Client;
 import com.jasper.model.Model;
 import com.jasper.model.MultiThreadedServer;
 import com.jasper.model.request.RequestHandler;
@@ -10,50 +10,55 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.HashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Jasper Lankhorst on 17-11-2016.
  */
 public class Controller {
 
+    private final static Logger LOG = LoggerFactory.getLogger(Controller.class);
+
     private Model model;
     private View view;
     private MultiThreadedServer multiThreadedServer;
     private Thread multiThreadedServerThread;
     private int portnumber;
-
     private static Boolean restartProces = false;
 
     /**
-     * Java.Controller class which grabs all.
+     * Java.Controller class
+     *
      * @param portNumber portnumber
      */
     public Controller(Integer portNumber,
                       HashMap<String, RequestHandler> getMap,
                       HashMap<String, RequestHandler> postMap) {
         this.model = new Model();
-        this.view  = new View();
+        this.view = new View();
 
         model.setGetMapping(getMap);
         model.setPostMapping(postMap);
 
         portnumber = portNumber;
 
-        setListeners(); //all listeners on 1 function.
+        setListeners();
         startServer(portnumber);
     }
 
     /**
      * Set all listeners.
      */
-    public void setListeners() {
+    private void setListeners() {
         //Build up all the actions for the current view.
         view.getRestartMenuItem().addActionListener(getRestartListener());
         view.getstopMenuItem().addActionListener(getStopListener());
     }
 
     /**
-     * Add a String to the Console log.
+     * Add a String to the VIEW
+     *
      * @param line String value put in the view.
      */
     public synchronized void addStringToLog(String line) {
@@ -64,17 +69,17 @@ public class Controller {
         view.refresh();
     }
 
-    /**
-     * Add the content to the OUTPUT log
-     */
-    public synchronized void addStringToOutputLog(String line) {
-        view.getOutgoingTextArea().setText("");
-        view.getOutgoingTextArea().append(line + "\r\n");
-        int len = view.getOutgoingTextArea().getDocument().getLength();
-
-        view.getOutgoingTextArea().setCaretPosition(len);
-        view.refresh();
-    }
+    //    /**
+    //     * Add the content to the OUTPUT log
+    //     */
+    //    public synchronized void addStringToOutputLog(String line) {
+    //        view.getOutgoingTextArea().setText("");
+    //        view.getOutgoingTextArea().append(line + "\r\n");
+    //        int len = view.getOutgoingTextArea().getDocument().getLength();
+    //
+    //        view.getOutgoingTextArea().setCaretPosition(len);
+    //        view.refresh();
+    //    }
 
     /**
      * Clear the logs
@@ -86,9 +91,10 @@ public class Controller {
 
     /**
      * Starting the server, if no server has been started already.
+     *
      * @param portNumber Integer
      */
-    public synchronized void startServer(Integer portNumber) {
+    private synchronized void startServer(Integer portNumber) {
 
         multiThreadedServer = new MultiThreadedServer(portNumber, this); //gets view to send log messages.
 
@@ -124,7 +130,7 @@ public class Controller {
         };
     }
 
-    public void stopMultiServerThread(Thread multiThreadedServer) {
+    private void stopMultiServerThread(Thread multiThreadedServer) {
         try {
             //deleting leftover variables.
             multiThreadedServerThread.join(); // wait for the thread to stop
@@ -136,6 +142,7 @@ public class Controller {
 
     /**
      * Stop the server.
+     *
      * @param multiThreadedServer
      */
     private void stopMultiThreadedServer(MultiThreadedServer multiThreadedServer) {
@@ -150,10 +157,14 @@ public class Controller {
             e.printStackTrace();
         }
 
-
         view.refresh();
     }
 
+    /**
+     * Stop application.
+     *
+     * @return
+     */
     private ActionListener getStopListener() {
         return new ActionListener() {
             @Override
@@ -165,25 +176,24 @@ public class Controller {
 
     /**
      * Add 'clientWorkerRunnable' connections to the list.
-     * @param clientWorkerRunnable
+     *
+     * @param client
      */
-    public void addConnection(ClientWorkerRunnable clientWorkerRunnable) {
-        model.getConnections().add(clientWorkerRunnable);
+    public void addConnection(Client client) {
+        model.addConnection(client);
     }
 
     /**
-     * Remove 'clientWorkerRunnable' connections to the list.
-     * @param clientWorkerRunnable
+     * Remove a single connection from the Connection list.
+     *
+     * @param client Connection removal.
      */
-    public void removeConnection(ClientWorkerRunnable clientWorkerRunnable) {
-        model.getConnections().remove(clientWorkerRunnable);
+    public void removeConnection(Client client) {
+        LOG.debug("removed connection.");
+        model.getConnections().remove(client);
     }
 
     public Model getModel() {
         return model;
-    }
-
-    public View getView() {
-        return view;
     }
 }

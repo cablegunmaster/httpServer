@@ -17,13 +17,17 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.SocketException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.jasper.model.httpenums.StatusCode.BAD_REQUEST;
 
 /**
  * Created by Jasper Lankhorst on 20-11-2016.
  */
-public class ClientWorkerRunnable implements Runnable {
+public class Client implements Runnable {
+
+    private final static Logger LOG = LoggerFactory.getLogger(Client.class);
 
     private Socket clientSocket;
     private Controller controller;
@@ -31,41 +35,40 @@ public class ClientWorkerRunnable implements Runnable {
     private InputStream in;
     private BufferedReader reader = null;
 
-    ClientWorkerRunnable(Socket clientSocket, Controller controller) {
+    Client(Socket clientSocket, Controller controller) {
         this.clientSocket = clientSocket;
         this.controller = controller;
     }
 
     @Override
     public void run() {
-        System.out.println("Connecting on [" + Thread.currentThread().getName() + "]");
+        LOG.debug("Connecting on [" + Thread.currentThread().getName() + "]");
 
         HttpResponseHandler responseHandler = null;
         try {
+
             in = clientSocket.getInputStream();
             out = clientSocket.getOutputStream();
-            responseHandler = handleHandlers(readInputStream(in));
+            responseHandler = handleHandlers(readInputStream(in), clientSocket);
+            controller.removeConnection(this);
+
+        } catch (SocketException e) {
+            LOG.warn("Disconnected client by a Socket error, probably disconnected by user.");
+        } catch (IOException e) {
+            LOG.warn("Disconnected client by Input output error");
+        } catch (Exception e) {
+            LOG.warn("Disconnected client by a general exception.", e);
+        } catch (Throwable e) {
+            LOG.warn("Disconnected client by a Throwable exception!", e);
+        } finally {
+            LOG.info("End of request on [" + Thread.currentThread().getName() + "]");
 
             controller.removeConnection(this);
-        } catch (SocketException e) {
-            System.err.println("Disconnected client by a Socket error, probably disconnected by user.");
-        } catch (IOException e) {
-            //report somewhere
-            System.err.println("Disconnected client by Input output error");
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Disconnected client by a general exception.");
-            System.err.println(e);
-        } catch (Throwable e) {
-            System.err.println("Disconnected client by a Throwable exception!");
-            System.err.println(e);
-            e.printStackTrace();
-        } finally {
-            System.out.println("End of request on [" + Thread.currentThread().getName() + "]");
 
             try {
 
                 if (responseHandler != null) {
+                    //is this needed?
                     out.write(responseHandler.getResponse().getBytes("UTF-8"));
                 }
 
@@ -73,8 +76,9 @@ public class ClientWorkerRunnable implements Runnable {
                 out.flush();
                 out.close();
                 clientSocket.close();
+
             } catch (IOException e) {
-                e.printStackTrace();
+                LOG.warn("IOEXCEPTION:", e);
                 controller.addStringToLog("[ Error ] IOException, socket is closed");
             }
         }
@@ -93,7 +97,7 @@ public class ClientWorkerRunnable implements Runnable {
 
         RequestParser requestParser = new RequestParser();
         HttpRequest request = requestParser.getRequest();
-        State state = requestParser.getRequest().getState();
+        State state = request.getState();
 
         while (!state.isErrorState() &&
                 !state.isDone()) {
@@ -106,22 +110,26 @@ public class ClientWorkerRunnable implements Runnable {
             } catch (IOException ex) {
                 request.setState(State.ERROR);
                 request.setStatusCode(BAD_REQUEST);
-                break;
+                break;//on error escape.
             }
         }
 
         return request;
     }
 
-    private HttpResponseHandler handleHandlers(HttpRequest request) throws UnsupportedEncodingException {
+    private HttpResponseHandler handleHandlers(HttpRequest request, Socket clientSocket) throws UnsupportedEncodingException,
+            SocketException {
 
         HttpResponseHandler response;
         switch (request.getStatusCode()) {
             case SWITCHING_PROTOCOL:
                 response = new SocketSwitchingResponse();
+                clientSocket.setSoTimeout(0); //timeout to make a clientsocket Idle.
                 break;
             default:
                 response = new HttpResponse();
+                clientSocket.setSoTimeout(5000); //timeout to make a clientsocket Idle.
+                clientSocket.setSoLinger(true, 10000); //timeout to close the socket.
                 break;
         }
 
@@ -154,8 +162,9 @@ public class ClientWorkerRunnable implements Runnable {
 
         } else {
 
-            if (request.getStatusCode() != null) {
-                response.setStatusCode(request.getStatusCode());
+            StatusCode statusCode = request.getStatusCode();
+            if (statusCode != null) {
+                response.setStatusCode(statusCode);
             } else {
                 response.setStatusCode(BAD_REQUEST);
             }

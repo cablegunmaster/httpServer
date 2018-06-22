@@ -11,17 +11,25 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class Model {
 
-    private CopyOnWriteArrayList<ClientWorkerRunnable> connections = new CopyOnWriteArrayList<>();
+    private CopyOnWriteArrayList<Client> connections = new CopyOnWriteArrayList<>();
     private HashMap<String, RequestHandler> getMap;
     private HashMap<String, RequestHandler> postMap;
 
     /**
      * Get the current connections.
      *
-     * @return List of all connections<ClientWorkerRunnable> containing
+     * @return List of all connections<Client> containing
      */
-    public List<ClientWorkerRunnable> getConnections() {
+    public List<Client> getConnections() {
         return connections;
+    }
+
+    public void addConnection(Client client){
+        connections.add(client);
+    }
+
+    public void removeConnection(Client client){
+        connections.remove(client);
     }
 
     public void setGetMapping(HashMap<String, RequestHandler> getMap) {

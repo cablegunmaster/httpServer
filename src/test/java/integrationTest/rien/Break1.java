@@ -1,4 +1,4 @@
-package com.rien;
+package integrationTest.rien;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
