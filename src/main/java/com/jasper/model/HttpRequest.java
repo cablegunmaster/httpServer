@@ -40,6 +40,7 @@ public class HttpRequest {
     private Map<String, String> headers = new HashMap<>();
     private StringBuilder headerName = new StringBuilder();
     private StringBuilder headerValue = new StringBuilder();
+    private boolean upgradingConnection = false;
 
     //HttpVersion number.
     private Double httpVersion;
@@ -207,5 +208,13 @@ public class HttpRequest {
     private String removeSemicolon(String inputString) {
         //$ means last part of string.
         return inputString.replaceAll(":$", "");
+    }
+
+    public boolean isUpgradingConnection() {
+        return upgradingConnection;
+    }
+
+    public void setUpgradingConnection(boolean upgradingConnection) {
+        this.upgradingConnection = upgradingConnection;
     }
 }
