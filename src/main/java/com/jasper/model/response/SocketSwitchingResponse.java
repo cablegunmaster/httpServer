@@ -43,6 +43,7 @@ public class SocketSwitchingResponse extends HttpResponseHandler {
                 .append(LINE_END);
 
         Integer contentLength = 0;
+
         if (contentInBytes != null) {
             contentLength = contentInBytes.length;
         }

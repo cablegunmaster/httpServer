@@ -31,6 +31,7 @@ public class Client implements Runnable {
 
     private Socket clientSocket;
     private Controller controller;
+    private Model model;
     private OutputStream out;
     private InputStream in;
     private BufferedReader reader = null;
@@ -38,6 +39,7 @@ public class Client implements Runnable {
     Client(Socket clientSocket, Controller controller) {
         this.clientSocket = clientSocket;
         this.controller = controller;
+        model = controller.getModel();
     }
 
     @Override
@@ -91,6 +93,7 @@ public class Client implements Runnable {
      * @throws IOException
      */
     private HttpRequest readInputStream(InputStream inputStream) {
+
         if (reader == null) {
             reader = new BufferedReader(new InputStreamReader(inputStream));
         }
@@ -99,9 +102,7 @@ public class Client implements Runnable {
         HttpRequest request = requestParser.getRequest();
         State state = request.getState();
 
-        while (!state.isErrorState() &&
-                !state.isDone()) {
-
+        while (!state.isErrorState() && !state.isDone()) {
             try {
                 request = requestParser.getRequest();
                 char c = (char) reader.read();
@@ -133,11 +134,18 @@ public class Client implements Runnable {
                 break;
         }
 
-        if (!request.getState().isErrorState()) {
+        if (request.getState().isErrorState()) {
+            StatusCode statusCode = request.getStatusCode();
+            if (statusCode != null) {
+                response.setStatusCode(statusCode);
+            } else {
+                response.setStatusCode(BAD_REQUEST);
+            }
+        } else {
 
             if (request.getRequestMethod().equals(RequestType.GET)) {
                 if (request.getPath() != null) {
-                    if (controller.getModel().getGetMap().containsKey(request.getPath())) {
+                    if (model.getGetMap().containsKey(request.getPath())) {
                         RequestHandler handler = (RequestHandler) controller.getModel().getGetMap().get(request.getPath());
                         handler.handle(request, response);
                         response.setStatusCode(StatusCode.ACCEPTED);
@@ -150,7 +158,7 @@ public class Client implements Runnable {
 
             if (request.getRequestMethod().equals(RequestType.POST)) {
                 if (request.getPath() != null) {
-                    if (controller.getModel().getPostMap().containsKey(request.getPath())) {
+                    if (model.getPostMap().containsKey(request.getPath())) {
                         RequestHandler handler = (RequestHandler) controller.getModel().getPostMap().get(request.getPath());
                         handler.handle(request, response);
                         response.setStatusCode(StatusCode.ACCEPTED);
@@ -160,14 +168,6 @@ public class Client implements Runnable {
                 response.setStatusCode(StatusCode.NOT_FOUND);
             }
 
-        } else {
-
-            StatusCode statusCode = request.getStatusCode();
-            if (statusCode != null) {
-                response.setStatusCode(statusCode);
-            } else {
-                response.setStatusCode(BAD_REQUEST);
-            }
         }
 
         response.buildResponse();
