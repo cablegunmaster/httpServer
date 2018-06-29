@@ -11,13 +11,14 @@ public class Server {
     private HashMap<String, RequestHandler> getMap = new HashMap<>();
     private HashMap<String, RequestHandler> postMap = new HashMap<>();
     private HashMap<String, RequestHandler> socketMap = new HashMap<>();
+    private Boolean guiVisible = false;
 
     public Server(int portNumber) {
         port = portNumber;
     }
 
     public void start() {
-        new Controller(getPortNumber(), getMap, postMap);
+        new Controller(getPortNumber(), getMap, postMap, getGuiVisible());
     }
 
     public void setPort(int port) {
@@ -38,5 +39,13 @@ public class Server {
 
     public void socket(String url, RequestHandler o) {
         socketMap.put(url, o);
+    }
+
+    public void setGUIVisible(Boolean guiVisible) {
+        guiVisible = true;
+    }
+
+    public Boolean getGuiVisible(){
+        return guiVisible;
     }
 }

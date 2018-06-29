@@ -22,7 +22,7 @@ public enum RequestType {
         return this == RequestType.GET;
     }
 
-    public boolean ispostRequest(){
+    public boolean isPostRequest(){
         return this == RequestType.POST;
     }
 }

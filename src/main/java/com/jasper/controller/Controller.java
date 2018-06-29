@@ -26,6 +26,7 @@ public class Controller {
     private Thread multiThreadedServerThread;
     private int portnumber;
     private static Boolean restartProces = false;
+    private Boolean guiVisible = false;
 
     /**
      * Java.Controller class
@@ -34,16 +35,20 @@ public class Controller {
      */
     public Controller(Integer portNumber,
                       HashMap<String, RequestHandler> getMap,
-                      HashMap<String, RequestHandler> postMap) {
-        this.model = new Model();
-        this.view = new View();
+                      HashMap<String, RequestHandler> postMap,
+                      Boolean guiVisible) {
 
+        this.guiVisible = guiVisible;
+        if (guiVisible) {
+            this.view = new View();
+            setListeners();
+        }
+
+        this.model = new Model();
         model.setGetMapping(getMap);
         model.setPostMapping(postMap);
-
         portnumber = portNumber;
 
-        setListeners();
         startServer(portnumber);
     }
 
@@ -62,11 +67,13 @@ public class Controller {
      * @param line String value put in the view.
      */
     public synchronized void addStringToLog(String line) {
-        view.getLogTextArea().append(line + "\r\n");
-        int len = view.getLogTextArea().getDocument().getLength();
+        if (guiVisible) {
+            view.getLogTextArea().append(line + "\r\n");
+            int len = view.getLogTextArea().getDocument().getLength();
 
-        view.getLogTextArea().setCaretPosition(len);
-        view.refresh();
+            view.getLogTextArea().setCaretPosition(len);
+            view.refresh();
+        }
     }
 
     //    /**

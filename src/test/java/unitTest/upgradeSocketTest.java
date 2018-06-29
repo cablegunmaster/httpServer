@@ -1,12 +1,21 @@
 package unitTest;
 
+import com.jasper.controller.Controller;
+import com.jasper.model.Client;
 import com.jasper.model.HttpRequest;
+import com.jasper.model.httpenums.RequestType;
 import com.jasper.model.httpenums.State;
 import com.jasper.model.httpenums.StateUrl;
+import com.jasper.model.httpenums.StatusCode;
 import com.jasper.model.request.RequestParser;
+import com.jasper.model.response.HttpResponseHandler;
+import com.jasper.model.response.SocketSwitchingResponse;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -20,7 +29,7 @@ public class upgradeSocketTest {
     }
 
     @Test
-    public void HttpGETVariableTest() {
+    public void setHttpUpgradeSocketTest() {
 
         //I send.
         String stringToTest = "GET /chat HTTP/1.1\n" +
@@ -46,5 +55,18 @@ public class upgradeSocketTest {
         assertNotNull("error state found:" + stateUrl.name(), request.getPath());
         assertTrue("Reading Method set to DONE", state.isDone());
         assertTrue("Request is upgrading connection", request.isUpgradingConnection());
+    }
+
+    @Test
+    public void HttpGetSocketResponseHandlerTest() throws UnsupportedEncodingException {
+        HttpRequest request = new HttpRequest();
+        request.setUpgradingConnection(true);
+        request.setStatusCode(StatusCode.SWITCHING_PROTOCOL);
+        request.setRequestMethod(RequestType.GET);
+
+        Client client = new Client(null, new Controller(8080, new HashMap<>(), new HashMap<>(), false));
+        HttpResponseHandler responseHandler = client.handleRequestHandlers(request);
+
+        assertEquals(responseHandler.getClass(), SocketSwitchingResponse.class);
     }
 }

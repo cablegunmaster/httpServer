@@ -6,6 +6,7 @@ import com.jasper.model.httpenums.RequestType;
 import com.jasper.model.httpenums.State;
 import com.jasper.model.httpenums.StatusCode;
 import com.jasper.model.request.uriparser.RequestUriParser;
+import java.util.Map;
 
 import static com.jasper.model.httpenums.State.ERROR;
 import static com.jasper.model.httpenums.StatusCode.BAD_REQUEST;
@@ -170,26 +171,53 @@ public class RequestParser {
         if (bufferCheck.hasNewline()) {
             request.getStateBuilder().setLength(0);
 
-            if (request.getRequestMethod().isGetRequest()) {
-                request.setState(State.DONE);
-            } else if (request.getRequestMethod().ispostRequest()) {
-                if (request.getHeaders().containsKey("Content-Length")) {
-                    request.setState(State.READ_BODY);
-                } else {
-                    request.setState(ERROR);
-                    request.setStatusCode(StatusCode.LENGTH_REQUIRED);
+            if (request.getRequestMethod() != null)
+                switch (request.getRequestMethod()) {
+                    case POST:
+                        Map<String, String> headers = request.getHeaders();
+                        if (headers.containsKey("Content-Length")) {
+                            request.setState(State.READ_BODY);
+                        } else {
+                            request.setState(ERROR);
+                            request.setStatusCode(StatusCode.LENGTH_REQUIRED);
+                        }
+                        break;
+                    case GET:
+                        request.setState(State.DONE);
+                        break;
+                    default:
+                        request.setState(ERROR);
+                        break;
                 }
-            }
         }
     }
 
+
+    /**
+     * All functions regarding "special" header value / names should be dealt here.
+     * @param c
+     */
     private void readHeaderValue(char c) {
         request.getStateBuilder().append(c);
         //new line found.
         if (bufferCheck.hasNewline()) {
+
+            //Function read all the header values.
+            //Special way of dealing with all the different headers function needs to be here.
+
             String headerValue = request.getStateBuilder().toString();
             if (headerName != null) {
-                request.addHeader(headerName, headerValue);
+
+                headerName = headerName.replace(":","");
+                switch (headerName) {
+                    case "Upgrade":
+                        request.setUpgradingConnection(true);
+                        break;
+                    default:
+                        break;
+                }
+
+                request.addHeader(headerName, headerValue.replaceAll("\n", ""));
             }
             request.getStateBuilder().setLength(0);
             request.setState(State.READ_HEADER_NAME);

@@ -4,6 +4,7 @@ package com.jasper.model.httpenums;
  * Viewed on 16/0/2018 https://developer.mozilla.org/nl/docs/Web/HTTP/Status
  */
 public enum StatusCode {
+    SWITCHING_PROTOCOL("101", "Switching Protocol"),
     OK("200", "OK"),
     ACCEPTED("202", "Accepted"),
     BAD_REQUEST("400", "Bad Request"),
@@ -16,7 +17,7 @@ public enum StatusCode {
     URI_TOO_LONG("414", "URI Too Long"),
     INTERNAL_SERVER_ERROR("500", "Internal Server Error"),
     HTTP_VERSION_NOT_SUPPORTED("505", "HTTP Version Not Supported");
-
+    
     private final String statusCodeNumber;
     private final String description;
 

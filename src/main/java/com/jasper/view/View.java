@@ -14,7 +14,6 @@ public class View {
     private JScrollPane jscrollpane;
 
     //textareas
-    private JTextArea loggedInUsersTextArea;
     private JTextArea logtextArea;
     private JTextArea outgoingTextArea;
 
@@ -42,13 +41,6 @@ public class View {
 
         mainFrame.pack(); //resorts the area to show everything.
         mainFrame.setVisible(true);
-    }
-
-    public void destroyGUI() {
-        if (mainFrame != null) {
-            mainFrame.removeAll();
-            mainFrame.setVisible(false); //Is this enough to clear out memory?
-        }
     }
 
     /**
@@ -83,6 +75,7 @@ public class View {
 
     /**
      * Used for the GUI in the middle.
+     *
      * @return JPanel containing the middle screen.
      */
     public JPanel MiddleContainer() {
@@ -100,11 +93,6 @@ public class View {
         JLabel outgoingLoglabel = new JLabel("Outgoing Log:");
         JScrollPane outgoingLogPane = setOutgoingTextArea();
 
-        //retrieve the loggedInTextPane
-//        JScrollPane loggedInTextArea = setLoggedInTextArea();
-//        JLabel connectedUserLabel = new JLabel("Connected Users:");
-//        connectedUserLabel.setPreferredSize(new Dimension(125, 100));
-
         //adds the Scrollpanel to the panel.
         middleContainer.add(serverLogLabel, BorderLayout.CENTER);
         middleContainer.add(receivingLogTextArea, BorderLayout.CENTER);
@@ -118,6 +106,7 @@ public class View {
 
     /**
      * Set the Log textarea combining the JScrollpane with the textarea.
+     *
      * @return JScrollPane containing a new textarea 300x300 size.
      */
     public JScrollPane setOutgoingTextArea() {
@@ -133,19 +122,6 @@ public class View {
 
         return jscrollpane;
     }
-
-//    public JScrollPane setLoggedInTextArea() {
-//        loggedInUsersTextArea = new JTextArea();
-//        loggedInUsersTextArea.setLineWrap(false); //makes sure no line gets wrapped.
-//        loggedInUsersTextArea.setWrapStyleWord(false);
-//        loggedInUsersTextArea.setEditable(false);
-//
-//        jscrollpane = new JScrollPane(loggedInUsersTextArea);
-//        jscrollpane.setVerticalScrollBarPolicy(
-//                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-//        jscrollpane.setPreferredSize(new Dimension(300, 100));
-//        return jscrollpane;
-//    }
 
     /**
      * Set the Log textarea combining the JScrollpane with the textarea.
@@ -174,24 +150,6 @@ public class View {
     public JTextArea getLogTextArea() {
         return logtextArea;
     }
-
-    /**
-     * Function: returning the mainview USER TextArea for appending a String.
-     *
-     * @return JTextArea for appending a String
-     */
-    public JTextArea getLoggedInUsersTextArea() {
-        return loggedInUsersTextArea;
-    }
-
-    /**
-     * Function get the outgoingTextArea.
-     * @return JTextaread for appending a String
-     */
-    public JTextArea getOutgoingTextArea() {
-        return outgoingTextArea;
-    }
-
 
     /**
      * Refresh the view van de maininterface.

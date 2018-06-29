@@ -36,7 +36,7 @@ public class Client implements Runnable {
     private InputStream in;
     private BufferedReader reader = null;
 
-    Client(Socket clientSocket, Controller controller) {
+    public Client(Socket clientSocket, Controller controller) {
         this.clientSocket = clientSocket;
         this.controller = controller;
         model = controller.getModel();
@@ -51,7 +51,10 @@ public class Client implements Runnable {
 
             in = clientSocket.getInputStream();
             out = clientSocket.getOutputStream();
-            responseHandler = handleHandlers(readInputStream(in), clientSocket);
+
+            HttpRequest request = readInputStream(in);
+            handleSocketHandlers(request, clientSocket);
+            responseHandler = handleRequestHandlers(request);
             controller.removeConnection(this);
 
         } catch (SocketException e) {
@@ -88,9 +91,6 @@ public class Client implements Runnable {
 
     /**
      * Read and parse characters from the stream, at the same time.
-     *
-     * @param inputStream
-     * @throws IOException
      */
     private HttpRequest readInputStream(InputStream inputStream) {
 
@@ -118,31 +118,42 @@ public class Client implements Runnable {
         return request;
     }
 
-    private HttpResponseHandler handleHandlers(HttpRequest request, Socket clientSocket) throws UnsupportedEncodingException,
-            SocketException {
-
-        HttpResponseHandler response;
+    private void handleSocketHandlers(HttpRequest request, Socket clientSocket) throws SocketException {
         switch (request.getStatusCode()) {
             case SWITCHING_PROTOCOL:
-                response = new SocketSwitchingResponse();
                 clientSocket.setSoTimeout(0); //timeout to make a clientsocket Idle.
                 break;
             default:
-                response = new HttpResponse();
                 clientSocket.setSoTimeout(5000); //timeout to make a clientsocket Idle.
                 clientSocket.setSoLinger(true, 10000); //timeout to close the socket.
                 break;
         }
+    }
 
-        if (request.getState().isErrorState()) {
+    public HttpResponseHandler handleRequestHandlers(HttpRequest request) throws UnsupportedEncodingException {
+
+        HttpResponseHandler response;
+
+        switch (request.getStatusCode()) {
+            case SWITCHING_PROTOCOL:
+                response = new SocketSwitchingResponse();
+                break;
+            default:
+                response = new HttpResponse();
+                break;
+        }
+
+        State state = request.getState();
+        if (state.isErrorState()) {
             StatusCode statusCode = request.getStatusCode();
             if (statusCode != null) {
                 response.setStatusCode(statusCode);
             } else {
                 response.setStatusCode(BAD_REQUEST);
             }
-        } else {
+        }
 
+        if (!state.isErrorState()) {
             if (request.getRequestMethod().equals(RequestType.GET)) {
                 if (request.getPath() != null) {
                     if (model.getGetMap().containsKey(request.getPath())) {
@@ -151,7 +162,6 @@ public class Client implements Runnable {
                         response.setStatusCode(StatusCode.ACCEPTED);
                     }
                 }
-
             } else {
                 response.setStatusCode(StatusCode.NOT_FOUND);
             }
@@ -167,11 +177,9 @@ public class Client implements Runnable {
             } else {
                 response.setStatusCode(StatusCode.NOT_FOUND);
             }
-
         }
 
         response.buildResponse();
-
         return response;
     }
 }
