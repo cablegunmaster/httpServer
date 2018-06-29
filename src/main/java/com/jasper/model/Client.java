@@ -48,7 +48,6 @@ public class Client implements Runnable {
 
         HttpResponseHandler responseHandler = null;
         try {
-
             in = clientSocket.getInputStream();
             out = clientSocket.getOutputStream();
 
@@ -56,7 +55,6 @@ public class Client implements Runnable {
             handleSocketHandlers(request, clientSocket);
             responseHandler = handleRequestHandlers(request);
             controller.removeConnection(this);
-
         } catch (SocketException e) {
             LOG.warn("Disconnected client by a Socket error, probably disconnected by user.");
         } catch (IOException e) {
@@ -71,7 +69,6 @@ public class Client implements Runnable {
             controller.removeConnection(this);
 
             try {
-
                 if (responseHandler != null) {
                     //is this needed?
                     out.write(responseHandler.getResponse().getBytes("UTF-8"));

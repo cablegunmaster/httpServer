@@ -17,7 +17,7 @@ public class HttpRequest {
 
     private State state = State.READ_METHOD;
     private StringBuilder stateBuilder = new StringBuilder();
-    private StatusCode statusCode = null; //status code of request.
+    private StatusCode statusCode = StatusCode.INTERNAL_SERVER_ERROR; //status code of request.
 
     //Method variables.
     private RequestType requestMethod = null;    //Method GET / POST

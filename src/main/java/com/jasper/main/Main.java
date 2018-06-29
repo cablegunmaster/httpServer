@@ -55,10 +55,11 @@ public class Main {
             res.write("Hello World2!");
         });
 
-        //TODO post afhandelen
         server.post("/store", (req, res) -> {
             res.write("Hello World3");
         });
+
+        server.setGUIVisible(true);
 
         server.start();
     }

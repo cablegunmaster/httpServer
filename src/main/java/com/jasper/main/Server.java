@@ -42,7 +42,7 @@ public class Server {
     }
 
     public void setGUIVisible(Boolean guiVisible) {
-        guiVisible = true;
+        this.guiVisible = guiVisible;
     }
 
     public Boolean getGuiVisible(){

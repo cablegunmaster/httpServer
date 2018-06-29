@@ -8,6 +8,7 @@ import com.jasper.model.httpenums.State;
 import com.jasper.model.httpenums.StateUrl;
 import com.jasper.model.httpenums.StatusCode;
 import com.jasper.model.request.RequestParser;
+import com.jasper.model.response.HttpResponse;
 import com.jasper.model.response.HttpResponseHandler;
 import com.jasper.model.response.SocketSwitchingResponse;
 import java.io.UnsupportedEncodingException;
@@ -57,6 +58,11 @@ public class upgradeSocketTest {
         assertTrue("Request is upgrading connection", request.isUpgradingConnection());
     }
 
+    /**
+     * Check if correct response is given.
+     *
+     * @throws UnsupportedEncodingException
+     */
     @Test
     public void HttpGetSocketResponseHandlerTest() throws UnsupportedEncodingException {
         HttpRequest request = new HttpRequest();
@@ -68,5 +74,22 @@ public class upgradeSocketTest {
         HttpResponseHandler responseHandler = client.handleRequestHandlers(request);
 
         assertEquals(responseHandler.getClass(), SocketSwitchingResponse.class);
+    }
+
+    /**
+     * Check if correct HTTPResponse is given.
+     *
+     * @throws UnsupportedEncodingException
+     */
+    @Test
+    public void HttpGetHttpResponseHandlerTest() throws UnsupportedEncodingException {
+        HttpRequest request = new HttpRequest();
+        request.setStatusCode(StatusCode.OK);
+        request.setRequestMethod(RequestType.GET);
+
+        Client client = new Client(null, new Controller(8080, new HashMap<>(), new HashMap<>(), false));
+        HttpResponseHandler responseHandler = client.handleRequestHandlers(request);
+
+        assertEquals(responseHandler.getClass(), HttpResponse.class);
     }
 }

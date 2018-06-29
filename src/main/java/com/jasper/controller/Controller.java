@@ -41,7 +41,6 @@ public class Controller {
         this.guiVisible = guiVisible;
         if (guiVisible) {
             this.view = new View();
-            setListeners();
         }
 
         this.model = new Model();
@@ -49,6 +48,7 @@ public class Controller {
         model.setPostMapping(postMap);
         portnumber = portNumber;
 
+        setListeners();
         startServer(portnumber);
     }
 
@@ -56,9 +56,11 @@ public class Controller {
      * Set all listeners.
      */
     private void setListeners() {
-        //Build up all the actions for the current view.
-        view.getRestartMenuItem().addActionListener(getRestartListener());
-        view.getstopMenuItem().addActionListener(getStopListener());
+        if (guiVisible) {
+            //Build up all the actions for the current view.
+            view.getRestartMenuItem().addActionListener(getRestartListener());
+            view.getstopMenuItem().addActionListener(getStopListener());
+        }
     }
 
     /**
@@ -76,24 +78,14 @@ public class Controller {
         }
     }
 
-    //    /**
-    //     * Add the content to the OUTPUT log
-    //     */
-    //    public synchronized void addStringToOutputLog(String line) {
-    //        view.getOutgoingTextArea().setText("");
-    //        view.getOutgoingTextArea().append(line + "\r\n");
-    //        int len = view.getOutgoingTextArea().getDocument().getLength();
-    //
-    //        view.getOutgoingTextArea().setCaretPosition(len);
-    //        view.refresh();
-    //    }
-
     /**
      * Clear the logs
      */
     public synchronized void clearLog() {
-        view.setReceivingLogTextArea();
-        view.setOutgoingTextArea();
+        if (guiVisible) {
+            view.setReceivingLogTextArea();
+            view.setOutgoingTextArea();
+        }
     }
 
     /**
