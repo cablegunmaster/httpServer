@@ -24,7 +24,7 @@ public class SocketSwitchingResponse extends HttpResponseHandler {
      * Output of the socket response. To send back an socket response??
      */
     @Override
-    public String toString() {
+    public String toHttpResponse() {
 
         StringBuilder response = new StringBuilder();
         byte[] contentInBytes = null;

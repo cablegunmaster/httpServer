@@ -23,7 +23,8 @@ public class RequestUriParser {
      */
     public void parseUri(HttpRequest request,
                          BufferCheck bufferCheck,
-                         StringBuilder stateUrlBuilder) {
+                         StringBuilder stateUrlBuilder,
+                         StringBuilder stateBuilder) {
         String input;
 
         switch (request.getStateUrl()) {
@@ -67,7 +68,7 @@ public class RequestUriParser {
                     }
 
                     stateUrlBuilder.setLength(0); //re-use builder.
-                    request.getStateBuilder().append("/"); //add the forward slash.
+                    stateBuilder.append("/"); //add the forward slash.
                     request.setStateUrl(StateUrl.READ_PATH);
                 }
                 break;
@@ -87,7 +88,7 @@ public class RequestUriParser {
                         }
 
                         stateUrlBuilder.setLength(0); //re-use builder.
-                        request.getStateBuilder().append("/"); //add the forward slash.
+                        stateBuilder.append("/"); //add the forward slash.
 
                         request.setStateUrl(StateUrl.READ_PATH);
                     } catch (IllegalArgumentException ex) {
@@ -118,14 +119,7 @@ public class RequestUriParser {
                 }
 
                 //End of line or Hash
-                if (bufferCheck.hasSpace() || bufferCheck.hasHash()) {
-                    request.setFilename(request.getPath() + request.getQuery()); //combine everything.
-                    stateUrlBuilder.setLength(0); //re-use builder.
-
-                    if (bufferCheck.hasHash()) {
-                        request.setStateUrl(StateUrl.READ_FRAGMENT);
-                    }
-                }
+                checkEndOfLineOrHasHash(request, bufferCheck, stateUrlBuilder);
 
                 break;
             case READ_QUERY_VALUE:
@@ -145,14 +139,7 @@ public class RequestUriParser {
                 }
 
                 //End of line or hash
-                if (bufferCheck.hasSpace() || bufferCheck.hasHash()) {
-                    request.setFilename(request.getPath() + request.getQuery()); //combine everything.
-                    stateUrlBuilder.setLength(0); //re-use builder.
-
-                    if (bufferCheck.hasHash()) {
-                        request.setStateUrl(StateUrl.READ_FRAGMENT);
-                    }
-                }
+                checkEndOfLineOrHasHash(request, bufferCheck, stateUrlBuilder);
 
                 break;
             case READ_FRAGMENT:
@@ -175,9 +162,31 @@ public class RequestUriParser {
         //Delimiter ? & ; for query parameter.
 
         //most likely urls who are longer as 255 chars are invalid.
-        if (request.getStateBuilder().length() > 255) {
+        if (stateBuilder.length() > 255) {
             request.setStatusCode(StatusCode.URI_TOO_LONG);
             request.setState(ERROR); //414 URI Too Long
+        }
+    }
+
+
+    /**
+     * Checks if the buffer has a space or has Hash in the buffer.
+     * Sets the state to read "Fragment" part of the url.
+     * @param request
+     * @param bufferCheck
+     * @param stateUrlBuilder
+     */
+    private void checkEndOfLineOrHasHash(HttpRequest request,
+                                         BufferCheck bufferCheck,
+                                         StringBuilder stateUrlBuilder) {
+
+        if (bufferCheck.hasSpace() || bufferCheck.hasHash()) {
+            request.setFilename(request.getPath() + request.getQuery()); //combine everything.
+            stateUrlBuilder.setLength(0); //re-use builder.
+
+            if (bufferCheck.hasHash()) {
+                request.setStateUrl(StateUrl.READ_FRAGMENT);
+            }
         }
     }
 }

@@ -11,8 +11,7 @@ public class HttpResponse extends HttpResponseHandler {
      * Output of the whole file, the full request as a String to be send back to the client. TODO improve this toString function to be able
      * to send back an extra support.
      */
-    @Override
-    public String toString() {
+    public String toHttpResponse() {
 
         StringBuilder response = new StringBuilder();
         byte[] contentInBytes = null;

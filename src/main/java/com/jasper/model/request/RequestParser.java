@@ -21,6 +21,7 @@ public class RequestParser {
     private HttpRequest request = new HttpRequest();
     private RequestUriParser requestUriParser = new RequestUriParser();
     private StringBuilder stateUrlBuilder = new StringBuilder();
+    private StringBuilder stateBuilder = new StringBuilder();
     private BufferCheck bufferCheck = new BufferCheck();
 
     private final static Integer BUFFER_SIZE_CACHE = 8192;
@@ -76,28 +77,28 @@ public class RequestParser {
     private void readMethod(char c) {
 
         if (!bufferCheck.hasSpace()) {
-            request.getStateBuilder().append(c);
+            stateBuilder.append(c);
         } else if (bufferCheck.hasSpace()) {
 
             request.setState(State.READ_URI);
 
             try {
-                request.setRequestMethod(RequestType.valueOf(request.getStateBuilder().toString()));
+                request.setRequestMethod(RequestType.valueOf(stateBuilder.toString()));
             } catch (IllegalArgumentException ex) {
                 request.setStatusCode(BAD_REQUEST);
                 request.setState(ERROR);
             }
 
-            request.getStateBuilder().setLength(0); //re-use builder.
+            stateBuilder.setLength(0); //re-use builder.
         }
     }
 
     private void readUri(char c) {
 
         if (bufferCheck.hasSpace()) {
-            requestUriParser.parseUri(request, bufferCheck, stateUrlBuilder);
+            requestUriParser.parseUri(request, bufferCheck, stateUrlBuilder, stateBuilder);
             request.setState(State.READ_HTTP);
-            request.getStateBuilder().setLength(0);
+            stateBuilder.setLength(0);
 
             if (request.getPath() == null) {
                 request.setState(ERROR);
@@ -109,9 +110,9 @@ public class RequestParser {
 
             //Check if character is valid in URI, general check.
             if (validUricharactersInGeneral.contains(Character.toString(c))) {
-                request.getStateBuilder().append(c);
+                stateBuilder.append(c);
                 stateUrlBuilder.append(c);
-                requestUriParser.parseUri(request, bufferCheck, stateUrlBuilder);
+                requestUriParser.parseUri(request, bufferCheck, stateUrlBuilder, stateBuilder);
             } else {
                 request.setState(ERROR);
                 request.setStatusCode(BAD_REQUEST);
@@ -122,10 +123,10 @@ public class RequestParser {
     private void readHttp(char c) {
         if (bufferCheck.hasSpace() || bufferCheck.hasNewline()) {
             request.setState(State.READ_HEADER_NAME);
-            parseHttp(request.getStateBuilder().toString());
-            request.getStateBuilder().setLength(0);
+            parseHttp(stateBuilder.toString());
+            stateBuilder.setLength(0);
         } else {
-            request.getStateBuilder().append(c);
+            stateBuilder.append(c);
         }
     }
 
@@ -159,17 +160,17 @@ public class RequestParser {
     }
 
     private void readHeaderName(char c) {
-        request.getStateBuilder().append(c);
+        stateBuilder.append(c);
         //found ":"
         if (bufferCheck.hasSemiColon()) {
             request.setState(State.READ_HEADER_VALUE);
-            headerName = request.getStateBuilder().toString();
-            request.getStateBuilder().setLength(0);
+            headerName = stateBuilder.toString();
+            stateBuilder.setLength(0);
         }
 
         //found /r/n request parsing DONE
         if (bufferCheck.hasNewline()) {
-            request.getStateBuilder().setLength(0);
+            stateBuilder.setLength(0);
 
             if (request.getRequestMethod() != null)
                 switch (request.getRequestMethod()) {
@@ -198,20 +199,21 @@ public class RequestParser {
      * @param c
      */
     private void readHeaderValue(char c) {
-        request.getStateBuilder().append(c);
+        stateBuilder.append(c);
         //new line found.
         if (bufferCheck.hasNewline()) {
 
             //Function read all the header values.
             //Special way of dealing with all the different headers function needs to be here.
 
-            String headerValue = request.getStateBuilder().toString();
+            String headerValue = stateBuilder.toString();
             if (headerName != null) {
 
                 headerName = headerName.replace(":","");
                 switch (headerName) {
                     case "Upgrade":
                         request.setUpgradingConnection(true);
+                        request.setStatusCode(StatusCode.SWITCHING_PROTOCOL);
                         break;
                     default:
                         break;
@@ -219,14 +221,14 @@ public class RequestParser {
 
                 request.addHeader(headerName, headerValue.replaceAll("\n", ""));
             }
-            request.getStateBuilder().setLength(0);
+            stateBuilder.setLength(0);
             request.setState(State.READ_HEADER_NAME);
         }
     }
 
     //TODO cutup in smaller functions.
     private void readBody(char c) {
-        request.getStateBuilder().append(c);
+        stateBuilder.append(c);
         postSize++;
 
         if (totalBodySize == 0) {
@@ -247,26 +249,26 @@ public class RequestParser {
         if (postSize < totalBodySize) {
             if (postState.isPostValue()) {
                 if (bufferCheck.hasDelimiter()) {
-                    postQueryValue = request.getStateBuilder().toString();
+                    postQueryValue = stateBuilder.toString();
                     postState = PostState.READ_POST_NAME;
                     request.getQueryPOST().put(postQueryKey, postQueryValue);
-                    request.getStateBuilder().setLength(0);
+                    stateBuilder.setLength(0);
                 }
             }
 
             if (postState.isPostName()) {
                 if (bufferCheck.hasEqualsymbol()) {
-                    postQueryKey = request.getStateBuilder().toString();
+                    postQueryKey = stateBuilder.toString();
                     postState = PostState.READ_POST_VALUE;
-                    request.getStateBuilder().setLength(0);
+                    stateBuilder.setLength(0);
                 }
             }
 
         } else if (postSize == totalBodySize) {
 
-            postQueryValue = request.getStateBuilder().toString();
+            postQueryValue = stateBuilder.toString();
             request.getQueryPOST().put(postQueryKey, postQueryValue);
-            request.getStateBuilder().setLength(0);
+            stateBuilder.setLength(0);
             request.setState(State.DONE);
 
         } else if (postSize > totalBodySize) {

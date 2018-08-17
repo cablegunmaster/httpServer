@@ -41,10 +41,12 @@ public abstract class HttpResponseHandler {
     }
 
     public void buildResponse() {
-        response = toString();
+        response = toHttpResponse();
     }
 
     public String getResponse() {
         return response;
     }
+
+    public abstract String toHttpResponse();
 }

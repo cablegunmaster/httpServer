@@ -16,7 +16,6 @@ import static jdk.nashorn.internal.objects.NativeString.trim;
 public class HttpRequest {
 
     private State state = State.READ_METHOD;
-    private StringBuilder stateBuilder = new StringBuilder();
     private StatusCode statusCode = StatusCode.INTERNAL_SERVER_ERROR; //status code of request.
 
     //Method variables.
@@ -38,8 +37,6 @@ public class HttpRequest {
 
     //Headers.
     private Map<String, String> headers = new HashMap<>();
-    private StringBuilder headerName = new StringBuilder();
-    private StringBuilder headerValue = new StringBuilder();
     private boolean upgradingConnection = false;
 
     //HttpVersion number.
@@ -69,20 +66,12 @@ public class HttpRequest {
         return stateUrl;
     }
 
-    public StringBuilder getStateBuilder() {
-        return stateBuilder;
-    }
-
     public void setStatusCode(StatusCode statusCode) {
         this.statusCode = statusCode;
     }
 
     public StatusCode getStatusCode() {
         return statusCode;
-    }
-
-    public void setStateBuilder(StringBuilder stateBuilder) {
-        this.stateBuilder = stateBuilder;
     }
 
     public Protocol getProtocol() {
@@ -167,22 +156,6 @@ public class HttpRequest {
 
     public void addHeader(String headerName, String headerValue) {
         this.headers.put(removeSemicolon(headerName), trim(removeRN(headerValue)));
-    }
-
-    public StringBuilder getHeaderName() {
-        return headerName;
-    }
-
-    public void setHeaderName(StringBuilder headerName) {
-        this.headerName = headerName;
-    }
-
-    public StringBuilder getHeaderValue() {
-        return headerValue;
-    }
-
-    public void setHeaderValue(StringBuilder headerValue) {
-        this.headerValue = headerValue;
     }
 
     public Map<String, String> getQueryGET() {
