@@ -6,6 +6,9 @@ import com.jasper.model.httpenums.RequestType;
 import com.jasper.model.httpenums.State;
 import com.jasper.model.httpenums.StatusCode;
 import com.jasper.model.request.uriparser.RequestUriParser;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.digest.DigestUtils;
+
 import java.util.Map;
 
 import static com.jasper.model.httpenums.State.ERROR;
@@ -146,7 +149,7 @@ public class RequestParser {
 
             if (version.equals("1.1") || version.equals("1.0")) {
                 try {
-                    request.setHttpVersion(Double.parseDouble(version));
+                    request.setHttpVersion(Float.parseFloat(version));
                     validHttp = true;
                 } catch (NumberFormatException ex) {
                     request.setStatusCode(StatusCode.HTTP_VERSION_NOT_SUPPORTED);
@@ -196,6 +199,7 @@ public class RequestParser {
 
     /**
      * All functions regarding "special" header value / names should be dealt here.
+     *
      * @param c
      */
     private void readHeaderValue(char c) {
@@ -206,14 +210,20 @@ public class RequestParser {
             //Function read all the header values.
             //Special way of dealing with all the different headers function needs to be here.
 
-            String headerValue = stateBuilder.toString();
+            String headerValue = removeRN(stateBuilder.toString());
             if (headerName != null) {
-
-                headerName = headerName.replace(":","");
+                headerName = headerName.replace(":", "");
                 switch (headerName) {
                     case "Upgrade":
                         request.setUpgradingConnection(true);
                         request.setStatusCode(StatusCode.SWITCHING_PROTOCOL);
+                        break;
+                    case "Sec-WebSocket-Key":
+                        String valueResponse = new String(
+                                Base64.encodeBase64(
+                                        DigestUtils.sha1(headerValue +
+                                                "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"))
+                        );
                         break;
                     default:
                         break;
@@ -279,5 +289,10 @@ public class RequestParser {
 
     public HttpRequest getRequest() {
         return request;
+    }
+
+    //TODO refactor this in util class later on?
+    private String removeRN(String inputString) {
+        return inputString.replaceAll("(\r\n|\n)", "");
     }
 }

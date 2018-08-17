@@ -1,10 +1,7 @@
 package com.jasper.model;
 
-import com.jasper.model.httpenums.Protocol;
-import com.jasper.model.httpenums.RequestType;
-import com.jasper.model.httpenums.State;
-import com.jasper.model.httpenums.StateUrl;
-import com.jasper.model.httpenums.StatusCode;
+import com.jasper.model.httpenums.*;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,10 +34,13 @@ public class HttpRequest {
 
     //Headers.
     private Map<String, String> headers = new HashMap<>();
+
+    //Upgrading variables
     private boolean upgradingConnection = false;
+    private String upgradeSecureKeyAnswer = "";
 
     //HttpVersion number.
-    private Double httpVersion;
+    private Float httpVersion;
 
     public void setRequestMethod(RequestType requestMethod) {
         this.requestMethod = requestMethod;
@@ -138,15 +138,11 @@ public class HttpRequest {
         this.ref = ref;
     }
 
-    public Double getHttpVersion() {
+    public Float getHttpVersion() {
         return httpVersion;
     }
 
-    public void setHttpVersion(Double httpVersion) {
-        this.httpVersion = httpVersion;
-    }
-
-    public void setHttpVersion(double httpVersion) {
+    public void setHttpVersion(Float httpVersion) {
         this.httpVersion = httpVersion;
     }
 
@@ -189,5 +185,17 @@ public class HttpRequest {
 
     public void setUpgradingConnection(boolean upgradingConnection) {
         this.upgradingConnection = upgradingConnection;
+    }
+
+    public void setHeaders(Map<String, String> headers) {
+        this.headers = headers;
+    }
+
+    public String getUpgradeSecureKeyAnswer() {
+        return upgradeSecureKeyAnswer;
+    }
+
+    public void setUpgradeSecureKeyAnswer(String upgradeSecureKeyAnswer) {
+        this.upgradeSecureKeyAnswer = upgradeSecureKeyAnswer;
     }
 }
