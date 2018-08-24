@@ -28,7 +28,7 @@ public class HandlerTest {
         request.setStatusCode(StatusCode.SWITCHING_PROTOCOL);
         request.setRequestMethod(RequestType.GET);
 
-        Client client = new Client(null, new Controller(8080, new HashMap<>(), new HashMap<>(), false));
+        Client client = new Client(null, new Controller(8080, new HashMap<>(), new HashMap<>(),new HashMap<>(), false));
         HttpResponseHandler responseHandler = client.handleRequestHandlers(request);
 
         assertEquals(responseHandler.getClass(), SocketSwitchingResponse.class);
@@ -45,7 +45,7 @@ public class HandlerTest {
         request.setStatusCode(StatusCode.OK);
         request.setRequestMethod(RequestType.GET);
 
-        Client client = new Client(null, new Controller(8080, new HashMap<>(), new HashMap<>(), false));
+        Client client = new Client(null, new Controller(8080, new HashMap<>(), new HashMap<>(),new HashMap<>(), false));
         HttpResponseHandler responseHandler = client.handleRequestHandlers(request);
 
         assertEquals(responseHandler.getClass(), HttpResponse.class);

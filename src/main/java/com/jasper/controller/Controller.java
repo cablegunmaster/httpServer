@@ -5,13 +5,15 @@ import com.jasper.model.Model;
 import com.jasper.model.MultiThreadedServer;
 import com.jasper.model.request.RequestHandler;
 import com.jasper.view.View;
-import java.awt.event.ActionEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.HashMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by Jasper Lankhorst on 17-11-2016.
@@ -26,7 +28,11 @@ public class Controller {
     private Thread multiThreadedServerThread;
     private int portnumber;
     private static Boolean restartProces = false;
-    private Boolean guiVisible = false;
+    private Boolean guiVisible;
+
+    private HashMap<String, RequestHandler> getMap;
+    private HashMap<String, RequestHandler> postMap;
+    private HashMap<String, RequestHandler> socketMap;
 
     /**
      * Java.Controller class
@@ -36,16 +42,20 @@ public class Controller {
     public Controller(Integer portNumber,
                       HashMap<String, RequestHandler> getMap,
                       HashMap<String, RequestHandler> postMap,
+                      HashMap<String, RequestHandler> socketMap,
                       Boolean guiVisible) {
 
         this.guiVisible = guiVisible;
+
         if (guiVisible) {
             this.view = new View();
         }
 
         this.model = new Model();
-        model.setGetMapping(getMap);
-        model.setPostMapping(postMap);
+        this.getMap = getMap;
+        this.postMap = postMap;
+        this.socketMap = socketMap;
+
         portnumber = portNumber;
 
         setListeners();
@@ -79,16 +89,6 @@ public class Controller {
     }
 
     /**
-     * Clear the logs
-     */
-    public synchronized void clearLog() {
-        if (guiVisible) {
-            view.setReceivingLogTextArea();
-            view.setOutgoingTextArea();
-        }
-    }
-
-    /**
      * Starting the server, if no server has been started already.
      *
      * @param portNumber Integer
@@ -108,28 +108,25 @@ public class Controller {
 
     }
 
+    @Nonnull
     private ActionListener getRestartListener() {
-        return new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-
-                //lock to ensure only one proces can restart the server.
-                if (!restartProces) {
-                    restartProces = true;
-                    if (multiThreadedServer != null) {
-                        stopMultiThreadedServer(multiThreadedServer);
-                        multiThreadedServer = null; //reset the server as well.
-                    }
-
-                    stopMultiServerThread(multiThreadedServerThread);
-                    restartProces = false;
-                    startServer(portnumber);
+        return actionEvent -> {
+            //lock to ensure only one proces can restart the server.
+            if (!restartProces) {
+                restartProces = true;
+                if (multiThreadedServer != null) {
+                    stopMultiThreadedServer(multiThreadedServer);
+                    multiThreadedServer = null; //reset the server as well.
                 }
+
+                stopMultiServerThread();
+                restartProces = false;
+                startServer(portnumber);
             }
         };
     }
 
-    private void stopMultiServerThread(Thread multiThreadedServer) {
+    private void stopMultiServerThread() {
         try {
             //deleting leftover variables.
             multiThreadedServerThread.join(); // wait for the thread to stop
@@ -164,13 +161,9 @@ public class Controller {
      *
      * @return
      */
+    @Nonnull
     private ActionListener getStopListener() {
-        return new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                System.exit(0);
-            }
-        };
+        return actionEvent -> System.exit(0);
     }
 
     /**
@@ -192,7 +185,35 @@ public class Controller {
         model.getConnections().remove(client);
     }
 
+    @Nonnull
     public Model getModel() {
         return model;
+    }
+
+    @CheckForNull
+    public HashMap<String, RequestHandler> getGetMap() {
+        return getMap;
+    }
+
+    public void setGetMap(HashMap<String, RequestHandler> getMap) {
+        this.getMap = getMap;
+    }
+
+    @CheckForNull
+    public HashMap<String, RequestHandler> getPostMap() {
+        return postMap;
+    }
+
+    public void setPostMap(HashMap<String, RequestHandler> postMap) {
+        this.postMap = postMap;
+    }
+
+    @CheckForNull
+    public HashMap<String, RequestHandler> getSocketMap() {
+        return socketMap;
+    }
+
+    public void setSocketMap(HashMap<String, RequestHandler> socketMap) {
+        this.socketMap = socketMap;
     }
 }

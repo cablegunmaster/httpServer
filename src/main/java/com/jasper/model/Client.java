@@ -11,12 +11,23 @@ import com.jasper.model.response.HttpResponseHandler;
 import com.jasper.model.response.SocketSwitchingResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.plugin.dom.exception.InvalidStateException;
 
-import java.io.*;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.SocketException;
 
+import static com.jasper.model.httpenums.StatusCode.ACCEPTED;
 import static com.jasper.model.httpenums.StatusCode.BAD_REQUEST;
+import static com.jasper.model.httpenums.StatusCode.NOT_FOUND;
+import static com.jasper.model.httpenums.StatusCode.SWITCHING_PROTOCOL;
 
 /**
  * Created by Jasper Lankhorst on 20-11-2016.
@@ -50,6 +61,8 @@ public class Client implements Runnable {
             HttpRequest request = readInputStream(in);
             handleSocketHandlers(request, clientSocket);
             responseHandler = handleRequestHandlers(request);
+
+            //only remove if its http 1.0
             controller.removeConnection(this);
         } catch (SocketException e) {
             LOG.warn("Disconnected client by a Socket error, probably disconnected by user.");
@@ -85,7 +98,8 @@ public class Client implements Runnable {
     /**
      * Read and parse characters from the stream, at the same time.
      */
-    private HttpRequest readInputStream(InputStream inputStream) {
+    @Nonnull
+    private HttpRequest readInputStream(@Nonnull InputStream inputStream) {
 
         if (reader == null) {
             reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -111,7 +125,7 @@ public class Client implements Runnable {
         return request;
     }
 
-    private void handleSocketHandlers(HttpRequest request, Socket clientSocket) throws SocketException {
+    private void handleSocketHandlers(@Nonnull HttpRequest request, @Nonnull Socket clientSocket) throws SocketException {
         switch (request.getStatusCode()) {
             case SWITCHING_PROTOCOL:
                 clientSocket.setSoTimeout(0); //timeout to make a clientsocket Idle.
@@ -123,20 +137,11 @@ public class Client implements Runnable {
         }
     }
 
-    public HttpResponseHandler handleRequestHandlers(HttpRequest request) throws UnsupportedEncodingException {
-
-        HttpResponseHandler response;
-
-        switch (request.getStatusCode()) {
-            case SWITCHING_PROTOCOL:
-                response = new SocketSwitchingResponse();
-                break;
-            default:
-                response = new HttpResponse();
-                break;
-        }
-
+    @Nonnull
+    public HttpResponseHandler handleRequestHandlers(@Nonnull HttpRequest request) throws UnsupportedEncodingException {
+        HttpResponseHandler response = getHandlerByRequest(request);
         State state = request.getState();
+
         if (state.isErrorState()) {
             StatusCode statusCode = request.getStatusCode();
             if (statusCode != null) {
@@ -144,35 +149,58 @@ public class Client implements Runnable {
             } else {
                 response.setStatusCode(BAD_REQUEST);
             }
-        }
-
-        if (!state.isErrorState()) {
-            if (request.getRequestMethod().equals(RequestType.GET)) {
-                if (request.getPath() != null) {
-                    if (model.getGetMap().containsKey(request.getPath())) {
-                        RequestHandler handler = (RequestHandler) controller.getModel().getGetMap().get(request.getPath());
-                        handler.handle(request, response);
-                        response.setStatusCode(StatusCode.ACCEPTED);
-                    }
-                }
+        } else {
+            RequestHandler handler = getHandlerByRequestMethod(request, response);
+            if (handler != null) {
+                handler.handle(request, response);
             } else {
-                response.setStatusCode(StatusCode.NOT_FOUND);
-            }
-
-            if (request.getRequestMethod().equals(RequestType.POST)) {
-                if (request.getPath() != null) {
-                    if (model.getPostMap().containsKey(request.getPath())) {
-                        RequestHandler handler = (RequestHandler) controller.getModel().getPostMap().get(request.getPath());
-                        handler.handle(request, response);
-                        response.setStatusCode(StatusCode.ACCEPTED);
-                    }
-                }
-            } else {
-                response.setStatusCode(StatusCode.NOT_FOUND);
+                response.setStatusCode(NOT_FOUND);
             }
         }
 
         response.buildResponse();
         return response;
+    }
+
+    @Nonnull
+    private HttpResponseHandler getHandlerByRequest(@Nonnull HttpRequest request) {
+        switch (request.getStatusCode()) {
+            case SWITCHING_PROTOCOL:
+                return new SocketSwitchingResponse();
+            default:
+                return new HttpResponse();
+        }
+    }
+
+    @CheckForNull
+    private RequestHandler getHandlerByRequestMethod(HttpRequest request, HttpResponseHandler response) {
+        RequestHandler handler = null;
+        if (request.getPath() != null) {
+
+            if (controller.getSocketMap() != null &&
+                    controller.getSocketMap().containsKey(request.getPath()) &&
+                    request.getStatusCode() == SWITCHING_PROTOCOL) {
+                handler = controller.getSocketMap().get(request.getPath());
+                response.setWebsocketAcceptString(request.getUpgradeSecureKeyAnswer());
+            }
+
+            if (request.getRequestMethod().equals(RequestType.GET) &&
+                    controller.getGetMap() != null &&
+                    controller.getGetMap().containsKey(request.getPath())) {
+                handler = controller.getGetMap().get(request.getPath());
+                response.setStatusCode(ACCEPTED);
+            }
+
+            if (request.getRequestMethod().equals(RequestType.POST) &&
+                    controller.getPostMap() != null &&
+                    controller.getPostMap().containsKey(request.getPath())) {
+                handler = controller.getPostMap().get(request.getPath());
+                response.setStatusCode(ACCEPTED);
+            }
+
+        } else {
+            throw new InvalidStateException("Path is not found and made it in this section, bad state.");
+        }
+        return handler;
     }
 }

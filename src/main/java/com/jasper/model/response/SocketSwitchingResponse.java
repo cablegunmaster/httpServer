@@ -9,17 +9,6 @@ import java.io.UnsupportedEncodingException;
  */
 public class SocketSwitchingResponse extends HttpResponseHandler {
 
-    String websocketAccept;
-
-    //TODO if response need modiciations?
-    public String getWebsocketAcceptString() {
-        return websocketAccept;
-    }
-
-    public void setWebsocketAcceptString(String websocketAccept) {
-        this.websocketAccept = websocketAccept;
-    }
-
     /**
      * Output of the socket response. To send back an socket response??
      */
@@ -49,13 +38,10 @@ public class SocketSwitchingResponse extends HttpResponseHandler {
         }
 
         //first version keep it simple:
-        response.append("Upgrade: WebSocket").append(LINE_END)
+        response.append("Upgrade: websocket").append(LINE_END)
                 .append("Connection: Upgrade").append(LINE_END)
-                .append("Sec-WebSocket-Protocol: chat").append(LINE_END)
-                .append("Sec-WebSocket-Accept:").append(getWebsocketAcceptString()).append(LINE_END)
-                .append(DOUBLE_LINE_END)
-                .append(getBody())
-                .append(DOUBLE_LINE_END);
+                .append("Sec-WebSocket-Accept: ").append(getWebsocketAcceptString()).append(LINE_END);
+                //.append("Sec-WebSocket-Protocol: chat").append(LINE_END);
 
         return response.toString();
     }

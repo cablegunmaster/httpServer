@@ -13,6 +13,7 @@ import java.util.Map;
 
 import static com.jasper.model.httpenums.State.ERROR;
 import static com.jasper.model.httpenums.StatusCode.BAD_REQUEST;
+import static com.jasper.model.httpenums.StatusCode.SWITCHING_PROTOCOL;
 
 /**
  * Created by jasper wil.lankhorst on 12-3-2017.
@@ -219,11 +220,8 @@ public class RequestParser {
                         request.setStatusCode(StatusCode.SWITCHING_PROTOCOL);
                         break;
                     case "Sec-WebSocket-Key":
-                        String valueResponse = new String(
-                                Base64.encodeBase64(
-                                        DigestUtils.sha1(headerValue +
-                                                "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"))
-                        );
+                        request.setStatusCode(SWITCHING_PROTOCOL);
+                        request.setUpgradeSecureKeyAnswer(encodeWebsocketAccept(headerValue));
                         break;
                     default:
                         break;
@@ -291,8 +289,18 @@ public class RequestParser {
         return request;
     }
 
-    //TODO refactor this in util class later on?
     private String removeRN(String inputString) {
         return inputString.replaceAll("(\r\n|\n)", "");
+    }
+
+
+    /**
+     * https://en.wikipedia.org/wiki/WebSocket
+     *
+     * @param input
+     * @return the string.
+     */
+    public String encodeWebsocketAccept(String input) {
+        return new String(Base64.encodeBase64(DigestUtils.sha1(input + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11")));
     }
 }

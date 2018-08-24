@@ -1,6 +1,9 @@
 package com.jasper.model;
 
 import com.jasper.controller.Controller;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -37,16 +40,16 @@ public class MultiThreadedServer implements Runnable {
         controller.addStringToLog("[ OK ] Server Thread exiting....");
     }
 
+    @Nonnull
     private Socket awaitIncomingConnection() {
-        Socket clientSocket = null;
+        Socket clientSocket;
         try {
             controller.addStringToLog("[ OK ] Server is awaiting connections...");
-
             this.serverSocket.setReuseAddress(true);
             clientSocket = this.serverSocket.accept();
         } catch (SocketException e) {
             isStopped = true;
-            clientSocket = null;
+            throw new RuntimeException("[ Error ] Socket exception happened", e);
         } catch (IOException e) {
             isStopped = true;
             throw new RuntimeException("[ Error ] accepting client connection", e);

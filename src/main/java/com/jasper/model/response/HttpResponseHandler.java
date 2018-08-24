@@ -15,6 +15,15 @@ public abstract class HttpResponseHandler {
     private StringBuilder body = new StringBuilder();
     private StatusCode statusCode = null; //status code of request.
     private double httpVersion = 1.1;
+    private String websocketAccept;
+
+    public String getWebsocketAcceptString() {
+        return websocketAccept;
+    }
+
+    public void setWebsocketAcceptString(String websocketAccept) {
+        this.websocketAccept = websocketAccept;
+    }
 
     public void setStatusCode(StatusCode statusCode) {
         this.statusCode = statusCode;

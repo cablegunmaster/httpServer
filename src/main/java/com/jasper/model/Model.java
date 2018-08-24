@@ -12,8 +12,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class Model {
 
     private CopyOnWriteArrayList<Client> connections = new CopyOnWriteArrayList<>();
-    private HashMap<String, RequestHandler> getMap;
-    private HashMap<String, RequestHandler> postMap;
 
     /**
      * Get the current connections.
@@ -32,19 +30,4 @@ public class Model {
         connections.remove(client);
     }
 
-    public void setGetMapping(HashMap<String, RequestHandler> getMap) {
-        this.getMap = getMap;
-    }
-
-    public void setPostMapping(HashMap<String, RequestHandler> postMap) {
-        this.postMap = postMap;
-    }
-
-    public HashMap getGetMap() {
-        return getMap;
-    }
-
-    public HashMap getPostMap() {
-        return postMap;
-    }
 }

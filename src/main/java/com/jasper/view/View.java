@@ -1,9 +1,10 @@
 package com.jasper.view;
 
+import javax.annotation.Nonnull;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import javax.swing.*;
 
 /**
  * Created by Jasper Lankhorst on 17-11-2016.
@@ -11,13 +12,10 @@ import javax.swing.*;
 public class View {
 
     private JFrame mainFrame;
-    private JScrollPane jscrollpane;
 
     //textareas
     private JTextArea logtextArea;
-    private JTextArea outgoingTextArea;
 
-    private JPanel middleContainer;
     private JMenuItem stopMenuItem;
     private JMenuItem restartMenuItem;
 
@@ -25,7 +23,7 @@ public class View {
         prepareGUI();
     }
 
-    public void prepareGUI() {
+    private void prepareGUI() {
         mainFrame = new JFrame("Main Server");
         mainFrame.setMinimumSize(new Dimension(200, 270));
         mainFrame.setSize(100, 100);
@@ -46,7 +44,8 @@ public class View {
     /**
      * Prepares toolbar on top.
      */
-    public JMenuBar NorthPanel() {
+    @Nonnull
+    private JMenuBar NorthPanel() {
 
         //the top toolbar.
         JMenuBar menuBar = new JMenuBar();
@@ -65,10 +64,12 @@ public class View {
         return menuBar;
     }
 
+    @Nonnull
     public JMenuItem getRestartMenuItem() {
         return restartMenuItem;
     }
 
+    @Nonnull
     public JMenuItem getstopMenuItem() {
         return stopMenuItem;
     }
@@ -78,10 +79,11 @@ public class View {
      *
      * @return JPanel containing the middle screen.
      */
-    public JPanel MiddleContainer() {
+    @Nonnull
+    private JPanel MiddleContainer() {
 
         //New Panel.
-        middleContainer = new JPanel();
+        JPanel middleContainer = new JPanel();
         middleContainer.setLayout(new GridLayout(0, 2));
 
         //retrieve the incoming label
@@ -109,8 +111,9 @@ public class View {
      *
      * @return JScrollPane containing a new textarea 300x300 size.
      */
+    @Nonnull
     public JScrollPane setOutgoingTextArea() {
-        outgoingTextArea = new JTextArea();
+        JTextArea outgoingTextArea = new JTextArea();
         outgoingTextArea.setLineWrap(true); //makes sure no
         outgoingTextArea.setWrapStyleWord(true);
 
@@ -128,13 +131,14 @@ public class View {
      *
      * @return JScrollPane containing a new textarea 300x300 size.
      */
+    @Nonnull
     public JScrollPane setReceivingLogTextArea() {
         logtextArea = new JTextArea();
         logtextArea.setLineWrap(true); //makes sure no
         logtextArea.setWrapStyleWord(true);
 
         //SHOW The scroll panel on the textArea.
-        jscrollpane = new JScrollPane(logtextArea);
+        JScrollPane jscrollpane = new JScrollPane(logtextArea);
         jscrollpane.setVerticalScrollBarPolicy(
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         jscrollpane.setPreferredSize(new Dimension(300, 300));
@@ -147,6 +151,7 @@ public class View {
      *
      * @return JTextArea for appending a String
      */
+    @Nonnull
     public JTextArea getLogTextArea() {
         return logtextArea;
     }

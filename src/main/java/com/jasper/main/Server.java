@@ -18,7 +18,7 @@ public class Server {
     }
 
     public void start() {
-        new Controller(getPortNumber(), getMap, postMap, getGuiVisible());
+        new Controller(getPortNumber(), getMap, postMap, socketMap, getGuiVisible());
     }
 
     public void setPort(int port) {
