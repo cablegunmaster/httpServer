@@ -11,7 +11,6 @@ import com.jasper.model.response.HttpResponseHandler;
 import com.jasper.model.response.SocketSwitchingResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.plugin.dom.exception.InvalidStateException;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -214,8 +213,6 @@ public class Client implements Runnable {
                 handler = controller.getPostMap().get(request.getPath());
             }
 
-        } else {
-            throw new InvalidStateException("Path is not found and made it in this section, bad state. Path: " + request.getPath());
         }
         return handler;
     }
