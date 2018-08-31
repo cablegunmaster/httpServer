@@ -1,7 +1,6 @@
 package com.jasper.model.response;
 
 import com.jasper.model.httpenums.StatusCode;
-import java.io.UnsupportedEncodingException;
 
 /**
  * Response for the Socket switching when the upgrade is requested Going from HTTP to websocket protocol,
@@ -16,13 +15,13 @@ public class SocketSwitchingResponse extends HttpResponseHandler {
     public String toHttpResponse() {
 
         StringBuilder response = new StringBuilder();
-        byte[] contentInBytes = null;
+//        byte[] contentInBytes = null;
 
-        try {
-            contentInBytes = getBody().getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            contentInBytes = getBody().getBytes("UTF-8");
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
 
         response.append("HTTP/1.1")
                 .append(SPACE)
@@ -31,17 +30,19 @@ public class SocketSwitchingResponse extends HttpResponseHandler {
                 .append(StatusCode.SWITCHING_PROTOCOL.getDescription())
                 .append(LINE_END);
 
-        Integer contentLength = 0;
-
-        if (contentInBytes != null) {
-            contentLength = contentInBytes.length;
-        }
+//        Integer contentLength = 0;
+//
+//        if (contentInBytes != null) {
+//            contentLength = contentInBytes.length;
+//        }
 
         //first version keep it simple:
         response.append("Upgrade: websocket").append(LINE_END)
                 .append("Connection: Upgrade").append(LINE_END)
-                .append("Sec-WebSocket-Accept: ").append(getWebsocketAcceptString()).append(LINE_END);
-                //.append("Sec-WebSocket-Protocol: chat").append(LINE_END);
+                .append("Sec-WebSocket-Accept: ").append(getWebsocketAcceptString())
+                .append(LINE_END)
+                .append(LINE_END);
+        //.append("Sec-WebSocket-Protocol: chat").append(LINE_END);
 
         return response.toString();
     }

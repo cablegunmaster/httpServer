@@ -2,6 +2,11 @@ package com.jasper.model.response;
 
 import com.jasper.model.httpenums.StatusCode;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.jasper.model.httpenums.StatusCode.NOT_FOUND;
+
 /**
  * All variables and functions shared for the HTTP protocol
  */
@@ -12,17 +17,18 @@ public abstract class HttpResponseHandler {
     final static String SPACE = " ";
 
     private String response = null;
+    private StatusCode statusCode = NOT_FOUND; //status code of request.
     private StringBuilder body = new StringBuilder();
-    private StatusCode statusCode = null; //status code of request.
-    private double httpVersion = 1.1;
-    private String websocketAccept;
+    private String httpVersion;
+    private String webSocketAccept;
+    private Map<String, String> headers = new HashMap<>();
 
     public String getWebsocketAcceptString() {
-        return websocketAccept;
+        return webSocketAccept;
     }
 
     public void setWebsocketAcceptString(String websocketAccept) {
-        this.websocketAccept = websocketAccept;
+        this.webSocketAccept = websocketAccept;
     }
 
     public void setStatusCode(StatusCode statusCode) {
@@ -41,11 +47,11 @@ public abstract class HttpResponseHandler {
         return body.toString();
     }
 
-    public double getHttpVersion() {
+    public String getHttpVersion() {
         return httpVersion;
     }
 
-    public void setHttpVersion(double httpVersion) {
+    public void setHttpVersion(String httpVersion) {
         this.httpVersion = httpVersion;
     }
 
@@ -53,9 +59,19 @@ public abstract class HttpResponseHandler {
         response = toHttpResponse();
     }
 
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public void addHeader(String key, String value) {
+        this.headers.put(key, value);
+    }
+
     public String getResponse() {
         return response;
     }
 
     public abstract String toHttpResponse();
+
+
 }

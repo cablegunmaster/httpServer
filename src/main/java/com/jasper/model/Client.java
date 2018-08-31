@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
 
 import static com.jasper.model.httpenums.StatusCode.ACCEPTED;
 import static com.jasper.model.httpenums.StatusCode.BAD_REQUEST;
@@ -53,17 +54,23 @@ public class Client implements Runnable {
     public void run() {
         LOG.debug("Connecting on [" + Thread.currentThread().getName() + "]");
 
-        HttpResponseHandler responseHandler = null;
         try {
             in = clientSocket.getInputStream();
             out = clientSocket.getOutputStream();
 
-            HttpRequest request = readInputStream(in);
-            handleSocketHandlers(request, clientSocket);
-            responseHandler = handleRequestHandlers(request);
+            HttpRequest request = readSendRequest(in, out, clientSocket);
 
-            //only remove if its http 1.0
-            controller.removeConnection(this);
+            //TODO how does a http 1.1 request closes the socket? read 14.10 and 8.1 in RFC 2616 more closely about this.
+            String connection = request.getHeaders().getOrDefault("Connection", "close");
+
+            if (request.getHeaders().containsKey("Connection") &&
+                    request.getHeaders().get("Connection").equals("keep-alive") ||
+                    request.getHeaders().containsKey("Connection") && request.isUpgradingConnection()) {
+                while (!connection.equals("close")) {
+                    readSendRequest(in, out, clientSocket);
+                }
+            }
+
         } catch (SocketException e) {
             LOG.warn("Disconnected client by a Socket error, probably disconnected by user.");
         } catch (IOException e) {
@@ -75,13 +82,8 @@ public class Client implements Runnable {
         } finally {
             LOG.info("End of request on [" + Thread.currentThread().getName() + "]");
 
-            controller.removeConnection(this);
-
             try {
-                if (responseHandler != null) {
-                    //is this needed?
-                    out.write(responseHandler.getResponse().getBytes("UTF-8"));
-                }
+                controller.removeConnection(this);
 
                 in.close();
                 out.flush();
@@ -93,6 +95,22 @@ public class Client implements Runnable {
                 controller.addStringToLog("[ Error ] IOException, socket is closed");
             }
         }
+    }
+
+    public HttpRequest readSendRequest(InputStream in, OutputStream out, Socket clientSocket) throws IOException {
+        HttpResponseHandler responseHandler = null;
+
+        //Initial request.
+        HttpRequest request = readInputStream(in);
+        handleSocketHandlers(request, clientSocket);
+        responseHandler = handleRequestHandlers(request);
+
+        if (responseHandler.getHttpVersion().equals("1.1") &&
+                request.getHeaders().get("Connection").equals("keep-alive")) {
+            responseHandler.addHeader("Connection", "keep-alive");
+        }
+        out.write(responseHandler.getResponse().getBytes(StandardCharsets.UTF_8));
+        return request;
     }
 
     /**
@@ -140,25 +158,26 @@ public class Client implements Runnable {
     @Nonnull
     public HttpResponseHandler handleRequestHandlers(@Nonnull HttpRequest request) throws UnsupportedEncodingException {
         HttpResponseHandler response = getHandlerByRequest(request);
-        State state = request.getState();
+        RequestHandler handler = getHandlerByRequestMethod(request);
 
-        if (state.isErrorState()) {
-            StatusCode statusCode = request.getStatusCode();
-            if (statusCode != null) {
-                response.setStatusCode(statusCode);
-            } else {
-                response.setStatusCode(BAD_REQUEST);
+        StatusCode statusCode = null;
+        State state = request.getState();
+        if (handler != null) {
+            handler.handle(request, response);
+            response.setStatusCode(ACCEPTED);
+
+            if (request.getUpgradeSecureKeyAnswer() != null) {
+                response.setWebsocketAcceptString(request.getUpgradeSecureKeyAnswer());
             }
+
+        } else if (state.isErrorState()) {
+            response.setStatusCode(request.getStatusCode());
         } else {
-            RequestHandler handler = getHandlerByRequestMethod(request, response);
-            if (handler != null) {
-                handler.handle(request, response);
-            } else {
-                response.setStatusCode(NOT_FOUND);
-            }
+            response.setStatusCode(NOT_FOUND);
         }
 
-        response.buildResponse();
+        response.setHttpVersion(request.getHttpVersion());
+        response.buildResponse(); //TODO add this before sending?
         return response;
     }
 
@@ -173,33 +192,30 @@ public class Client implements Runnable {
     }
 
     @CheckForNull
-    private RequestHandler getHandlerByRequestMethod(HttpRequest request, HttpResponseHandler response) {
+    private RequestHandler getHandlerByRequestMethod(HttpRequest request) {
         RequestHandler handler = null;
-        if (request.getPath() != null) {
 
+        if (request.getPath() != null) {
             if (controller.getSocketMap() != null &&
                     controller.getSocketMap().containsKey(request.getPath()) &&
                     request.getStatusCode() == SWITCHING_PROTOCOL) {
                 handler = controller.getSocketMap().get(request.getPath());
-                response.setWebsocketAcceptString(request.getUpgradeSecureKeyAnswer());
             }
 
             if (request.getRequestMethod().equals(RequestType.GET) &&
                     controller.getGetMap() != null &&
                     controller.getGetMap().containsKey(request.getPath())) {
                 handler = controller.getGetMap().get(request.getPath());
-                response.setStatusCode(ACCEPTED);
             }
 
             if (request.getRequestMethod().equals(RequestType.POST) &&
                     controller.getPostMap() != null &&
                     controller.getPostMap().containsKey(request.getPath())) {
                 handler = controller.getPostMap().get(request.getPath());
-                response.setStatusCode(ACCEPTED);
             }
 
         } else {
-            throw new InvalidStateException("Path is not found and made it in this section, bad state.");
+            throw new InvalidStateException("Path is not found and made it in this section, bad state. Path: " + request.getPath());
         }
         return handler;
     }

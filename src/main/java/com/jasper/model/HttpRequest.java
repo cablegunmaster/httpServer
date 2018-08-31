@@ -41,10 +41,10 @@ public class HttpRequest {
     private StringBuilder headerName = new StringBuilder();
     private StringBuilder headerValue = new StringBuilder();
     private boolean upgradingConnection = false;
-    private String upgradeSecureKeyAnswer = "";
+    private String upgradeSecureKeyAnswer = null;
 
     //HttpVersion number.
-    private Float httpVersion;
+    private String httpVersion;
 
     public void setRequestMethod(RequestType requestMethod) {
         this.requestMethod = requestMethod;
@@ -150,11 +150,11 @@ public class HttpRequest {
         this.ref = ref;
     }
 
-    public Float getHttpVersion() {
+    public String getHttpVersion() {
         return httpVersion;
     }
 
-    public void setHttpVersion(Float httpVersion) {
+    public void setHttpVersion(String httpVersion) {
         this.httpVersion = httpVersion;
     }
 

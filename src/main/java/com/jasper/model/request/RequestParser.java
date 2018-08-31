@@ -150,7 +150,7 @@ public class RequestParser {
 
             if (version.equals("1.1") || version.equals("1.0")) {
                 try {
-                    request.setHttpVersion(Float.parseFloat(version));
+                    request.setHttpVersion(version);
                     validHttp = true;
                 } catch (NumberFormatException ex) {
                     request.setStatusCode(StatusCode.HTTP_VERSION_NOT_SUPPORTED);
@@ -188,6 +188,7 @@ public class RequestParser {
                         }
                         break;
                     case GET:
+                        bufferSize = 0;
                         request.setState(State.DONE);
                         break;
                     default:
@@ -277,6 +278,7 @@ public class RequestParser {
             postQueryValue = stateBuilder.toString();
             request.getQueryPOST().put(postQueryKey, postQueryValue);
             stateBuilder.setLength(0);
+            bufferSize = 0;
             request.setState(State.DONE);
 
         } else if (postSize > totalBodySize) {

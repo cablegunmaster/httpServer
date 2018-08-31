@@ -1,6 +1,7 @@
 package com.jasper.model.response;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
 
 /**
  * Http response object for sending back a HTTP response for GET or POST.
@@ -31,6 +32,14 @@ public class HttpResponse extends HttpResponseHandler {
         Integer contentLength = 0;
         if (contentInBytes != null) {
             contentLength = contentInBytes.length;
+        }
+
+        //Add Additional Headers.
+        Map<String, String> headers = getHeaders();
+        for (String key : headers.keySet()) {
+            response.append(key);
+            response.append(":");
+            response.append(headers.get(key));
         }
 
         response.append("Content-Length: ").append(contentLength).append(LINE_END);

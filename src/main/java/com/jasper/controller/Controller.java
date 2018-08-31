@@ -14,6 +14,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Jasper Lankhorst on 17-11-2016.
@@ -30,9 +31,9 @@ public class Controller {
     private static Boolean restartProces = false;
     private Boolean guiVisible;
 
-    private HashMap<String, RequestHandler> getMap;
-    private HashMap<String, RequestHandler> postMap;
-    private HashMap<String, RequestHandler> socketMap;
+    private Map<String, RequestHandler> getMap;
+    private Map<String, RequestHandler> postMap;
+    private Map<String, RequestHandler> socketMap;
 
     /**
      * Java.Controller class
@@ -40,9 +41,9 @@ public class Controller {
      * @param portNumber portnumber
      */
     public Controller(Integer portNumber,
-                      HashMap<String, RequestHandler> getMap,
-                      HashMap<String, RequestHandler> postMap,
-                      HashMap<String, RequestHandler> socketMap,
+                      Map<String, RequestHandler> getMap,
+                      Map<String, RequestHandler> postMap,
+                      Map<String, RequestHandler> socketMap,
                       Boolean guiVisible) {
 
         this.guiVisible = guiVisible;
@@ -191,7 +192,7 @@ public class Controller {
     }
 
     @CheckForNull
-    public HashMap<String, RequestHandler> getGetMap() {
+    public Map<String, RequestHandler> getGetMap() {
         return getMap;
     }
 
@@ -200,7 +201,7 @@ public class Controller {
     }
 
     @CheckForNull
-    public HashMap<String, RequestHandler> getPostMap() {
+    public Map<String, RequestHandler> getPostMap() {
         return postMap;
     }
 
@@ -209,7 +210,7 @@ public class Controller {
     }
 
     @CheckForNull
-    public HashMap<String, RequestHandler> getSocketMap() {
+    public Map<String, RequestHandler> getSocketMap() {
         return socketMap;
     }
 

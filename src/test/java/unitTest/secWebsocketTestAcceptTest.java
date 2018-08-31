@@ -18,9 +18,15 @@ public class secWebsocketTestAcceptTest {
     }
 
     @Test
-    public void secTestInvalidKey(){
+    public void secTestValidKey(){
         String key = "LKF8lHGznbKGIgO1UzAOhg==";
         Assert.assertEquals("vxUU43EIDuR3gscJp2fMckI95cQ=", requestParser.encodeWebsocketAccept(key));
+    }
+
+    @Test
+    public void mozillaKeyExampleTest(){
+        String key = "dGhlIHNhbXBsZSBub25jZQ==";
+        Assert.assertEquals("s3pPLMBiTxaQ9kYGzzhZRbK+xOo=", requestParser.encodeWebsocketAccept(key));
     }
 
     @Test
