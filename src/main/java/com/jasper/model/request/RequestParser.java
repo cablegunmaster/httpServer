@@ -303,6 +303,6 @@ public class RequestParser {
      * @return the string.
      */
     public String encodeWebsocketAccept(String input) {
-        return new String(Base64.encodeBase64(DigestUtils.sha1(input + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11")));
+        return new String(Base64.encodeBase64(DigestUtils.sha1(input.trim() + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11")));
     }
 }

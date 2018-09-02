@@ -2,6 +2,8 @@ package com.jasper.model.response;
 
 import com.jasper.model.httpenums.StatusCode;
 
+import java.util.Map;
+
 /**
  * Response for the Socket switching when the upgrade is requested Going from HTTP to websocket protocol,
  * bidirectioneel binair protcol.
@@ -40,9 +42,16 @@ public class SocketSwitchingResponse extends HttpResponseHandler {
         response.append("Upgrade: websocket").append(LINE_END)
                 .append("Connection: Upgrade").append(LINE_END)
                 .append("Sec-WebSocket-Accept: ").append(getWebsocketAcceptString())
-                .append(LINE_END)
                 .append(LINE_END);
-        //.append("Sec-WebSocket-Protocol: chat").append(LINE_END);
+
+        Map<String, String> headers = getHeaders();
+        for (String key : headers.keySet()) {
+            response.append(key);
+            response.append(": ");
+            response.append(headers.get(key));
+            response.append(LINE_END);
+        }
+         response.append(LINE_END);
 
         return response.toString();
     }

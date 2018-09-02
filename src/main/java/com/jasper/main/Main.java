@@ -48,7 +48,7 @@ public class Main {
         });
 
         server.get("/", (req, res) -> {
-            res.write("Hello World same as index.html?");
+            res.write("Hello World same as index.html This is a string.");
         });
 
         server.get("/hello/test/*", (req, res) -> {

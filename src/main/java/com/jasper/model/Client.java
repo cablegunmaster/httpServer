@@ -14,20 +14,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 
-import static com.jasper.model.httpenums.StatusCode.ACCEPTED;
-import static com.jasper.model.httpenums.StatusCode.BAD_REQUEST;
-import static com.jasper.model.httpenums.StatusCode.NOT_FOUND;
-import static com.jasper.model.httpenums.StatusCode.SWITCHING_PROTOCOL;
+import static com.jasper.model.httpenums.StatusCode.*;
 
 /**
  * Created by Jasper Lankhorst on 20-11-2016.
@@ -69,7 +61,6 @@ public class Client implements Runnable {
                     readSendRequest(in, out, clientSocket);
                 }
             }
-
         } catch (SocketException e) {
             LOG.warn("Disconnected client by a Socket error, probably disconnected by user.");
         } catch (IOException e) {
@@ -104,7 +95,8 @@ public class Client implements Runnable {
         handleSocketHandlers(request, clientSocket);
         responseHandler = handleRequestHandlers(request);
 
-        if (responseHandler.getHttpVersion().equals("1.1") &&
+        if (responseHandler.getHttpVersion() != null &&
+                responseHandler.getHttpVersion().equals("1.1") &&
                 request.getHeaders().get("Connection").equals("keep-alive")) {
             responseHandler.addHeader("Connection", "keep-alive");
         }
@@ -167,6 +159,11 @@ public class Client implements Runnable {
 
             if (request.getUpgradeSecureKeyAnswer() != null) {
                 response.setWebsocketAcceptString(request.getUpgradeSecureKeyAnswer());
+
+                if(request.getHeaders().containsKey("Sec-WebSocket-Protocol")){
+                    response.addHeader("Sec-WebSocket-Protocol",
+                            request.getHeaders().get("Sec-WebSocket-Protocol"));
+                }
             }
 
         } else if (state.isErrorState()) {
