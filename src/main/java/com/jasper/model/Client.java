@@ -14,12 +14,20 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 
-import static com.jasper.model.httpenums.StatusCode.*;
+import static com.jasper.model.httpenums.StatusCode.ACCEPTED;
+import static com.jasper.model.httpenums.StatusCode.BAD_REQUEST;
+import static com.jasper.model.httpenums.StatusCode.NOT_FOUND;
+import static com.jasper.model.httpenums.StatusCode.SWITCHING_PROTOCOL;
 
 /**
  * Created by Jasper Lankhorst on 20-11-2016.
@@ -30,7 +38,6 @@ public class Client implements Runnable {
 
     private Socket clientSocket;
     private Controller controller;
-    private Model model;
     private OutputStream out;
     private InputStream in;
     private BufferedReader reader = null;
@@ -38,7 +45,6 @@ public class Client implements Runnable {
     public Client(Socket clientSocket, Controller controller) {
         this.clientSocket = clientSocket;
         this.controller = controller;
-        model = controller.getModel();
     }
 
     @Override
@@ -50,8 +56,6 @@ public class Client implements Runnable {
             out = clientSocket.getOutputStream();
 
             HttpRequest request = readSendRequest(in, out, clientSocket);
-
-            //TODO how does a http 1.1 request closes the socket? read 14.10 and 8.1 in RFC 2616 more closely about this.
             String connection = request.getHeaders().getOrDefault("Connection", "close");
 
             if (request.getHeaders().containsKey("Connection") &&
@@ -160,7 +164,7 @@ public class Client implements Runnable {
             if (request.getUpgradeSecureKeyAnswer() != null) {
                 response.setWebsocketAcceptString(request.getUpgradeSecureKeyAnswer());
 
-                if(request.getHeaders().containsKey("Sec-WebSocket-Protocol")){
+                if (request.getHeaders().containsKey("Sec-WebSocket-Protocol")) {
                     response.addHeader("Sec-WebSocket-Protocol",
                             request.getHeaders().get("Sec-WebSocket-Protocol"));
                 }
@@ -173,7 +177,6 @@ public class Client implements Runnable {
         }
 
         response.setHttpVersion(request.getHttpVersion());
-        response.buildResponse(); //TODO add this before sending?
         return response;
     }
 

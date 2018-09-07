@@ -86,8 +86,4 @@ public class upgradeSocketTest {
         assertTrue("Reading Method set to DONE", state.isDone());
         assertTrue("Request is upgrading connection", request.isUpgradingConnection());
     }
-
-    //TODO fix the error when upgrade is different as "websocket" what to reply?
-    //TODO fix the correct reponse to the websocket and check why its not working yet.
-    //TODO Readup the sec-websocket-key and what to return whenthe key is given.
 }

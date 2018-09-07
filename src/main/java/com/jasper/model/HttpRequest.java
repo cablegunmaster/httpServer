@@ -219,7 +219,7 @@ public class HttpRequest {
         this.headers = headers;
     }
 
-    public String getUpgradeSecureKeyAnswer() {
+    protected String getUpgradeSecureKeyAnswer() {
         return upgradeSecureKeyAnswer;
     }
 

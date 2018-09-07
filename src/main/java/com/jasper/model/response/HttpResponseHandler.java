@@ -16,7 +16,6 @@ public abstract class HttpResponseHandler {
     final static String DOUBLE_LINE_END = "\r\n\r\n";
     final static String SPACE = " ";
 
-    private String response = null;
     private StatusCode statusCode = NOT_FOUND; //status code of request.
     private StringBuilder body = new StringBuilder();
     private String httpVersion;
@@ -55,10 +54,6 @@ public abstract class HttpResponseHandler {
         this.httpVersion = httpVersion;
     }
 
-    public void buildResponse() {
-        response = toHttpResponse();
-    }
-
     public Map<String, String> getHeaders() {
         return headers;
     }
@@ -68,7 +63,7 @@ public abstract class HttpResponseHandler {
     }
 
     public String getResponse() {
-        return response;
+        return toHttpResponse();
     }
 
     public abstract String toHttpResponse();
