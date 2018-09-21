@@ -9,6 +9,7 @@ import com.jasper.model.request.RequestParser;
 import com.jasper.model.response.HttpResponse;
 import com.jasper.model.response.HttpResponseHandler;
 import com.jasper.model.response.SocketSwitchingResponse;
+import org.omg.CORBA.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,10 +60,15 @@ public class Client implements Runnable {
             String connection = request.getHeaders().getOrDefault("Connection", "close");
 
             if (request.getHeaders().containsKey("Connection") &&
-                    request.getHeaders().get("Connection").equals("keep-alive") ||
-                    request.getHeaders().containsKey("Connection") && request.isUpgradingConnection()) {
+                    request.getHeaders().get("Connection").equals("keep-alive")) {
                 while (!connection.equals("close")) {
-                    readSendRequest(in, out, clientSocket);
+                    if(request.getHeaders().containsKey("Connection") && request.isUpgradingConnection()){
+                        //do WS
+                        readSendSocket(in,out, clientSocket);
+                    }else {
+                        HttpRequest request1 = readSendRequest(in, out, clientSocket);
+                        connection = request1.getHeaders().getOrDefault("Connection", "close");
+                    }
                 }
             }
         } catch (SocketException e) {
@@ -89,6 +95,16 @@ public class Client implements Runnable {
                 controller.addStringToLog("[ Error ] IOException, socket is closed");
             }
         }
+    }
+
+    /**
+     * Read Websocket connection.
+     * @param in
+     * @param out
+     * @param clientSocket
+     */
+    private void readSendSocket(InputStream in, OutputStream out, Socket clientSocket) {
+        System.out.println();
     }
 
     public HttpRequest readSendRequest(InputStream in, OutputStream out, Socket clientSocket) throws IOException {
