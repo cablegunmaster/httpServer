@@ -9,26 +9,17 @@ import com.jasper.model.request.RequestParser;
 import com.jasper.model.response.HttpResponse;
 import com.jasper.model.response.HttpResponseHandler;
 import com.jasper.model.response.SocketSwitchingResponse;
-import org.omg.CORBA.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 
-import static com.jasper.model.httpenums.StatusCode.ACCEPTED;
-import static com.jasper.model.httpenums.StatusCode.BAD_REQUEST;
-import static com.jasper.model.httpenums.StatusCode.NOT_FOUND;
-import static com.jasper.model.httpenums.StatusCode.SWITCHING_PROTOCOL;
+import static com.jasper.model.httpenums.StatusCode.*;
 
 /**
  * Created by Jasper Lankhorst on 20-11-2016.
@@ -59,18 +50,21 @@ public class Client implements Runnable {
             HttpRequest request = readSendRequest(in, out, clientSocket);
             String connection = request.getHeaders().getOrDefault("Connection", "close");
 
-            if (request.getHeaders().containsKey("Connection") &&
-                    request.getHeaders().get("Connection").equals("keep-alive")) {
+            if (request.getHeaders().containsKey("Connection")) {
                 while (!connection.equals("close")) {
-                    if(request.getHeaders().containsKey("Connection") && request.isUpgradingConnection()){
+
+                    if (request.isUpgradingConnection()) {
                         //do WS
-                        readSendSocket(in,out, clientSocket);
-                    }else {
-                        HttpRequest request1 = readSendRequest(in, out, clientSocket);
-                        connection = request1.getHeaders().getOrDefault("Connection", "close");
+                        readSendSocket(in, out, clientSocket);
+                    }
+
+                    if (request.getHeaders().get("Connection").equals("keep-alive")) {
+                        HttpRequest repeatRequest = readSendRequest(in, out, clientSocket);
+                        connection = repeatRequest.getHeaders().getOrDefault("Connection", "close");
                     }
                 }
             }
+
         } catch (SocketException e) {
             LOG.warn("Disconnected client by a Socket error, probably disconnected by user.");
         } catch (IOException e) {
@@ -99,12 +93,21 @@ public class Client implements Runnable {
 
     /**
      * Read Websocket connection.
-     * @param in
+     *
+     * @param inStream
      * @param out
-     * @param clientSocket
+     * @param clientSocket Read bits 9-15 (inclusive) and interpret that as an unsigned integer. If it's 125 or less, then that's the length; you're done. If it's 126, go to step 2. If it's 127, go to step 3.
+     *                     Read the next 16 bits and interpret those as an unsigned integer. You're done.
+     *                     Read the next 64 bits and interpret those as an unsigned integer (The most significant bit MUST be 0). You're done.
      */
-    private void readSendSocket(InputStream in, OutputStream out, Socket clientSocket) {
-        System.out.println();
+    private void readSendSocket(InputStream inStream, OutputStream out, Socket clientSocket) throws IOException {
+
+        //WS protocol read byte 1,2,3?
+        int i;
+        while((i=inStream.read())!=-1)
+        {
+            System.out.println(Integer.toString(i));
+        }
     }
 
     public HttpRequest readSendRequest(InputStream in, OutputStream out, Socket clientSocket) throws IOException {

@@ -1,22 +1,12 @@
 package unitTest;
 
-import com.jasper.controller.Controller;
-import com.jasper.model.Client;
 import com.jasper.model.HttpRequest;
-import com.jasper.model.httpenums.RequestType;
 import com.jasper.model.httpenums.State;
 import com.jasper.model.httpenums.StateUrl;
-import com.jasper.model.httpenums.StatusCode;
 import com.jasper.model.request.RequestParser;
-import com.jasper.model.response.HttpResponse;
-import com.jasper.model.response.HttpResponseHandler;
-import com.jasper.model.response.SocketSwitchingResponse;
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -59,7 +49,7 @@ public class upgradeSocketTest {
     }
 
     @Test
-    public void returnCorrectWebsocketResponse(){
+    public void returnCorrectWebsocketResponse() {
 
         //I send.
         String stringToTest = "GET /chat HTTP/1.1\n" +
