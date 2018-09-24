@@ -99,6 +99,7 @@ public class Client implements Runnable {
      * @param clientSocket Read bits 9-15 (inclusive) and interpret that as an unsigned integer. If it's 125 or less, then that's the length; you're done. If it's 126, go to step 2. If it's 127, go to step 3.
      *                     Read the next 16 bits and interpret those as an unsigned integer. You're done.
      *                     Read the next 64 bits and interpret those as an unsigned integer (The most significant bit MUST be 0). You're done.
+     *                     https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_servers
      */
     private void readSendSocket(InputStream inStream, OutputStream out, Socket clientSocket) throws IOException {
 
