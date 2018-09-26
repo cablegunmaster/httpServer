@@ -109,6 +109,20 @@ public class Client implements Runnable {
         {
             System.out.println(Integer.toString(i));
         }
+
+        /**
+         * 129 (?) 128 betekent einde bericht. dat is FIN, RSV
+         * 129 (128 betekent masking bit is gezet) dus 129 - 128  = 1  byte die je verder moet lezen
+         *
+         * 213 ( byte lezen) is de letter "a" maar dan in cijfer en gemaskerd als iets anders in combinatie met mask kan het de letter a weer worden.
+         *
+         * (masker combinatie bestaat uit 4  bytes, elke byte is een nummer van 1-255 )
+         * 91
+         * 187
+         * 242
+         * 180
+         */
+
     }
 
     public HttpRequest readSendRequest(InputStream in, OutputStream out, Socket clientSocket) throws IOException {
