@@ -33,6 +33,7 @@ public class Client implements Runnable {
     private OutputStream out;
     private InputStream in;
     private BufferedReader reader = null;
+    private HttpRequest request;
 
     public Client(Socket clientSocket, Controller controller) {
         this.clientSocket = clientSocket;
@@ -47,21 +48,13 @@ public class Client implements Runnable {
             in = clientSocket.getInputStream();
             out = clientSocket.getOutputStream();
 
-            HttpRequest request = readSendRequest(in, out, clientSocket);
-            String connection = request.getHeaders().getOrDefault("Connection", "close");
+            request = readSendRequest(in, out, clientSocket);
+//            String connection = request.getHeaders().getOrDefault("Connection", "close");
 
             if (request.getHeaders().containsKey("Connection")) {
-                while (!connection.equals("close")) {
-
-                    if (request.isUpgradingConnection()) {
-                        //do WS
-                        readSendSocket(in, out, clientSocket);
-                    }
-
-                    if (request.getHeaders().get("Connection").equals("keep-alive")) {
-                        HttpRequest repeatRequest = readSendRequest(in, out, clientSocket);
-                        connection = repeatRequest.getHeaders().getOrDefault("Connection", "close");
-                    }
+                if (request.isUpgradingConnection()) {
+                    //do WS
+                    readSendSocket(in, out, clientSocket);
                 }
             }
 
@@ -76,13 +69,16 @@ public class Client implements Runnable {
         } finally {
             LOG.info("End of request on [" + Thread.currentThread().getName() + "]");
 
+
             try {
                 controller.removeConnection(this);
 
                 in.close();
                 out.flush();
                 out.close();
-                clientSocket.close();
+                if (request.getHeaders().get("Connection").equals("close")) {
+                    clientSocket.close();
+                }
 
             } catch (IOException e) {
                 LOG.warn("IOEXCEPTION:", e);
@@ -103,14 +99,28 @@ public class Client implements Runnable {
      */
     private void readSendSocket(InputStream inStream, OutputStream out, Socket clientSocket) throws IOException {
 
+
+//        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         //WS protocol read byte 1,2,3?
         int i;
-        while((i=inStream.read())!=-1)
-        {
-            System.out.println(Integer.toString(i));
+        while ((i = inStream.read()) != -1) {
+            System.out.println(i);
+        }
+
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        byte[] buffer = new byte[0xFFFF];
+        for (int len = in.read(buffer); len != -1; len = in.read(buffer)) {
+            os.write(buffer, 0, len);
+        }
+
+        byte[] ok = os.toByteArray();
+
+        for (byte output : ok) {
+            System.out.println(output);
         }
 
         /**
+         * http://www.herongyang.com/Java/Bit-String-Stored-in-Byte-Array-Test-Program.html
          * 129 (?) 128 betekent einde bericht. dat is FIN, RSV
          * 129 (128 betekent masking bit is gezet) dus 129 - 128  = 1  byte die je verder moet lezen
          *
@@ -122,7 +132,6 @@ public class Client implements Runnable {
          * 242
          * 180
          */
-
     }
 
     public HttpRequest readSendRequest(InputStream in, OutputStream out, Socket clientSocket) throws IOException {
@@ -178,8 +187,8 @@ public class Client implements Runnable {
                 clientSocket.setSoTimeout(0); //timeout to make a clientsocket Idle.
                 break;
             default:
-                clientSocket.setSoTimeout(5000); //timeout to make a clientsocket Idle.
-                clientSocket.setSoLinger(true, 10000); //timeout to close the socket.
+                clientSocket.setSoTimeout(500000); //timeout to make a clientsocket Idle.
+                clientSocket.setSoLinger(true, 100000); //timeout to close the socket.
                 break;
         }
     }
