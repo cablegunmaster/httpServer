@@ -17,13 +17,14 @@ public class SocketMessageParser {
     private String message = null;
     private int messageLength = 0;
 
-    private Stack<Integer> content = new Stack<>();
-    private Stack<Integer> maskList = new Stack<>();
+    private List<Integer> content = new ArrayList<>();
+    private List<Integer> maskList = new ArrayList<>();
     private SocketMessageState state = ENDMESSAGE;
 
     /**
      * Message parsed to string.
      * ONLY IMPLEMENTED STEP 1 (if size is smaller as 126)
+     *
      * @param input is based on the
      */
     public void parseMessage(int input) throws UnsupportedEncodingException {
@@ -45,18 +46,19 @@ public class SocketMessageParser {
                 }
                 break;
             case CONTENT:
-                if(content.size() < messageLength) {
-                    content.push(input);
-                    if(content.size() == messageLength) {
+                if (content.size() < messageLength) {
+                    content.add(input);
+                    if (content.size() == messageLength) {
                         state = MASK;
                     }
                 }
                 break;
             case MASK:
-                if(maskList.size() < MASK_SIZE){
-                    maskList.push(input);
-                    if(maskList.size() == MASK_SIZE) {
+                if (maskList.size() < MASK_SIZE) {
+                    maskList.add(input);
+                    if (maskList.size() == MASK_SIZE) {
                         state = CONTENT_TO_STRING;
+                        decodeMessage();
                     }
                 }
                 //Add to
@@ -75,23 +77,17 @@ public class SocketMessageParser {
         return ((value >> bitFromRight) & 0x01) == 1;
     }
 
+    /**
+     * Get unsigned byte from Integer.
+     * https://android.jlelse.eu/java-when-to-use-n-8-0xff-and-when-to-use-byte-n-8-2efd82ae7dd7
+     */
+
     public void decodeMessage() throws UnsupportedEncodingException {
         byte[] decoded = new byte[content.size()];
 
-        for(int i = 0 ; i < content.size(); i++){
-            decoded[i] = (byte) (content.pop() ^ (maskList.pop() & 0x3));
+        for (int i = 0; i < content.size(); i++) {
+            decoded[i] = (byte) (content.get(i) ^ (maskList.get(i % 4)));
         }
-       System.out.println(new String(decoded, "UTF-8"));
+        System.out.println(new String(decoded, "UTF-8"));
     }
-
-//    public String decodeMessage() throws UnsupportedEncodingException {
-//        byte[] decoded = new byte[6];
-//        byte[] encoded = new byte[] {(byte) 198,(byte)  131,(byte)  130, (byte) 182,(byte)  194,(byte)  135};
-//        byte[] key = {(byte) 167, (byte) 225, (byte) 225,(byte)  210};
-//
-//        for (int i = 0; i < encoded.length; i++) {
-//            decoded[i] = (byte)(encoded[i] ^ key[i & 0x3]);
-//        }
-//        System.out.println(new String(decoded, "UTF-8"));
-//    }
 }
