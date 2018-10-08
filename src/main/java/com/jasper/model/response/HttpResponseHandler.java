@@ -67,6 +67,4 @@ public abstract class HttpResponseHandler {
     }
 
     public abstract String toHttpResponse();
-
-
 }

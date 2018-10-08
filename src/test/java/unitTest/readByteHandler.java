@@ -60,7 +60,7 @@ public class readByteHandler {
     public void testHandler() throws UnsupportedEncodingException {
         SocketMessageParser smParser = new SocketMessageParser();
 
-        for (int i : fourthByteList) {
+        for (int i : thirdByteList) {
             smParser.parseMessage(i);
         }
     }

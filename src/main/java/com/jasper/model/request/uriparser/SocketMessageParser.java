@@ -5,9 +5,12 @@ import com.jasper.model.httpenums.SocketMessageState;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
-import static com.jasper.model.httpenums.SocketMessageState.*;
+import static com.jasper.model.httpenums.SocketMessageState.CONTENT;
+import static com.jasper.model.httpenums.SocketMessageState.CONTENT_TO_STRING;
+import static com.jasper.model.httpenums.SocketMessageState.ENDMESSAGE;
+import static com.jasper.model.httpenums.SocketMessageState.LENGTH;
+import static com.jasper.model.httpenums.SocketMessageState.MASK;
 
 public class SocketMessageParser {
 
@@ -40,28 +43,27 @@ public class SocketMessageParser {
                 if (checkBitActivated(7, input)) {
                     mask = true;
                     messageLength = (input - 128); //shift to remove last bit
-                    state = CONTENT;
+                    state = MASK;
                 } else {
                     messageLength = input;
-                }
-                break;
-            case CONTENT:
-                if (content.size() < messageLength) {
-                    content.add(input);
-                    if (content.size() == messageLength) {
-                        state = MASK;
-                    }
                 }
                 break;
             case MASK:
                 if (maskList.size() < MASK_SIZE) {
                     maskList.add(input);
                     if (maskList.size() == MASK_SIZE) {
+                        state = CONTENT;
+                    }
+                }
+                break;
+            case CONTENT:
+                if (content.size() < messageLength) {
+                    content.add(input);
+                    if (content.size() == messageLength) {
                         state = CONTENT_TO_STRING;
                         decodeMessage();
                     }
                 }
-                //Add to
                 break;
             case CONTENT_TO_STRING:
                 decodeMessage();
