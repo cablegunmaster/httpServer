@@ -35,6 +35,7 @@ public class Main {
         server.socket("/chat", (req, res) -> {
             //read out request.
             //send back with response?
+
         });
 
         server.get("/hello", (req, res) -> {

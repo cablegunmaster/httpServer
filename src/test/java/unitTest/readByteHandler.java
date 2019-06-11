@@ -17,6 +17,7 @@ public class readByteHandler {
             151,
             92,
             134);
+
     //abDDDE
     List<Integer> thirdByteList = Arrays.asList(129,
             134,
@@ -112,20 +113,7 @@ public class readByteHandler {
         );
     }
 
-    @Test
-    public void maskHandlerAAAA() throws UnsupportedEncodingException {
-
-        byte[] decoded = new byte[5];
-        byte[] encoded = new byte[]{(byte) 91, (byte) 23, (byte) 159,(byte) 192, (byte) 58};
-        byte[] key = {(byte) 118, (byte) 254, (byte) 161, (byte) 58};
-
-        for (int i = 0; i < encoded.length; i++) {
-            decoded[i] = (byte) (encoded[i] ^ (key[i & 0x3]));
-        }
-        System.out.println(new String(decoded, "UTF-8"));
-    }
-
-    //ABCDEF
+    //abcdef
     @Test
     public void maskHandler() throws UnsupportedEncodingException {
         byte[] decoded = new byte[6];

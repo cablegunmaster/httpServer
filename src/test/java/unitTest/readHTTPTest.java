@@ -14,6 +14,8 @@ public class readHTTPTest {
 
     private RequestParser parser;
 
+    private final String LINE = "\r\n";
+
     @Before
     public void createParser() {
         parser = new RequestParser();
@@ -38,7 +40,7 @@ public class readHTTPTest {
 
     @Test
     public void setHttpRequestWithNoPathHTTPVersionOnePointOne() {
-        String stringToTest = "GET http://localhost:8080/ HTTP/1.1\\r\\n ";
+        String stringToTest = "GET http://localhost:8080/ HTTP/1.1"+ LINE;
 
         for (int i = 0; i < stringToTest.length(); i++) {
             char c = stringToTest.charAt(i);
@@ -71,7 +73,7 @@ public class readHTTPTest {
 
     @Test
     public void requestHTTPIsStartingToReadHeader() {
-        String stringToTest = "GET /index.html HTTP/1.1 \\r\\n ";
+        String stringToTest = "GET /index.html HTTP/1.1 ";
 
         for (int i = 0; i < stringToTest.length(); i++) {
             char c = stringToTest.charAt(i);
@@ -89,7 +91,7 @@ public class readHTTPTest {
 
     @Test
     public void requestLocalHost() {
-        String stringToTest = "GET http://localhost:8080/index.html HTTP/1.1 \\r\\n ";
+        String stringToTest = "GET http://localhost:8080/index.html HTTP/1.1"+ LINE;
 
         for (int i = 0; i < stringToTest.length(); i++) {
             char c = stringToTest.charAt(i);

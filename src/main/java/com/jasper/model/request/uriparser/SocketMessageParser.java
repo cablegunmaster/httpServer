@@ -6,18 +6,14 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.jasper.model.httpenums.SocketMessageState.CONTENT;
-import static com.jasper.model.httpenums.SocketMessageState.CONTENT_TO_STRING;
-import static com.jasper.model.httpenums.SocketMessageState.ENDMESSAGE;
-import static com.jasper.model.httpenums.SocketMessageState.LENGTH;
-import static com.jasper.model.httpenums.SocketMessageState.MASK;
+import static com.jasper.model.httpenums.SocketMessageState.*;
 
 public class SocketMessageParser {
 
     private final static int MASK_SIZE = 4;
-    private Boolean finalMessage = false;
-    private Boolean mask = false;
-    private String message = null;
+    private Boolean finalMessage;
+    private Boolean mask;
+    private String message;
     private int messageLength = 0;
 
     private List<Integer> content = new ArrayList<>();
@@ -90,6 +86,7 @@ public class SocketMessageParser {
         for (int i = 0; i < content.size(); i++) {
             decoded[i] = (byte) (content.get(i) ^ (maskList.get(i % 4)));
         }
-        System.out.println(new String(decoded, "UTF-8"));
+        message = new String(decoded, "UTF-8");
+        System.out.println(message);
     }
 }

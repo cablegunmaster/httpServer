@@ -6,6 +6,7 @@ import com.jasper.model.httpenums.State;
 import com.jasper.model.httpenums.StatusCode;
 import com.jasper.model.request.RequestHandler;
 import com.jasper.model.request.RequestParser;
+import com.jasper.model.request.uriparser.SocketMessageParser;
 import com.jasper.model.response.HttpResponse;
 import com.jasper.model.response.HttpResponseHandler;
 import com.jasper.model.response.SocketSwitchingResponse;
@@ -69,18 +70,22 @@ public class Client implements Runnable {
         } finally {
             LOG.info("End of request on [" + Thread.currentThread().getName() + "]");
 
-
             try {
                 controller.removeConnection(this);
 
                 in.close();
                 out.flush();
                 out.close();
-                if (request.getHeaders().get("Connection").equals("close")) {
+
+                if (!request.getHeaders().isEmpty() &&
+                        request.getHeaders().containsKey("Connection") &&
+                        request.getHeaders().get("Connection").equals("close")) {
                     clientSocket.close();
                 }
 
+
             } catch (IOException e) {
+
                 LOG.warn("IOEXCEPTION:", e);
                 controller.addStringToLog("[ Error ] IOException, socket is closed");
             }
@@ -102,9 +107,23 @@ public class Client implements Runnable {
 
 //        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         //WS protocol read byte 1,2,3?
+
+        SocketMessageParser messageParser = new SocketMessageParser();
+
         int i;
         while ((i = inStream.read()) != -1) {
             System.out.println(i);
+
+            messageParser.parseMessage(i);
+            /*recordMessage(i);
+            String message = convertMessage(i);
+            if(message.equals("exit")){
+                break;
+            }
+
+            sendReply(message);*/
+
+            //keep in this loop until it needs to be ended, really test it thoroughly.
         }
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -255,7 +274,6 @@ public class Client implements Runnable {
                     controller.getPostMap().containsKey(request.getPath())) {
                 handler = controller.getPostMap().get(request.getPath());
             }
-
         }
         return handler;
     }

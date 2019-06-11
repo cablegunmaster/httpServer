@@ -14,6 +14,8 @@ public class upgradeSocketTest {
 
     private RequestParser parser;
 
+    private final String LINE = "\r\n";
+
     @Before
     public void createParser() {
         parser = new RequestParser();
@@ -23,15 +25,15 @@ public class upgradeSocketTest {
     public void setHttpUpgradeSocketTest() {
 
         //I send.
-        String stringToTest = "GET /chat HTTP/1.1\n" +
-                "Host: server.example.com\n" +
-                "Upgrade: websocket\n" +
-                "Connection: Upgrade\n" +
-                "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\n" +
-                "Origin: http://example.com\n" +
-                "Sec-WebSocket-Protocol: chat, superchat\n" +
-                "Sec-WebSocket-Version: 13" +
-                "\n\n";
+        String stringToTest = "GET /chat HTTP/1.1" +LINE +
+                "Host: server.example.com" +LINE +
+                "Upgrade: websocket" +LINE +
+                "Connection: Upgrade" +LINE +
+                "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" +LINE +
+                "Origin: http://example.com" + LINE +
+                "Sec-WebSocket-Protocol: chat, superchat" + LINE +
+                "Sec-WebSocket-Version: 13"
+                +LINE+LINE;
 
         for (int i = 0; i < stringToTest.length(); i++) {
             char c = stringToTest.charAt(i);
@@ -52,15 +54,15 @@ public class upgradeSocketTest {
     public void returnCorrectWebsocketResponse() {
 
         //I send.
-        String stringToTest = "GET /chat HTTP/1.1\n" +
-                "Host: server.example.com\n" +
-                "Upgrade: websocket\n" +
-                "Connection: Upgrade\n" +
-                "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\n" +
-                "Origin: http://example.com\n" +
-                "Sec-WebSocket-Protocol: chat, superchat\n" +
-                "Sec-WebSocket-Version: 13" +
-                "\n\n";
+        String stringToTest = "GET /chat HTTP/1.1" +LINE +
+                "Host: server.example.com" +LINE +
+                "Upgrade: websocket" +LINE +
+                "Connection: Upgrade" +LINE +
+                "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" +LINE +
+                "Origin: http://example.com" +LINE +
+                "Sec-WebSocket-Protocol: chat, superchat" +LINE +
+                "Sec-WebSocket-Version: 13"
+                +LINE+LINE;
 
         for (int i = 0; i < stringToTest.length(); i++) {
             char c = stringToTest.charAt(i);
