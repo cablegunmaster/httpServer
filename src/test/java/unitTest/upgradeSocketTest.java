@@ -25,15 +25,15 @@ public class upgradeSocketTest {
     public void setHttpUpgradeSocketTest() {
 
         //I send.
-        String stringToTest = "GET /chat HTTP/1.1" +LINE +
-                "Host: server.example.com" +LINE +
-                "Upgrade: websocket" +LINE +
-                "Connection: Upgrade" +LINE +
-                "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" +LINE +
+        String stringToTest = "GET /chat HTTP/1.1" + LINE +
+                "Host: server.example.com" + LINE +
+                "Upgrade: websocket" + LINE +
+                "Connection: Upgrade" + LINE +
+                "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" + LINE +
                 "Origin: http://example.com" + LINE +
                 "Sec-WebSocket-Protocol: chat, superchat" + LINE +
                 "Sec-WebSocket-Version: 13"
-                +LINE+LINE;
+                + LINE + LINE;
 
         for (int i = 0; i < stringToTest.length(); i++) {
             char c = stringToTest.charAt(i);
@@ -54,15 +54,15 @@ public class upgradeSocketTest {
     public void returnCorrectWebsocketResponse() {
 
         //I send.
-        String stringToTest = "GET /chat HTTP/1.1" +LINE +
-                "Host: server.example.com" +LINE +
-                "Upgrade: websocket" +LINE +
-                "Connection: Upgrade" +LINE +
-                "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" +LINE +
-                "Origin: http://example.com" +LINE +
-                "Sec-WebSocket-Protocol: chat, superchat" +LINE +
+        String stringToTest = "GET /chat HTTP/1.1" + LINE +
+                "Host: server.example.com" + LINE +
+                "Upgrade: websocket" + LINE +
+                "Connection: Upgrade" + LINE +
+                "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" + LINE +
+                "Origin: http://example.com" + LINE +
+                "Sec-WebSocket-Protocol: chat, superchat" + LINE +
                 "Sec-WebSocket-Version: 13"
-                +LINE+LINE;
+                + LINE + LINE;
 
         for (int i = 0; i < stringToTest.length(); i++) {
             char c = stringToTest.charAt(i);

@@ -14,8 +14,35 @@ public class HttpResponse extends HttpResponseHandler {
      */
     @Override
     public String toHttpResponse() {
+        StringBuilder response = new StringBuilder();
+        response.append("HTTP/1.1 ")
+                .append(getStatusCode().getStatusCodeNumber())
+                .append(SPACE)
+                .append(getStatusCode().getDescription()).append(LINE_END);
+        response.append(getHeaderBuild()); //Add Additional Headers.
+        response.append("Content-Length: ").append(getContentLength()).append(LINE_END);
+        response.append("Content-Type: text/html; charset=utf-8");
+        response.append(DOUBLE_LINE_END);
+        response.append(getBody());
+        response.append(DOUBLE_LINE_END);
+
+        return response.toString();
+    }
+
+    private StringBuilder getHeaderBuild() {
+        Map<String, String> headers = getHeaders();
 
         StringBuilder response = new StringBuilder();
+        for (String key : headers.keySet()) {
+            response.append(key);
+            response.append(":");
+            response.append(headers.get(key));
+        }
+        return response;
+    }
+
+    //get length of bytes.
+    private Integer getContentLength() {
         byte[] contentInBytes = null;
 
         try {
@@ -24,30 +51,6 @@ public class HttpResponse extends HttpResponseHandler {
             e.printStackTrace();
         }
 
-        response.append("HTTP/1.1 ")
-                .append(getStatusCode().getStatusCodeNumber())
-                .append(SPACE)
-                .append(getStatusCode().getDescription()).append(LINE_END);
-
-        Integer contentLength = 0;
-        if (contentInBytes != null) {
-            contentLength = contentInBytes.length;
-        }
-
-        //Add Additional Headers.
-        Map<String, String> headers = getHeaders();
-        for (String key : headers.keySet()) {
-            response.append(key);
-            response.append(":");
-            response.append(headers.get(key));
-        }
-
-        response.append("Content-Length: ").append(contentLength).append(LINE_END);
-        response.append("Content-Type: text/html; charset=utf-8");
-        response.append(DOUBLE_LINE_END);
-        response.append(getBody());
-        response.append(DOUBLE_LINE_END);
-
-        return response.toString();
+        return contentInBytes != null ? contentInBytes.length : 0;
     }
 }
