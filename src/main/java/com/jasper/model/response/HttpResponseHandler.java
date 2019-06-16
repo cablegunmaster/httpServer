@@ -54,8 +54,14 @@ public abstract class HttpResponseHandler {
         this.httpVersion = httpVersion;
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
+    public StringBuilder getHeaders() {
+        StringBuilder response = new StringBuilder();
+        for (String key : headers.keySet()) {
+            response.append(key)
+                    .append(":")
+                    .append(headers.get(key));
+        }
+        return response;
     }
 
     public void addHeader(String key, String value) {

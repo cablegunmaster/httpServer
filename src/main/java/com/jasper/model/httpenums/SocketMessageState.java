@@ -1,7 +1,7 @@
 package com.jasper.model.httpenums;
 
 public enum SocketMessageState {
-    ENDMESSAGE,
+    END_MESSAGE,
     LENGTH,
     CONTENT,
     MASK,

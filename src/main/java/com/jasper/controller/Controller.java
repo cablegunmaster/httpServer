@@ -22,14 +22,15 @@ import java.util.Map;
 public class Controller {
 
     private final static Logger LOG = LoggerFactory.getLogger(Controller.class);
+    private static Boolean restartProcess = false;
+    private Boolean guiVisible;
 
     private Model model;
     private View view;
+
     private MultiThreadedServer multiThreadedServer;
     private Thread multiThreadedServerThread;
-    private int portnumber;
-    private static Boolean restartProces = false;
-    private Boolean guiVisible;
+    private int portNumber;
 
     private Map<String, RequestHandler> getMap;
     private Map<String, RequestHandler> postMap;
@@ -38,7 +39,7 @@ public class Controller {
     /**
      * Java.Controller class
      *
-     * @param portNumber portnumber
+     * @param portNumber portNumber
      */
     public Controller(Integer portNumber,
                       Map<String, RequestHandler> getMap,
@@ -57,10 +58,10 @@ public class Controller {
         this.postMap = postMap;
         this.socketMap = socketMap;
 
-        portnumber = portNumber;
+        this.portNumber = portNumber;
 
         setListeners();
-        startServer(portnumber);
+        startServer(this.portNumber);
     }
 
     /**
@@ -104,7 +105,7 @@ public class Controller {
             multiThreadedServerThread = new Thread(multiThreadedServer);
             multiThreadedServerThread.start();
 
-            addStringToLog("[ OK ] Server is started on portnumber: " + portnumber);
+            addStringToLog("[ OK ] Server is started on portNumber: " + this.portNumber);
         }
 
     }
@@ -113,16 +114,16 @@ public class Controller {
     private ActionListener getRestartListener() {
         return actionEvent -> {
             //lock to ensure only one proces can restart the server.
-            if (!restartProces) {
-                restartProces = true;
+            if (!restartProcess) {
+                restartProcess = true;
                 if (multiThreadedServer != null) {
                     stopMultiThreadedServer(multiThreadedServer);
                     multiThreadedServer = null; //reset the server as well.
                 }
 
                 stopMultiServerThread();
-                restartProces = false;
-                startServer(portnumber);
+                restartProcess = false;
+                startServer(portNumber);
             }
         };
     }
@@ -196,25 +197,11 @@ public class Controller {
         return getMap;
     }
 
-    public void setGetMap(HashMap<String, RequestHandler> getMap) {
-        this.getMap = getMap;
-    }
-
-    @CheckForNull
     public Map<String, RequestHandler> getPostMap() {
         return postMap;
     }
 
-    public void setPostMap(HashMap<String, RequestHandler> postMap) {
-        this.postMap = postMap;
-    }
-
-    @CheckForNull
     public Map<String, RequestHandler> getSocketMap() {
         return socketMap;
-    }
-
-    public void setSocketMap(HashMap<String, RequestHandler> socketMap) {
-        this.socketMap = socketMap;
     }
 }

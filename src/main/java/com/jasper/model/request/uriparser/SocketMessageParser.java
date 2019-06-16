@@ -2,7 +2,7 @@ package com.jasper.model.request.uriparser;
 
 import com.jasper.model.httpenums.SocketMessageState;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +18,7 @@ public class SocketMessageParser {
 
     private List<Integer> content = new ArrayList<>();
     private List<Integer> maskList = new ArrayList<>();
-    private SocketMessageState state = ENDMESSAGE;
+    private SocketMessageState state = END_MESSAGE;
 
     /**
      * Message parsed to string.
@@ -26,9 +26,9 @@ public class SocketMessageParser {
      *
      * @param input is based on the
      */
-    public void parseMessage(int input) throws UnsupportedEncodingException {
+    public void parseMessage(int input) {
         switch (state) {
-            case ENDMESSAGE:
+            case END_MESSAGE:
                 //Check if its end of message
                 if (checkBitActivated(7, input)) {
                     finalMessage = true;
@@ -80,13 +80,13 @@ public class SocketMessageParser {
      * https://android.jlelse.eu/java-when-to-use-n-8-0xff-and-when-to-use-byte-n-8-2efd82ae7dd7
      */
 
-    public void decodeMessage() throws UnsupportedEncodingException {
+    public void decodeMessage() {
         byte[] decoded = new byte[content.size()];
 
         for (int i = 0; i < content.size(); i++) {
             decoded[i] = (byte) (content.get(i) ^ (maskList.get(i % 4)));
         }
-        message = new String(decoded, "UTF-8");
+        message = new String(decoded, StandardCharsets.UTF_8);
         System.out.println(message);
     }
 }
