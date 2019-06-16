@@ -16,43 +16,33 @@ public class SocketSwitchingResponse extends HttpResponseHandler {
     @Override
     public String toHttpResponse() {
 
-        StringBuilder response = new StringBuilder();
-//        byte[] contentInBytes = null;
+        String response = "HTTP/1.1" +
+                SPACE +
+                StatusCode.SWITCHING_PROTOCOL.getStatusCodeNumber() +
+                SPACE +
+                StatusCode.SWITCHING_PROTOCOL.getDescription() +
+                LINE_END +
+                getHeaderBuild() +
+                "Upgrade: websocket" + LINE_END +
+                "Connection: Upgrade" + LINE_END +
+                "Sec-WebSocket-Accept: " + getWebsocketAcceptString() +
+                LINE_END +
+                LINE_END;
+        return response;
+    }
 
-//        try {
-//            contentInBytes = getBody().getBytes("UTF-8");
-//        } catch (UnsupportedEncodingException e) {
-//            e.printStackTrace();
-//        }
-
-        response.append("HTTP/1.1")
-                .append(SPACE)
-                .append(StatusCode.SWITCHING_PROTOCOL.getStatusCodeNumber())
-                .append(SPACE)
-                .append(StatusCode.SWITCHING_PROTOCOL.getDescription())
-                .append(LINE_END);
-
-//        Integer contentLength = 0;
-//
-//        if (contentInBytes != null) {
-//            contentLength = contentInBytes.length;
-//        }
-
-        //first version keep it simple:
-        response.append("Upgrade: websocket").append(LINE_END)
-                .append("Connection: Upgrade").append(LINE_END)
-                .append("Sec-WebSocket-Accept: ").append(getWebsocketAcceptString())
-                .append(LINE_END);
-
+    private StringBuilder getHeaderBuild() {
         Map<String, String> headers = getHeaders();
+
+        StringBuilder response = new StringBuilder();
         for (String key : headers.keySet()) {
             response.append(key);
             response.append(": ");
             response.append(headers.get(key));
             response.append(LINE_END);
         }
-         response.append(LINE_END);
 
-        return response.toString();
+        return response;
     }
+
 }

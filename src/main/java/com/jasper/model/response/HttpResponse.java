@@ -14,19 +14,16 @@ public class HttpResponse extends HttpResponseHandler {
      */
     @Override
     public String toHttpResponse() {
-        StringBuilder response = new StringBuilder();
-        response.append("HTTP/1.1 ")
-                .append(getStatusCode().getStatusCodeNumber())
-                .append(SPACE)
-                .append(getStatusCode().getDescription()).append(LINE_END);
-        response.append(getHeaderBuild()); //Add Additional Headers.
-        response.append("Content-Length: ").append(getContentLength()).append(LINE_END);
-        response.append("Content-Type: text/html; charset=utf-8");
-        response.append(DOUBLE_LINE_END);
-        response.append(getBody());
-        response.append(DOUBLE_LINE_END);
-
-        return response.toString();
+        return "HTTP/1.1 " +
+                getStatusCode().getStatusCodeNumber() +
+                SPACE +
+                getStatusCode().getDescription() + LINE_END +
+                getHeaderBuild() + //Add Additional Headers.
+                "Content-Length: " + getContentLength() + LINE_END +
+                "Content-Type: text/html; charset=utf-8" +
+                DOUBLE_LINE_END +
+                getBody() +
+                DOUBLE_LINE_END;
     }
 
     private StringBuilder getHeaderBuild() {
@@ -34,9 +31,9 @@ public class HttpResponse extends HttpResponseHandler {
 
         StringBuilder response = new StringBuilder();
         for (String key : headers.keySet()) {
-            response.append(key);
-            response.append(":");
-            response.append(headers.get(key));
+            response.append(key)
+                    .append(":")
+                    .append(headers.get(key));
         }
         return response;
     }
