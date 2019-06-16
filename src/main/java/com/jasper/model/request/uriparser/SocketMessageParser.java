@@ -11,8 +11,7 @@ import static com.jasper.model.httpenums.SocketMessageState.*;
 public class SocketMessageParser {
 
     private final static int MASK_SIZE = 4;
-    private Boolean finalMessage;
-    private Boolean mask;
+    private Boolean messageReady = false;
     private String message;
     private int messageLength = 0;
 
@@ -31,13 +30,12 @@ public class SocketMessageParser {
             case END_MESSAGE:
                 //Check if its end of message
                 if (checkBitActivated(7, input)) {
-                    finalMessage = true;
+                    reset();
                 }
                 state = LENGTH;
                 break;
             case LENGTH:
                 if (checkBitActivated(7, input)) {
-                    mask = true;
                     messageLength = (input - 128); //shift to remove last bit
                     state = MASK;
                 } else {
@@ -56,22 +54,22 @@ public class SocketMessageParser {
                 if (content.size() < messageLength) {
                     content.add(input);
                     if (content.size() == messageLength) {
-                        state = CONTENT_TO_STRING;
+                        state = END_MESSAGE;
                         decodeMessage();
+                        messageReady = true;
                     }
                 }
                 break;
-            case CONTENT_TO_STRING:
-                decodeMessage();
+            default:
+                reset();
                 break;
         }
     }
 
     /**
      * @param bitFromRight (0 - 7) is range.
-     * @return
      */
-    public Boolean checkBitActivated(int bitFromRight, int value) {
+    private Boolean checkBitActivated(int bitFromRight, int value) {
         return ((value >> bitFromRight) & 0x01) == 1;
     }
 
@@ -80,7 +78,7 @@ public class SocketMessageParser {
      * https://android.jlelse.eu/java-when-to-use-n-8-0xff-and-when-to-use-byte-n-8-2efd82ae7dd7
      */
 
-    public void decodeMessage() {
+    private void decodeMessage() {
         byte[] decoded = new byte[content.size()];
 
         for (int i = 0; i < content.size(); i++) {
@@ -88,5 +86,24 @@ public class SocketMessageParser {
         }
         message = new String(decoded, StandardCharsets.UTF_8);
         System.out.println(message);
+    }
+
+    private void reset() {
+        state = END_MESSAGE;
+
+        message = null;
+        messageLength = 0;
+        messageReady = false;
+
+        content.clear();
+        maskList.clear();
+    }
+
+    public boolean getMessageReady() {
+        return messageReady;
+    }
+
+    public String getMessage() {
+        return message;
     }
 }

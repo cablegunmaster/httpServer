@@ -34,6 +34,7 @@ Headers bevatten \r\n als einde van de regel.
 Value length van een Header, als deze langer is dan X of ongeldige karakters bevat (uitzoeken welke kunnen) 
 als langer dan toegestaan (Header value mismatch exception ) response terugsturen met status code XXX.
 
+
 ###re-usage of Threads.
 ik zit nu met het probleem dat 1 thread, 1 socket verbinding aan kan.
 Socket switched niet van verbinding, Buffereren? op een bepaalde manier.

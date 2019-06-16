@@ -18,9 +18,9 @@ import javax.annotation.Nonnull;
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
-import java.nio.charset.StandardCharsets;
 
 import static com.jasper.model.httpenums.StatusCode.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Created by Jasper Lankhorst on 20-11-2016.
@@ -50,7 +50,7 @@ public class Client implements Runnable {
             out = clientSocket.getOutputStream();
 
             request = readSendRequest(in, out, clientSocket);
-//            String connection = request.getHeaders().getOrDefault("Connection", "close");
+            //String connection = request.getHeaders().getOrDefault("Connection", "close"); //TODO CHECk what this is for?
 
             if (request.getHeaders().containsKey("Connection")) {
                 if (request.isUpgradingConnection()) {
@@ -95,14 +95,14 @@ public class Client implements Runnable {
     /**
      * Read Websocket connection.
      *
-     * @param inStream
+     * @param in
      * @param out
      * @param clientSocket Read bits 9-15 (inclusive) and interpret that as an unsigned integer. If it's 125 or less, then that's the length; you're done. If it's 126, go to step 2. If it's 127, go to step 3.
      *                     Read the next 16 bits and interpret those as an unsigned integer. You're done.
      *                     Read the next 64 bits and interpret those as an unsigned integer (The most significant bit MUST be 0). You're done.
      *                     https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_servers
      */
-    private void readSendSocket(InputStream inStream, OutputStream out, Socket clientSocket) throws IOException {
+    private void readSendSocket(InputStream in, OutputStream out, Socket clientSocket) throws IOException {
 
 
 //        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -111,32 +111,22 @@ public class Client implements Runnable {
         SocketMessageParser messageParser = new SocketMessageParser();
 
         int i;
-        while ((i = inStream.read()) != -1) {
-            System.out.println(i);
+        while ((i = in.read()) != -1) {
 
             messageParser.parseMessage(i);
-            /*recordMessage(i);
-            String message = convertMessage(i);
-            if(message.equals("exit")){
-                break;
+            if (messageParser.getMessageReady()) {
+                String message = messageParser.getMessage();
+
+
+                if (message.equals("/c exit")) {
+                    break;
+                }
+
+                sendCommandBack("ok");
             }
-
-            sendReply(message);*/
-
             //keep in this loop until it needs to be ended, really test it thoroughly.
         }
 
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        byte[] buffer = new byte[0xFFFF];
-        for (int len = in.read(buffer); len != -1; len = in.read(buffer)) {
-            os.write(buffer, 0, len);
-        }
-
-        byte[] ok = os.toByteArray();
-
-        for (byte output : ok) {
-            System.out.println(output);
-        }
 
         /**
          * http://www.herongyang.com/Java/Bit-String-Stored-in-Byte-Array-Test-Program.html
@@ -153,6 +143,31 @@ public class Client implements Runnable {
          */
     }
 
+    private void sendCommandBack(String s) {
+
+        int length = s.length();
+        byte startByte = (byte) 129;
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        if (length <= 125) {
+
+            byte[] startBuffer = new byte[2];
+            byte lengthByte = (byte) s.length();
+            startBuffer[0] = startByte;
+            startBuffer[1] = lengthByte;
+
+            byte[] endBuffer = s.getBytes(UTF_8);
+            byte[] destinationBuffer = new byte[endBuffer.length + startBuffer.length];
+
+            System.arraycopy(startBuffer, 0, destinationBuffer, 0, startBuffer.length);
+            System.arraycopy(endBuffer, 0, destinationBuffer, 2, endBuffer.length);
+
+            os.write(destinationBuffer, 0, destinationBuffer.length);
+        } else {
+            //bigger split up message.
+        }
+    }
+
     public HttpRequest readSendRequest(InputStream in, OutputStream out, Socket clientSocket) throws IOException {
         HttpResponseHandler responseHandler = null;
 
@@ -166,7 +181,7 @@ public class Client implements Runnable {
                 request.getHeaders().get("Connection").equals("keep-alive")) {
             responseHandler.addHeader("Connection", "keep-alive");
         }
-        out.write(responseHandler.getResponse().getBytes(StandardCharsets.UTF_8));
+        out.write(responseHandler.getResponse().getBytes(UTF_8));
         return request;
     }
 

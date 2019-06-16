@@ -5,11 +5,15 @@ import com.jasper.model.httpenums.Protocol;
 import com.jasper.model.httpenums.StateUrl;
 import com.jasper.model.httpenums.StatusCode;
 import com.jasper.model.request.BufferCheck;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.jasper.model.httpenums.State.ERROR;
 import static com.jasper.model.httpenums.StatusCode.BAD_REQUEST;
 
 public class RequestUriParser {
+
+    private final static Logger LOG = LoggerFactory.getLogger(RequestUriParser.class);
 
     private String getQueryKey = null;
 
@@ -38,6 +42,7 @@ public class RequestUriParser {
 
                         request.setStateUrl(StateUrl.READ_AUTHORITY);
                     } catch (IllegalArgumentException ex) {
+                        LOG.info("ERROR: stateUrl: {} exception: {}", request.getStateUrl(), ex);
                         request.setState(ERROR);
                         request.setStatusCode(BAD_REQUEST); //400 if its a wrong request.
                     }
@@ -83,6 +88,7 @@ public class RequestUriParser {
                         if (portNumber >= 80) {
                             request.setPort(portNumber); //everything minus "/"
                         } else {
+                            LOG.info("ERROR: reading PORT state:{}", request.getStateUrl().name());
                             request.setStatusCode(BAD_REQUEST);
                             request.setState(ERROR);
                         }
@@ -92,6 +98,7 @@ public class RequestUriParser {
 
                         request.setStateUrl(StateUrl.READ_PATH);
                     } catch (IllegalArgumentException ex) {
+                        LOG.info("ERROR: stateUrl: {} exception: {}", request.getStateUrl(), ex);
                         request.setStatusCode(BAD_REQUEST); //400 if its a wrong request.
                         request.setState(ERROR);
                     }
@@ -159,10 +166,11 @@ public class RequestUriParser {
         // Help with which characters may or may not appear and when unencoded or should be encoded:
         //https://en.wikipedia.org/wiki/Uniform_Resource_Identifier#Generic_syntax
 
-        //Delimiter ? & ; for query parameter.
+        //TODO check Delimiter ? & ; for query parameter.
 
         //most likely urls who are longer as 255 chars are invalid.
         if (stateBuilder.length() > 255) {
+            LOG.info("ERROR: reading url: {} ,  state:{}", stateBuilder.toString(), request.getStateUrl().name());
             request.setStatusCode(StatusCode.URI_TOO_LONG);
             request.setState(ERROR); //414 URI Too Long
         }
@@ -172,6 +180,7 @@ public class RequestUriParser {
     /**
      * Checks if the buffer has a space or has Hash in the buffer.
      * Sets the state to read "Fragment" part of the url.
+     *
      * @param request
      * @param bufferCheck
      * @param stateUrlBuilder

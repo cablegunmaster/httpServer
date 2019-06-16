@@ -1,5 +1,6 @@
 package com.jasper.model.request;
 
+import com.jasper.controller.Controller;
 import com.jasper.model.HttpRequest;
 import com.jasper.model.httpenums.PostState;
 import com.jasper.model.httpenums.RequestType;
@@ -8,6 +9,8 @@ import com.jasper.model.httpenums.StatusCode;
 import com.jasper.model.request.uriparser.RequestUriParser;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -19,6 +22,8 @@ import static com.jasper.model.httpenums.StatusCode.SWITCHING_PROTOCOL;
  * Created by jasper wil.lankhorst on 12-3-2017.
  */
 public class RequestParser {
+
+    private final static Logger LOG = LoggerFactory.getLogger(RequestParser.class);
 
     private PostState postState = PostState.READ_POST_NAME;
 
@@ -45,6 +50,7 @@ public class RequestParser {
         if (bufferSize > BUFFER_SIZE_CACHE) {
             request.setStatusCode(StatusCode.PAYLOAD_TO_LARGE);
             request.setState(ERROR);//413
+            LOG.info("ERROR: readingNextCharacter Payload to big on state: {}", request.getState());
             return;
         }
 
@@ -91,6 +97,7 @@ public class RequestParser {
             } catch (IllegalArgumentException ex) {
                 request.setStatusCode(BAD_REQUEST);
                 request.setState(ERROR);
+                LOG.info("ERROR: reading method : {} exception: {}", State.READ_URI, ex);
             }
 
             stateBuilder.setLength(0); //re-use builder.
@@ -106,6 +113,7 @@ public class RequestParser {
 
             if (request.getPath() == null) {
                 request.setState(ERROR);
+                LOG.info("ERROR: reading path no path found: {}", State.READ_HTTP);
             }
         } else {
 
@@ -118,6 +126,7 @@ public class RequestParser {
                 stateUrlBuilder.append(c);
                 requestUriParser.parseUri(request, bufferCheck, stateUrlBuilder, stateBuilder);
             } else {
+                LOG.info("ERROR: invalid characters in path: {}, {}", c, State.READ_HTTP);
                 request.setState(ERROR);
                 request.setStatusCode(BAD_REQUEST);
             }
@@ -159,6 +168,7 @@ public class RequestParser {
         }
 
         if (!validHttp) {
+            LOG.info("ERROR: invalid url requested: {}", inputString);
             request.setState(ERROR);
         }
     }
@@ -183,6 +193,7 @@ public class RequestParser {
                         if (headers.containsKey("Content-Length")) {
                             request.setState(State.READ_BODY);
                         } else {
+                            LOG.info("ERROR: reading headernames, no Content-length is found");
                             request.setState(ERROR);
                             request.setStatusCode(StatusCode.LENGTH_REQUIRED);
                         }
@@ -192,6 +203,7 @@ public class RequestParser {
                         request.setState(State.DONE);
                         break;
                     default:
+                        LOG.info("ERROR: reading headernames, Only POST & GET are supported");
                         request.setState(ERROR);
                         break;
                 }
@@ -244,6 +256,7 @@ public class RequestParser {
 
             //if header value is empty.
             if (request.getHeaders().get("Content-Length") == null) {
+                LOG.info("ERROR: reading Content-length , no size is found.");
                 request.setState(ERROR);
                 request.setStatusCode(StatusCode.LENGTH_REQUIRED);
             } else {
@@ -282,6 +295,7 @@ public class RequestParser {
             request.setState(State.DONE);
 
         } else if (postSize > totalBodySize) {
+            LOG.info("ERROR: reading Body of post, larger as the payload is permitted per request.");
             request.setStatusCode(StatusCode.PAYLOAD_TO_LARGE);
             request.setState(ERROR);
         }

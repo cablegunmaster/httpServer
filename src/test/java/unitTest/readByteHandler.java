@@ -4,13 +4,26 @@ import com.jasper.model.request.uriparser.SocketMessageParser;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
 public class readByteHandler {
 
-    List<Integer> oneByteList = Arrays.asList(129, 133, 8, 25, 234, 118, 105, 120, 139, 23, 105);
-    List<Integer> secondByteList = Arrays.asList(129,
+    //aaaaa 5 char
+    List<Integer> oneByteList = Arrays.asList(
+            129,
+            133,
+
+            8,
+            25,
+            234,
+            118,
+            105,
+
+            120, 139, 23, 105);
+    List<Integer> secondByteList = Arrays.asList(
+            129,
             129,
             231,
             146,
@@ -19,7 +32,8 @@ public class readByteHandler {
             134);
 
     //abDDDE
-    List<Integer> thirdByteList = Arrays.asList(129,
+    List<Integer> thirdByteList = Arrays.asList(
+            129,
             134,
             249,
             211,
@@ -32,7 +46,8 @@ public class readByteHandler {
             189,
             150);
 
-    List<Integer> fourthByteList = Arrays.asList(129,
+    List<Integer> fourthByteList = Arrays.asList(
+            129,
             131,
             219,
             106,
@@ -58,17 +73,17 @@ public class readByteHandler {
      */
 
     @Test
-    public void testHandler() throws UnsupportedEncodingException {
+    public void testHandler() {
         SocketMessageParser smParser = new SocketMessageParser();
 
-        for (int i : thirdByteList) {
+        for (int i : oneByteList) {
             smParser.parseMessage(i);
         }
     }
 
     //Stacks principe?
     @Test
-    public void maskHandleraa() throws UnsupportedEncodingException {
+    public void maskHandleraa() {
         byte[] decoded = new byte[2];
         byte[] encoded = new byte[]{(byte) 161, (byte) 162};
         byte[] key = {(byte) 192, (byte) 195, (byte) 226, (byte) 166};
@@ -76,11 +91,11 @@ public class readByteHandler {
         for (int i = 0; i < encoded.length; i++) {
             decoded[i] = (byte) (encoded[i] ^ key[i & 0x3]);
         }
-        System.out.println(new String(decoded, "UTF-8"));
+        System.out.println(new String(decoded, StandardCharsets.UTF_8));
     }
 
     @Test
-    public void maskHandleraBC() throws UnsupportedEncodingException {
+    public void maskHandleraBC() {
 
         //Stack?
         /**
@@ -107,7 +122,7 @@ public class readByteHandler {
         }
 
         System.out.println(
-                new StringBuilder(new String(decoded, "UTF-8"))
+                new StringBuilder(new String(decoded, StandardCharsets.UTF_8))
                         .reverse()
                         .toString()
         );
@@ -115,7 +130,7 @@ public class readByteHandler {
 
     //abcdef
     @Test
-    public void maskHandler() throws UnsupportedEncodingException {
+    public void maskHandler() {
         byte[] decoded = new byte[6];
         byte[] encoded = new byte[]{(byte) 198, (byte) 131, (byte) 130, (byte) 182, (byte) 194, (byte) 135};
         byte[] key = {(byte) 167, (byte) 225, (byte) 225, (byte) 210};
@@ -123,6 +138,6 @@ public class readByteHandler {
         for (int i = 0; i < encoded.length; i++) {
             decoded[i] = (byte) (encoded[i] ^ key[i & 0x3]);
         }
-        System.out.println(new String(decoded, "UTF-8"));
+        System.out.println(new String(decoded, StandardCharsets.UTF_8));
     }
 }

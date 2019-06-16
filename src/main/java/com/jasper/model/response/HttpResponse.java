@@ -1,5 +1,9 @@
 package com.jasper.model.response;
 
+import com.jasper.model.request.uriparser.RequestUriParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.annotation.Nonnull;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
@@ -10,6 +14,7 @@ import java.util.Map;
  */
 public class HttpResponse extends HttpResponseHandler {
 
+    private final static Logger LOG = LoggerFactory.getLogger(HttpResponseHandler.class);
     /**
      * Output of the whole file, the full request as a String to be send back to the client. TODO improve this toString function to be able
      * to send back an extra support.
@@ -17,6 +22,9 @@ public class HttpResponse extends HttpResponseHandler {
     @Nonnull
     @Override
     public String toHttpResponse() {
+
+        LOG.info("Create http response test length:{}", this.getContentLength());
+
         return "HTTP/1.1 " +
                 getStatusCode().getStatusCodeNumber() +
                 SPACE +
