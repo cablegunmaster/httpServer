@@ -122,7 +122,9 @@ public class Client implements Runnable {
                     break;
                 }
 
-                sendCommandBack("ok");
+                // out.write(destinationBuffer, 0, destinationBuffer.length);
+
+                out.write(sendCommandBack(message));
             }
             //keep in this loop until it needs to be ended, really test it thoroughly.
         }
@@ -143,12 +145,11 @@ public class Client implements Runnable {
          */
     }
 
-    private void sendCommandBack(String s) {
+    private byte[] sendCommandBack(String s) {
 
         int length = s.length();
         byte startByte = (byte) 129;
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-
+        byte[] destinationBuffer = new byte[0];
         if (length <= 125) {
 
             byte[] startBuffer = new byte[2];
@@ -157,15 +158,17 @@ public class Client implements Runnable {
             startBuffer[1] = lengthByte;
 
             byte[] endBuffer = s.getBytes(UTF_8);
-            byte[] destinationBuffer = new byte[endBuffer.length + startBuffer.length];
+            destinationBuffer = new byte[endBuffer.length + startBuffer.length];
 
             System.arraycopy(startBuffer, 0, destinationBuffer, 0, startBuffer.length);
             System.arraycopy(endBuffer, 0, destinationBuffer, 2, endBuffer.length);
 
-            os.write(destinationBuffer, 0, destinationBuffer.length);
+
         } else {
-            //bigger split up message.
+            //TODO bigger split up message.
         }
+
+        return destinationBuffer;
     }
 
     public HttpRequest readSendRequest(InputStream in, OutputStream out, Socket clientSocket) throws IOException {
