@@ -6,7 +6,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.jasper.model.httpenums.SocketMessageState.*;
+import static com.jasper.model.httpenums.SocketMessageState.CONTENT;
+import static com.jasper.model.httpenums.SocketMessageState.END_MESSAGE;
+import static com.jasper.model.httpenums.SocketMessageState.LENGTH;
+import static com.jasper.model.httpenums.SocketMessageState.MASK;
 
 public class SocketMessageParser {
 
@@ -18,6 +21,17 @@ public class SocketMessageParser {
     private List<Integer> content = new ArrayList<>();
     private List<Integer> maskList = new ArrayList<>();
     private SocketMessageState state = END_MESSAGE;
+
+    private void reset() {
+        state = END_MESSAGE;
+
+        message = null;
+        messageLength = 0;
+        messageReady = false;
+
+        content.clear();
+        maskList.clear();
+    }
 
     /**
      * Message parsed to string.
@@ -88,16 +102,6 @@ public class SocketMessageParser {
         System.out.println(message);
     }
 
-    private void reset() {
-        state = END_MESSAGE;
-
-        message = null;
-        messageLength = 0;
-        messageReady = false;
-
-        content.clear();
-        maskList.clear();
-    }
 
     public boolean getMessageReady() {
         return messageReady;
