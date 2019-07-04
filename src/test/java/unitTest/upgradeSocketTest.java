@@ -1,7 +1,7 @@
 package unitTest;
 
 import com.jasper.model.HttpRequest;
-import com.jasper.model.httpenums.State;
+import com.jasper.model.httpenums.HttpState;
 import com.jasper.model.httpenums.StateUrl;
 import com.jasper.model.request.RequestParser;
 import org.junit.Before;
@@ -42,7 +42,7 @@ public class upgradeSocketTest {
 
         HttpRequest request = parser.getRequest();
         StateUrl stateUrl = request.getStateUrl(); //for url reading.
-        State state = request.getState();
+        HttpState state = request.getState();
 
         //I receive.
         assertNotNull("error state found:" + stateUrl.name(), request.getPath());
@@ -71,7 +71,7 @@ public class upgradeSocketTest {
 
         HttpRequest request = parser.getRequest();
         StateUrl stateUrl = request.getStateUrl(); //for url reading.
-        State state = request.getState();
+        HttpState state = request.getState();
 
         //I receive.
         assertNotNull("error state found:" + stateUrl.name(), request.getPath());

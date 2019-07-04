@@ -1,10 +1,9 @@
 package com.jasper.model.request;
 
-import com.jasper.controller.Controller;
 import com.jasper.model.HttpRequest;
+import com.jasper.model.httpenums.HttpState;
 import com.jasper.model.httpenums.PostState;
 import com.jasper.model.httpenums.RequestType;
-import com.jasper.model.httpenums.State;
 import com.jasper.model.httpenums.StatusCode;
 import com.jasper.model.request.uriparser.RequestUriParser;
 import org.apache.commons.codec.binary.Base64;
@@ -14,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-import static com.jasper.model.httpenums.State.ERROR;
+import static com.jasper.model.httpenums.HttpState.ERROR;
 import static com.jasper.model.httpenums.StatusCode.BAD_REQUEST;
 import static com.jasper.model.httpenums.StatusCode.SWITCHING_PROTOCOL;
 
@@ -90,14 +89,14 @@ public class RequestParser {
             stateBuilder.append(c);
         } else if (bufferCheck.hasSpace()) {
 
-            request.setState(State.READ_URI);
+            request.setState(HttpState.READ_URI);
 
             try {
                 request.setRequestMethod(RequestType.valueOf(stateBuilder.toString()));
             } catch (IllegalArgumentException ex) {
                 request.setStatusCode(BAD_REQUEST);
                 request.setState(ERROR);
-                LOG.info("ERROR: reading method : {} exception: {}", State.READ_URI, ex);
+                LOG.info("ERROR: reading method : {} exception: {}", HttpState.READ_URI, ex);
             }
 
             stateBuilder.setLength(0); //re-use builder.
@@ -108,12 +107,12 @@ public class RequestParser {
 
         if (bufferCheck.hasSpace()) {
             requestUriParser.parseUri(request, bufferCheck, stateUrlBuilder, stateBuilder);
-            request.setState(State.READ_HTTP);
+            request.setState(HttpState.READ_HTTP);
             stateBuilder.setLength(0);
 
             if (request.getPath() == null) {
                 request.setState(ERROR);
-                LOG.info("ERROR: reading path no path found: {}", State.READ_HTTP);
+                LOG.info("ERROR: reading path no path found: {}", HttpState.READ_HTTP);
             }
         } else {
 
@@ -126,7 +125,7 @@ public class RequestParser {
                 stateUrlBuilder.append(c);
                 requestUriParser.parseUri(request, bufferCheck, stateUrlBuilder, stateBuilder);
             } else {
-                LOG.info("ERROR: invalid characters in path: {}, {}", c, State.READ_HTTP);
+                LOG.info("ERROR: invalid characters in path: {}, {}", c, HttpState.READ_HTTP);
                 request.setState(ERROR);
                 request.setStatusCode(BAD_REQUEST);
             }
@@ -135,7 +134,7 @@ public class RequestParser {
 
     private void readHttp(char c) {
         if (bufferCheck.hasSpace() || bufferCheck.hasNewline()) {
-            request.setState(State.READ_HEADER_NAME);
+            request.setState(HttpState.READ_HEADER_NAME);
             parseHttp(stateBuilder.toString());
             stateBuilder.setLength(0);
         } else {
@@ -177,7 +176,7 @@ public class RequestParser {
         stateBuilder.append(c);
         //found ":"
         if (bufferCheck.hasSemiColon()) {
-            request.setState(State.READ_HEADER_VALUE);
+            request.setState(HttpState.READ_HEADER_VALUE);
             headerName = stateBuilder.toString();
             stateBuilder.setLength(0);
         }
@@ -191,7 +190,7 @@ public class RequestParser {
                     case POST:
                         Map<String, String> headers = request.getHeaders();
                         if (headers.containsKey("Content-Length")) {
-                            request.setState(State.READ_BODY);
+                            request.setState(HttpState.READ_BODY);
                         } else {
                             LOG.info("ERROR: reading headernames, no Content-length is found");
                             request.setState(ERROR);
@@ -200,7 +199,7 @@ public class RequestParser {
                         break;
                     case GET:
                         bufferSize = 0;
-                        request.setState(State.DONE);
+                        request.setState(HttpState.DONE);
                         break;
                     default:
                         LOG.info("ERROR: reading headernames, Only POST & GET are supported");
@@ -243,7 +242,7 @@ public class RequestParser {
                 request.addHeader(headerName, headerValue.replaceAll("\n", ""));
             }
             stateBuilder.setLength(0);
-            request.setState(State.READ_HEADER_NAME);
+            request.setState(HttpState.READ_HEADER_NAME);
         }
     }
 
@@ -292,7 +291,7 @@ public class RequestParser {
             request.getQueryPOST().put(postQueryKey, postQueryValue);
             stateBuilder.setLength(0);
             bufferSize = 0;
-            request.setState(State.DONE);
+            request.setState(HttpState.DONE);
 
         } else if (postSize > totalBodySize) {
             LOG.info("ERROR: reading Body of post, larger as the payload is permitted per request.");

@@ -1,7 +1,7 @@
 package unitTest;
 
 import com.jasper.model.HttpRequest;
-import com.jasper.model.httpenums.State;
+import com.jasper.model.httpenums.HttpState;
 import com.jasper.model.request.RequestParser;
 import com.jasper.model.httpenums.RequestType;
 import org.junit.Before;
@@ -41,7 +41,7 @@ public class readMethodTest {
         }
 
         HttpRequest request = parser.getRequest();
-        State state = request.getState();
+        HttpState state = request.getState();
 
         assertNull("No method yet found", request.getRequestMethod());
         assertTrue("Reading Method still not yet finished", state.isReadingMethod());
@@ -57,7 +57,7 @@ public class readMethodTest {
         }
 
         HttpRequest request = parser.getRequest();
-        State state = request.getState();
+        HttpState state = request.getState();
 
         assertNull("No method yet found", request.getRequestMethod());
         assertTrue("Reading Method still not yet finished", state.isReadingMethod());
@@ -73,7 +73,7 @@ public class readMethodTest {
         }
 
         HttpRequest request = parser.getRequest();
-        State state = request.getState();
+        HttpState state = request.getState();
 
         assertNull("No method yet found", request.getRequestMethod());
         assertTrue("Reading Method still not yet finished", state.isReadingMethod());
@@ -90,10 +90,10 @@ public class readMethodTest {
         }
 
         HttpRequest request = parser.getRequest();
-        State state = request.getState();
+        HttpState state = request.getState();
 
         assertEquals("Request method should be set to GET ", request.getRequestMethod(), RequestType.GET);
-        assertTrue("Next State should be set as READING URI when found.", state.isReadingURI());
+        assertTrue("Next HttpState should be set as READING URI when found.", state.isReadingURI());
     }
 
     @Test
@@ -106,10 +106,10 @@ public class readMethodTest {
         }
 
         HttpRequest request = parser.getRequest();
-        State state = request.getState();
+        HttpState state = request.getState();
 
         assertEquals("Request method should be set to POST ", request.getRequestMethod(), RequestType.POST);
-        assertTrue("Next State should be set as READING URI when found.", state.isReadingURI());
+        assertTrue("Next HttpState should be set as READING URI when found.", state.isReadingURI());
     }
 
     @Test
@@ -122,10 +122,10 @@ public class readMethodTest {
         }
 
         HttpRequest request = parser.getRequest();
-        State state = request.getState();
+        HttpState state = request.getState();
 
         assertNull("Invalid request is found no requestType is set ", request.getRequestMethod());
-        assertTrue("next State should be set as STILL READING", state.isReadingMethod());
+        assertTrue("next HttpState should be set as STILL READING", state.isReadingMethod());
     }
 
     @Test
@@ -138,9 +138,9 @@ public class readMethodTest {
         }
 
         HttpRequest request = parser.getRequest();
-        State state = request.getState();
+        HttpState state = request.getState();
 
         assertNull("Invalid request is found no requestType is set ", request.getRequestMethod());
-        assertTrue("next State should be set as Error", state.isErrorState());
+        assertTrue("next HttpState should be set as Error", state.isErrorState());
     }
 }

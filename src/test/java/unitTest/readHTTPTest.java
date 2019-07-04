@@ -1,8 +1,8 @@
 package unitTest;
 
 import com.jasper.model.HttpRequest;
+import com.jasper.model.httpenums.HttpState;
 import com.jasper.model.httpenums.RequestType;
-import com.jasper.model.httpenums.State;
 import com.jasper.model.request.RequestParser;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +31,7 @@ public class readHTTPTest {
         }
 
         HttpRequest request = parser.getRequest();
-        State state = request.getState();
+        HttpState state = request.getState();
 
         assertEquals("Method GET  found", request.getRequestMethod(), RequestType.GET);
         assertTrue("Is still reading the HTTP version line, waiting end char." +
@@ -48,7 +48,7 @@ public class readHTTPTest {
         }
 
         HttpRequest request = parser.getRequest();
-        State state = request.getState();
+        HttpState state = request.getState();
 
         assertEquals("Path equals to Slash.", "/", request.getPath());
         assertTrue("url reading method is set and finished.", state.isReadingHeaderName());
@@ -64,7 +64,7 @@ public class readHTTPTest {
         }
 
         HttpRequest request = parser.getRequest();
-        State state = request.getState();
+        HttpState state = request.getState();
 
         assertEquals("Method GET  found", request.getRequestMethod(), RequestType.GET);
         assertTrue("Is still reading the HTTP version line, waiting for end char." +
@@ -81,11 +81,11 @@ public class readHTTPTest {
         }
 
         HttpRequest request = parser.getRequest();
-        State state = request.getState();
+        HttpState state = request.getState();
 
         assertEquals("/index.html", request.getPath());
         assertEquals("Method GET  found", request.getRequestMethod(), RequestType.GET);
-        assertTrue("Is reading the first header. [State]:" + state.toString(), state.isReadingHeaderName());
+        assertTrue("Is reading the first header. [HttpState]:" + state.toString(), state.isReadingHeaderName());
     }
 
 
@@ -99,9 +99,9 @@ public class readHTTPTest {
         }
 
         HttpRequest request = parser.getRequest();
-        State state = request.getState();
+        HttpState state = request.getState();
 
         assertEquals("Method GET  found", request.getRequestMethod(), RequestType.GET);
-        assertTrue("Is reading the first header. [State]:" + state, state.isReadingHeaderName());
+        assertTrue("Is reading the first header. [HttpState]:" + state, state.isReadingHeaderName());
     }
 }

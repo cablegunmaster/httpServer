@@ -3,7 +3,7 @@ package com.jasper.model.httpenums;
 /**
  * States for reading Request.
  */
-public enum State {
+public enum HttpState {
     READ_METHOD,
     READ_URI,
     READ_HTTP,

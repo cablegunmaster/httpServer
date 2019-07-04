@@ -2,7 +2,7 @@ package com.jasper.model;
 
 import com.jasper.controller.Controller;
 import com.jasper.model.httpenums.RequestType;
-import com.jasper.model.httpenums.State;
+import com.jasper.model.httpenums.HttpState;
 import com.jasper.model.httpenums.StatusCode;
 import com.jasper.model.request.RequestHandler;
 import com.jasper.model.request.RequestParser;
@@ -200,7 +200,7 @@ public class Client implements Runnable {
 
         RequestParser requestParser = new RequestParser();
         HttpRequest request = requestParser.getRequest();
-        State state = request.getState();
+        HttpState state = request.getState();
 
         while (!state.isErrorState() && !state.isDone()) {
             try {
@@ -209,7 +209,7 @@ public class Client implements Runnable {
                 requestParser.nextCharacter(c);
                 state = request.getState();
             } catch (IOException ex) {
-                request.setState(State.ERROR);
+                request.setState(HttpState.ERROR);
                 request.setStatusCode(BAD_REQUEST);
                 break;//on error escape.
             }
@@ -236,7 +236,7 @@ public class Client implements Runnable {
         RequestHandler handler = getHandlerByRequestMethod(request);
 
         StatusCode statusCode = null;
-        State state = request.getState();
+        HttpState state = request.getState();
         if (handler != null) {
             handler.handle(request, response);
             response.setStatusCode(ACCEPTED);

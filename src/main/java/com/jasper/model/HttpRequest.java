@@ -1,8 +1,8 @@
 package com.jasper.model;
 
+import com.jasper.model.httpenums.HttpState;
 import com.jasper.model.httpenums.Protocol;
 import com.jasper.model.httpenums.RequestType;
-import com.jasper.model.httpenums.State;
 import com.jasper.model.httpenums.StateUrl;
 import com.jasper.model.httpenums.StatusCode;
 import java.util.HashMap;
@@ -15,7 +15,7 @@ import static jdk.nashorn.internal.objects.NativeString.trim;
  */
 public class HttpRequest {
 
-    private State state = State.READ_METHOD;
+    private HttpState state = HttpState.READ_METHOD;
     private StringBuilder stateBuilder = new StringBuilder();
     private StatusCode statusCode = StatusCode.INTERNAL_SERVER_ERROR; //status code of request.
 
@@ -54,11 +54,11 @@ public class HttpRequest {
         return requestMethod;
     }
 
-    public State getState() {
+    public HttpState getState() {
         return state;
     }
 
-    public void setState(State status) {
+    public void setState(HttpState status) {
         this.state = status;
     }
 

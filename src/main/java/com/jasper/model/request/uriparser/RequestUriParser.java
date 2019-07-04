@@ -8,7 +8,7 @@ import com.jasper.model.request.BufferCheck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.jasper.model.httpenums.State.ERROR;
+import static com.jasper.model.httpenums.HttpState.ERROR;
 import static com.jasper.model.httpenums.StatusCode.BAD_REQUEST;
 
 public class RequestUriParser {

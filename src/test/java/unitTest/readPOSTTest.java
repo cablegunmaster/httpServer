@@ -1,7 +1,7 @@
 package unitTest;
 
 import com.jasper.model.HttpRequest;
-import com.jasper.model.httpenums.State;
+import com.jasper.model.httpenums.HttpState;
 import com.jasper.model.request.RequestParser;
 import java.util.Map;
 import org.junit.Before;
@@ -47,7 +47,7 @@ public class readPOSTTest {
 
         HttpRequest request = parser.getRequest();
         Map<String, String> queryPost = request.getQueryPOST();
-        State state = request.getState();
+        HttpState state = request.getState();
 
         assertNotNull("error state found:" + "/foo.php", request.getPath());
         assertEquals("BODY: ", 3, queryPost.size());
@@ -79,7 +79,7 @@ public class readPOSTTest {
         HttpRequest request = parser.getRequest();
         Map<String, String> headers = request.getHeaders();
         Map<String, String> queryPost = request.getQueryPOST();
-        State state = request.getState();
+        HttpState state = request.getState();
 
         assertNotNull("error state found:" + "/foo.php", request.getPath());
         assertEquals("first_name=John&last_name=Doe&action=Submit".length(), Integer.parseInt(headers.get("Content-Length")));
@@ -112,7 +112,7 @@ public class readPOSTTest {
         HttpRequest request = parser.getRequest();
         Map<String, String> headers = request.getHeaders();
         Map<String, String> queryPost = request.getQueryPOST();
-        State state = request.getState();
+        HttpState state = request.getState();
 
         assertNotNull("error state found:" + "/foo.php", request.getPath());
         assertNotEquals("first_name=John&te".length(),Integer.parseInt(headers.get("Content-Length")));

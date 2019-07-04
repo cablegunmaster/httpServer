@@ -2,7 +2,7 @@ package unitTest;
 
 import com.jasper.model.HttpRequest;
 import com.jasper.model.httpenums.RequestType;
-import com.jasper.model.httpenums.State;
+import com.jasper.model.httpenums.HttpState;
 import com.jasper.model.request.RequestParser;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,10 +51,10 @@ public class readHeadersTest {
         //request all variables needed for easier reading.
         HttpRequest request = parser.getRequest();
         RequestType requestType = request.getRequestMethod();
-        State state = request.getState();
+        HttpState state = request.getState();
 
         assertEquals("Method GET  found", requestType, RequestType.GET);
-        assertTrue("State:" + state.name(), state.isDone());
+        assertTrue("HttpState:" + state.name(), state.isDone());
         assertEquals(11, request.getHeaders().size());
         assertEquals("no-cache", request.getHeaders().get("Pragma"));
         assertEquals("Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR " +
