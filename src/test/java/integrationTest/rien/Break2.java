@@ -19,7 +19,7 @@ public class Break2 {
         try{
             int count = 0;
 
-            while(count++ < 1000) {
+            while(count++ < 100000) {
                 System.out.println("Connection "+count);
 
                 Socket socket = new Socket("localhost", port);

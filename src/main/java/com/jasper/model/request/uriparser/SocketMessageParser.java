@@ -83,7 +83,7 @@ public class SocketMessageParser {
     /**
      * @param bitFromRight (0 - 7) is range.
      */
-    private Boolean checkBitActivated(int bitFromRight, int value) {
+    private boolean checkBitActivated(int bitFromRight, int value) {
         return ((value >> bitFromRight) & 0x01) == 1;
     }
 

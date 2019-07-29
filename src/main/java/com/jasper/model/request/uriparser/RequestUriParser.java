@@ -17,8 +17,6 @@ public class RequestUriParser {
 
     private String getQueryKey = null;
 
-    //TODO needs to be refactored to be easier to read.
-
     /**
      * https://www.ietf.org/rfc/rfc3986.txt Supports for now a simplified version of the RFC. Not included IPV6. InputString it only the
      * URI, should check if it has invalid characters in it. TODO entity checking %20 spaces and extra entitys.
@@ -57,11 +55,11 @@ public class RequestUriParser {
                 }
                 break;
             case READ_AUTHORITY:
+
                 //check if it has a port.
                 if (bufferCheck.hasSemiColon()) {
                     input = stateUrlBuilder.toString(); //no builder flush.
                     request.setHost(input.substring(0, input.length() - 1)); //everything minus ':'
-
                     request.setStateUrl(StateUrl.READ_PORT);
                 }
 
@@ -102,7 +100,9 @@ public class RequestUriParser {
                         request.setStatusCode(BAD_REQUEST); //400 if its a wrong request.
                         request.setState(ERROR);
                     }
+
                 }
+
                 break;
             case READ_PATH:
                 if (bufferCheck.hasHash() || bufferCheck.hasQuestionMark() || bufferCheck.hasSpace()) {

@@ -1,9 +1,8 @@
 package com.jasper.model;
 
 import com.jasper.controller.Controller;
-import com.jasper.model.httpenums.RequestType;
 import com.jasper.model.httpenums.HttpState;
-import com.jasper.model.httpenums.StatusCode;
+import com.jasper.model.httpenums.RequestType;
 import com.jasper.model.request.RequestHandler;
 import com.jasper.model.request.RequestParser;
 import com.jasper.model.request.uriparser.SocketMessageParser;
@@ -235,7 +234,6 @@ public class Client implements Runnable {
         HttpResponseHandler response = getHandlerByRequest(request);
         RequestHandler handler = getHandlerByRequestMethod(request);
 
-        StatusCode statusCode = null;
         HttpState state = request.getState();
         if (handler != null) {
             handler.handle(request, response);
@@ -262,12 +260,10 @@ public class Client implements Runnable {
 
     @Nonnull
     private HttpResponseHandler getHandlerByRequest(@Nonnull HttpRequest request) {
-        switch (request.getStatusCode()) {
-            case SWITCHING_PROTOCOL:
-                return new SocketSwitchingResponse();
-            default:
-                return new HttpResponse();
+        if (request.getStatusCode() == SWITCHING_PROTOCOL) {
+            return new SocketSwitchingResponse();
         }
+        return new HttpResponse();
     }
 
     @CheckForNull
