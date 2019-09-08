@@ -3,7 +3,6 @@ package unitTest;
 import com.jasper.model.request.uriparser.SocketMessageParser;
 import org.junit.Test;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;

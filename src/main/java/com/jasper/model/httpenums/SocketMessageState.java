@@ -5,5 +5,7 @@ public enum SocketMessageState {
     LENGTH,
     CONTENT,
     MASK,
-    CONTENT_TO_STRING;
+    CONTENT_TO_STRING,
+    LENGTH_SIXTEEN_BIT,
+    LENGTH_SIXTY_FOUR_BIT;
 }

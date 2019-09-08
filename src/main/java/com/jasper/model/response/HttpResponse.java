@@ -37,7 +37,6 @@ public class HttpResponse extends HttpResponseHandler {
                 DOUBLE_LINE_END;
     }
 
-
     //get length of bytes.
     @Nonnull
     private Integer getContentLength() {
