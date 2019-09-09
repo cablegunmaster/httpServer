@@ -18,8 +18,8 @@ public class SocketMessageParser {
     private OpCode opCode;
 
     private boolean messageReady = false;
-    private StringBuffer message;
-    private int messageLength = 0;
+    private StringBuffer message = new StringBuffer();
+    private Long messageLength = 0L;
 
     private List<Integer> lengthList = new ArrayList<>();
     private List<Integer> content = new ArrayList<>();
@@ -35,9 +35,8 @@ public class SocketMessageParser {
         isFinMessage = false;
         isMaskSet = false;
         messageReady = false;
-
-        message = null;
-        messageLength = 0;
+        clear(message);
+        messageLength = 0L;
 
         lengthList.clear();
         content.clear();
@@ -63,9 +62,9 @@ public class SocketMessageParser {
             case LENGTH:
                 if (checkBitActivated(7, input)) {
                     isMaskSet = true;
-                    messageLength = (input - 128); //shift to remove last bit
+                    messageLength = (input - 128L); //shift to remove last bit
                 } else {
-                    messageLength = input;
+                    messageLength = (long) input;
                 }
 
                 //Payload length:  7 bits, 7+16 bits, or 7+64 bits
@@ -92,7 +91,7 @@ public class SocketMessageParser {
 
                 if (lengthList.size() == 2) {
                     short int16 = (short) (((lengthList.get(0) & 0xFF) << 8) | (lengthList.get(1) & 0xFF));
-                    messageLength += int16 + messageLength;
+                    messageLength = (long) int16;
                     state = MASK;
                 }
                 break;
@@ -108,7 +107,7 @@ public class SocketMessageParser {
                         j++;
                     }
 
-                    messageLength += result + messageLength;
+                    messageLength = (long) result;
                     state = MASK;
                 }
                 break;
@@ -191,7 +190,6 @@ public class SocketMessageParser {
             decoded[i] = (byte) (content.get(i) ^ (maskList.get(i % 4)));
         }
         message.append(new String(decoded, StandardCharsets.UTF_8));
-        System.out.println(message);
     }
 
     public boolean getMessageReady() {
@@ -204,5 +202,9 @@ public class SocketMessageParser {
 
     public OpCode getOpCode() {
         return opCode;
+    }
+
+    public void clear(StringBuffer s) {
+        s.setLength(0);
     }
 }

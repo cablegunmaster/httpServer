@@ -8,6 +8,7 @@ import com.jasper.model.request.RequestParser;
 import com.jasper.model.request.uriparser.SocketMessageParser;
 import com.jasper.model.response.HttpResponse;
 import com.jasper.model.response.HttpResponseHandler;
+import com.jasper.model.response.SocketResponse;
 import com.jasper.model.response.SocketSwitchingResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,7 +116,7 @@ public class Client implements Runnable {
             messageParser.parseMessage(i);
             if (messageParser.getMessageReady()) {
                 String message = messageParser.getMessage();
-
+                messageParser.reset();
 
                 if (message.equals("/c exit")) {
                     break;
@@ -123,51 +124,10 @@ public class Client implements Runnable {
 
                 // out.write(destinationBuffer, 0, destinationBuffer.length);
 
-                out.write(sendCommandBack(message));
+                out.write(SocketResponse.createSocketResponse(message));
             }
             //keep in this loop until it needs to be ended, really test it thoroughly.
         }
-
-
-        /**
-         * http://www.herongyang.com/Java/Bit-String-Stored-in-Byte-Array-Test-Program.html
-         * 129 (?) 128 betekent einde bericht. dat is FIN, RSV
-         * 129 (128 betekent masking bit is gezet) dus 129 - 128  = 1  byte die je verder moet lezen
-         *
-         * 213 ( byte lezen) is de letter "a" maar dan in cijfer en gemaskerd als iets anders in combinatie met mask kan het de letter a weer worden.
-         *
-         * (masker combinatie bestaat uit 4  bytes, elke byte is een nummer van 1-255 )
-         * 91
-         * 187
-         * 242
-         * 180
-         */
-    }
-
-    private byte[] sendCommandBack(String s) {
-
-        int length = s.length();
-        byte startByte = (byte) 129;
-        byte[] destinationBuffer = new byte[0];
-        if (length <= 125) {
-
-            byte[] startBuffer = new byte[2];
-            byte lengthByte = (byte) s.length();
-            startBuffer[0] = startByte;
-            startBuffer[1] = lengthByte;
-
-            byte[] endBuffer = s.getBytes(UTF_8);
-            destinationBuffer = new byte[endBuffer.length + startBuffer.length];
-
-            System.arraycopy(startBuffer, 0, destinationBuffer, 0, startBuffer.length);
-            System.arraycopy(endBuffer, 0, destinationBuffer, 2, endBuffer.length);
-
-
-        } else {
-            //TODO bigger split up message.
-        }
-
-        return destinationBuffer;
     }
 
     public HttpRequest readSendRequest(InputStream in, OutputStream out, Socket clientSocket) throws IOException {
