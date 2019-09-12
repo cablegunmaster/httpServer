@@ -10,6 +10,12 @@ import org.junit.Test;
 public class CheckBitActivated {
 
     @Test
+    public void testBitActivatedONeOTwentyNine(){
+        SocketMessageParser parser = new SocketMessageParser();
+        Assert.assertTrue(parser.checkBitActivated(0, 129));
+    }
+
+    @Test
     public void testBitActivatedONe(){
         SocketMessageParser parser = new SocketMessageParser();
         Assert.assertTrue(parser.checkBitActivated(0, 1));
@@ -18,7 +24,7 @@ public class CheckBitActivated {
     @Test
     public void testBitActivatedONeTestWrong(){
         SocketMessageParser parser = new SocketMessageParser();
-        Assert.assertFalse(parser.checkBitActivated(0, 3));
+        Assert.assertFalse(parser.checkBitActivated(0, 4));
     }
 
     @Test
