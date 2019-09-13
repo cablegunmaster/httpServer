@@ -17,7 +17,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
-public class HandlerTest {
+public class ChoosingHandlerTest {
 
     /**
      * Check if correct response is given.

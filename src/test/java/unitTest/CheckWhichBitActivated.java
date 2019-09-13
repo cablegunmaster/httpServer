@@ -7,7 +7,7 @@ import org.junit.Test;
 /**
  * Simple test to see where it read from.
  */
-public class CheckBitActivated {
+public class CheckWhichBitActivated {
 
     @Test
     public void testBitActivatedONeOTwentyNine(){

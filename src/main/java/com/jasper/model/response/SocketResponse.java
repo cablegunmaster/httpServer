@@ -38,7 +38,7 @@ public class SocketResponse {
             startBuffer[1] = 126;
 
             //load up other 2 bytes.
-            shortToByteArray(lengthByte, startBuffer);
+            shortToByteArray(message.length(), startBuffer);
             OffsetBytes = 4;
         }
 
@@ -48,7 +48,7 @@ public class SocketResponse {
             startBuffer[1] = 127;
 
             //offset because we have  Startbuffer already
-            longToByteArray((message.length()), startBuffer, 2);
+            longToByteArray(message.length(), startBuffer, 2);
             OffsetBytes = 10;
         }
 
@@ -63,14 +63,9 @@ public class SocketResponse {
 
     //unsigned 16 bit integer
     public static void shortToByteArray(long l, byte[] startBuffer) {
-        if (l <= 255) {
-            startBuffer[3] = (byte) (l); //smallest number goes in the back.
-            startBuffer[2] = (byte) 0;
-        } else {
-            startBuffer[3] = (byte) (l); //smallest number goes in the back.
-            l >>>= 8; //get next byte from short.
-            startBuffer[2] = (byte) (l); //biggest number upfront?
-        }
+        startBuffer[3] = (byte) (l); //smallest number goes in the back.
+        l >>>= 8;
+        startBuffer[2] = (byte) (l & 0xff);
     }
 
     //to 8 bytes 64 bit unsigned.
@@ -93,7 +88,7 @@ public class SocketResponse {
         l >>>= 8;
         b[1 + offset] = (byte) (l);
         l >>>= 8;
-        b[offset] = (byte) (l); //byte 0
+        b[offset] = (byte) (l & 0xff); //byte 0
     }
 
 }
