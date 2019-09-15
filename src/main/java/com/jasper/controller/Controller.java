@@ -1,9 +1,9 @@
 package com.jasper.controller;
 
 import com.jasper.model.Client;
-import com.jasper.model.Model;
+import com.jasper.model.connectionManager;
 import com.jasper.model.MultiThreadedServer;
-import com.jasper.model.request.RequestHandler;
+import com.jasper.model.RequestHandler;
 import com.jasper.view.View;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +13,6 @@ import javax.annotation.Nonnull;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -25,7 +24,7 @@ public class Controller {
     private static Boolean restartProcess = false;
     private Boolean guiVisible;
 
-    private Model model;
+    private connectionManager connectionManager;
     private View view;
 
     private MultiThreadedServer multiThreadedServer;
@@ -53,7 +52,7 @@ public class Controller {
             this.view = new View();
         }
 
-        this.model = new Model();
+        this.connectionManager = new connectionManager();
         this.getMap = getMap;
         this.postMap = postMap;
         this.socketMap = socketMap;
@@ -174,7 +173,7 @@ public class Controller {
      * @param client
      */
     public void addConnection(Client client) {
-        model.addConnection(client);
+        connectionManager.addConnection(client);
     }
 
     /**
@@ -184,12 +183,12 @@ public class Controller {
      */
     public void removeConnection(Client client) {
         LOG.debug("removed connection.");
-        model.getConnections().remove(client);
+        connectionManager.getConnections().remove(client);
     }
 
     @Nonnull
-    public Model getModel() {
-        return model;
+    public connectionManager getConnectionManager() {
+        return connectionManager;
     }
 
     @CheckForNull

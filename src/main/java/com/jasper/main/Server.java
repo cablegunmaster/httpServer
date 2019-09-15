@@ -1,7 +1,7 @@
 package com.jasper.main;
 
 import com.jasper.controller.Controller;
-import com.jasper.model.request.RequestHandler;
+import com.jasper.model.RequestHandler;
 import java.util.HashMap;
 
 public class Server {

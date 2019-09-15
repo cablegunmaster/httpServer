@@ -1,15 +1,14 @@
 package com.jasper.model;
 
 import com.jasper.controller.Controller;
-import com.jasper.model.httpenums.HttpState;
-import com.jasper.model.httpenums.RequestType;
-import com.jasper.model.request.RequestHandler;
-import com.jasper.model.request.RequestParser;
-import com.jasper.model.request.uriparser.SocketMessageParser;
-import com.jasper.model.response.HttpResponse;
-import com.jasper.model.response.HttpResponseHandler;
-import com.jasper.model.response.SocketResponse;
-import com.jasper.model.response.SocketSwitchingResponse;
+import com.jasper.model.http.enums.HttpState;
+import com.jasper.model.http.enums.RequestType;
+import com.jasper.model.http.models.HttpParser;
+import com.jasper.model.socket.models.SocketMessageParser;
+import com.jasper.model.http.HttpResponse;
+import com.jasper.model.http.HttpResponseHandler;
+import com.jasper.model.socket.models.SocketResponse;
+import com.jasper.model.http.upgrade.UpgradeHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +18,7 @@ import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 
-import static com.jasper.model.httpenums.StatusCode.*;
+import static com.jasper.model.http.enums.StatusCode.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
@@ -157,7 +156,7 @@ public class Client implements Runnable {
             reader = new BufferedReader(new InputStreamReader(inputStream));
         }
 
-        RequestParser requestParser = new RequestParser();
+        HttpParser requestParser = new HttpParser();
         HttpRequest request = requestParser.getRequest();
         HttpState state = request.getState();
 
@@ -221,7 +220,7 @@ public class Client implements Runnable {
     @Nonnull
     private HttpResponseHandler getHandlerByRequest(@Nonnull HttpRequest request) {
         if (request.getStatusCode() == SWITCHING_PROTOCOL) {
-            return new SocketSwitchingResponse();
+            return new UpgradeHttpResponse();
         }
         return new HttpResponse();
     }

@@ -1,10 +1,10 @@
 package com.jasper.model;
 
-import com.jasper.model.httpenums.HttpState;
-import com.jasper.model.httpenums.Protocol;
-import com.jasper.model.httpenums.RequestType;
-import com.jasper.model.httpenums.StateUrl;
-import com.jasper.model.httpenums.StatusCode;
+import com.jasper.model.http.enums.HttpState;
+import com.jasper.model.http.enums.Protocol;
+import com.jasper.model.http.enums.RequestType;
+import com.jasper.model.http.enums.StateUrl;
+import com.jasper.model.http.enums.StatusCode;
 import java.util.HashMap;
 import java.util.Map;
 
