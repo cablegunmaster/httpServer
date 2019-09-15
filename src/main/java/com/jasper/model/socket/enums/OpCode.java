@@ -33,4 +33,12 @@ public enum OpCode {
                 .findFirst()
                 .orElse(null);
     }
+
+    public boolean isText(){
+        return this.name().equals("TEXT");
+    }
+
+    public boolean isContinuation(){
+        return this.name().equals("CONTINUATION");
+    }
 }

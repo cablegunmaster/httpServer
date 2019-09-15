@@ -1,14 +1,15 @@
 package com.jasper.model;
 
 import com.jasper.controller.Controller;
+import com.jasper.model.http.HttpResponse;
+import com.jasper.model.http.HttpResponseHandler;
 import com.jasper.model.http.enums.HttpState;
 import com.jasper.model.http.enums.RequestType;
 import com.jasper.model.http.models.HttpParser;
-import com.jasper.model.socket.models.SocketMessageParser;
-import com.jasper.model.http.HttpResponse;
-import com.jasper.model.http.HttpResponseHandler;
-import com.jasper.model.socket.models.SocketResponse;
 import com.jasper.model.http.upgrade.UpgradeHttpResponse;
+import com.jasper.model.socket.entity.Frame;
+import com.jasper.model.socket.models.SocketMessageParser;
+import com.jasper.model.socket.models.SocketResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +18,7 @@ import javax.annotation.Nonnull;
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.Stack;
 
 import static com.jasper.model.http.enums.StatusCode.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -34,6 +36,8 @@ public class Client implements Runnable {
     private InputStream in;
     private BufferedReader reader = null;
     private HttpRequest request;
+    private Stack<Frame> frameStack;
+    private StringBuffer messageBuffer;
 
     public Client(Socket clientSocket, Controller controller) {
         this.clientSocket = clientSocket;
@@ -113,17 +117,30 @@ public class Client implements Runnable {
         while ((i = in.read()) != -1) {
 
             messageParser.parseMessage(i);
-            if (messageParser.getMessageReady()) {
-                String message = messageParser.getMessage();
+            if (messageParser.isFrameReady()) {
+                frameStack.add(messageParser.getFrame());
                 messageParser.reset();
 
+                Frame f = frameStack.peek();
+
+                //Text handling of Message.
+                if (f.isFinMessage() && f.getOpCode().isText()) {
+                    Frame frame1 = frameStack.pop();
+                    messageBuffer.append(frame1.getMessage());
+
+                    while (!frameStack.isEmpty() && frameStack.peek().getOpCode().isContinuation()) {
+                        Frame frame2 = frameStack.pop();
+                        messageBuffer.append(frame2.getMessage());
+                    }
+                }
+
+                String message = messageBuffer.toString();
                 if (message.equals("/c exit")) {
                     break;
                 }
 
-                // out.write(destinationBuffer, 0, destinationBuffer.length);
-
-                out.write(SocketResponse.createSocketResponse(message));
+                out.write(SocketResponse.createSocketResponse(messageBuffer.toString()));
+                clear(messageBuffer);
             }
             //keep in this loop until it needs to be ended, really test it thoroughly.
         }
@@ -249,5 +266,9 @@ public class Client implements Runnable {
             }
         }
         return handler;
+    }
+
+    private void clear(StringBuffer s) {
+        s.setLength(0);
     }
 }
