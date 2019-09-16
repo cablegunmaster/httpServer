@@ -1,9 +1,10 @@
 package com.jasper.model;
 
 import com.jasper.controller.Controller;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -13,6 +14,8 @@ import java.net.SocketException;
  * Created by Jasper Lankhorst on 19-11-2016.
  */
 public class MultiThreadedServer implements Runnable {
+
+    private final static Logger LOG = LoggerFactory.getLogger(MultiThreadedServer.class);
 
     private int serverPort;
     private ServerSocket serverSocket = null;
@@ -33,26 +36,26 @@ public class MultiThreadedServer implements Runnable {
         openServerSocket();
         while (!isStopped()) {
             Socket clientSocket = awaitIncomingConnection();
-            if(!isStopped()) {
+            if (!isStopped() && clientSocket != null) {
                 sendRequest(clientSocket);
             }
         }
         controller.addStringToLog("[ OK ] Server Thread exiting....");
     }
 
-    @Nonnull
+    @CheckForNull
     private Socket awaitIncomingConnection() {
-        Socket clientSocket;
+        Socket clientSocket = null;
         try {
             controller.addStringToLog("[ OK ] Server is awaiting connections...");
             this.serverSocket.setReuseAddress(true);
             clientSocket = this.serverSocket.accept();
         } catch (SocketException e) {
             isStopped = true;
-            throw new RuntimeException("[ Error ] Socket exception happened", e);
+            LOG.warn("[ Error ] Socket exception happened", e);
         } catch (IOException e) {
             isStopped = true;
-            throw new RuntimeException("[ Error ] accepting client connection", e);
+            LOG.warn("[ Error ] accepting client connection", e);
         }
         return clientSocket;
     }

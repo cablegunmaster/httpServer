@@ -1,24 +1,26 @@
 package unitTest.socket;
 
-import com.jasper.model.socket.models.SocketMessageParser;
+import com.jasper.model.socket.models.entity.Frame;
 import com.jasper.model.socket.enums.OpCode;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class readOpCodeTest {
 
+    private Frame f;
+
     @Test
     public void testOpCode() {
-        SocketMessageParser parser = new SocketMessageParser();
-        parser.setOpcode(0);
-        Assert.assertEquals(OpCode.CONTINUATION, parser.getOpCode());
+        f = new Frame();
+        f.setOpcode(0);
+        Assert.assertEquals(OpCode.CONTINUATION, f.getOpCode());
     }
 
     @Test
     public void testOpCodeTwo() {
-        SocketMessageParser parser = new SocketMessageParser();
-        parser.setOpcode(10);
-        Assert.assertEquals(OpCode.PONG, parser.getOpCode());
+        f = new Frame();
+        f.setOpcode(10);
+        Assert.assertEquals(OpCode.PONG, f.getOpCode());
     }
 
     @Test

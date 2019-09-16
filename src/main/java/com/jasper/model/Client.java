@@ -7,9 +7,9 @@ import com.jasper.model.http.enums.HttpState;
 import com.jasper.model.http.enums.RequestType;
 import com.jasper.model.http.models.HttpParser;
 import com.jasper.model.http.upgrade.UpgradeHttpResponse;
-import com.jasper.model.socket.entity.Frame;
 import com.jasper.model.socket.models.SocketMessageParser;
 import com.jasper.model.socket.models.SocketResponse;
+import com.jasper.model.socket.models.entity.Frame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,8 +36,8 @@ public class Client implements Runnable {
     private InputStream in;
     private BufferedReader reader = null;
     private HttpRequest request;
-    private Stack<Frame> frameStack;
-    private StringBuffer messageBuffer;
+    private Stack<Frame> frameStack = new Stack<>();
+    private StringBuffer messageBuffer = new StringBuffer();
 
     public Client(Socket clientSocket, Controller controller) {
         this.clientSocket = clientSocket;
@@ -128,9 +128,13 @@ public class Client implements Runnable {
                     Frame frame1 = frameStack.pop();
                     messageBuffer.append(frame1.getMessage());
 
-                    while (!frameStack.isEmpty() && frameStack.peek().getOpCode().isContinuation()) {
-                        Frame frame2 = frameStack.pop();
-                        messageBuffer.append(frame2.getMessage());
+                    //has continuation frame.
+                    if (!frameStack.isEmpty()) {
+                        while (!frameStack.isEmpty() &&
+                                frameStack.peek().getOpCode().isContinuation()) {
+                            Frame frame2 = frameStack.pop();
+                            messageBuffer.append(frame2.getMessage());
+                        }
                     }
                 }
 

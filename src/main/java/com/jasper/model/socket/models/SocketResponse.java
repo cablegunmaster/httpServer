@@ -70,25 +70,16 @@ public class SocketResponse {
 
     //to 8 bytes 64 bit unsigned.
     private static void longToByteArray(long l, byte[] b, Integer offset) {
+
         if (offset == null) {
             offset = 0;
         }
 
-        b[7 + offset] = (byte) (l);
-        l >>>= 8;
-        b[6 + offset] = (byte) (l);
-        l >>>= 8;
-        b[5 + offset] = (byte) (l);
-        l >>>= 8;
-        b[4 + offset] = (byte) (l);
-        l >>>= 8;
-        b[3 + offset] = (byte) (l);
-        l >>>= 8;
-        b[2 + offset] = (byte) (l);
-        l >>>= 8;
-        b[1 + offset] = (byte) (l);
-        l >>>= 8;
-        b[offset] = (byte) (l & 0xff); //byte 0
+        //make a 8 byte from the length back again.
+        for (int i = 7; i >= 0; i--) {
+            b[i + offset] = (byte) (l);
+            l >>>= 8;
+        }
     }
 
 }

@@ -1,16 +1,17 @@
 package com.jasper.model.socket.models;
 
-import com.jasper.model.socket.entity.Frame;
+import com.jasper.model.socket.models.entity.Frame;
 
 import java.util.List;
 
 import static com.jasper.model.http.enums.SocketMessageState.*;
+import static com.jasper.model.socket.models.utils.ByteUtil.checkBitActivated;
 
 public class SocketMessageParser {
 
     private final static int MASK_SIZE = 4;
     private boolean isFrameReady = false;
-    private Frame frame;
+    private Frame frame = new Frame();
 
     /**
      * Reset when message is read.
@@ -34,7 +35,7 @@ public class SocketMessageParser {
                 frame.setState(LENGTH);
                 break;
             case LENGTH:
-                if (frame.checkBitActivated(7, input)) {
+                if (checkBitActivated(7, input)) {
                     frame.setMaskSet(true);
                     frame.setMessageLength(input - 128L); //shift to remove last bit
                 } else {
@@ -74,9 +75,8 @@ public class SocketMessageParser {
                 if (bigByteLength.size() == 8) {
                     long lengthList = 0L;
                     int j = 0;
-
-                    for (int i = 8; i > 0; i--) {
-                        lengthList = lengthList + (bigByteLength.get(j) & 0xFF) << (8 * i);
+                    for (int i = 7; i >= 0; i--) {
+                        lengthList = lengthList + ((bigByteLength.get(j) & 0xFF) << (8 * i));
                         j++;
                     }
 

@@ -1,4 +1,4 @@
-package com.jasper.model.socket.entity;
+package com.jasper.model.socket.models.entity;
 
 import com.jasper.model.http.enums.SocketMessageState;
 import com.jasper.model.socket.enums.OpCode;
@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.jasper.model.http.enums.SocketMessageState.END_FRAME;
+import static com.jasper.model.socket.models.utils.ByteUtil.checkBitActivated;
 
 public class Frame {
 
@@ -21,13 +22,6 @@ public class Frame {
     private List<Integer> lengthList = new ArrayList<>();
     private List<Integer> content = new ArrayList<>();
     private List<Integer> maskList = new ArrayList<>();
-
-    /**
-     * @param bitFromRight (0 - 7) is range.
-     */
-    public boolean checkBitActivated(int bitFromRight, int value) {
-        return ((value >> bitFromRight) & 0x01) == 1;
-    }
 
     //4 bit to hexadecimal.
     public void setOpcode(int value) {

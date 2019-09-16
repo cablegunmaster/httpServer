@@ -1,77 +1,72 @@
 package unitTest.bytes;
 
-import com.jasper.model.socket.models.SocketMessageParser;
+import com.jasper.model.socket.models.entity.Frame;
 import org.junit.Assert;
 import org.junit.Test;
+
+import static com.jasper.model.socket.models.utils.ByteUtil.checkBitActivated;
 
 /**
  * Simple test to see where it read from.
  */
 public class CheckWhichBitActivated {
 
+
     @Test
-    public void testBitActivatedONeOTwentyNine(){
-        SocketMessageParser parser = new SocketMessageParser();
-        Assert.assertTrue(parser.checkBitActivated(0, 129));
+    public void testBitActivatedONeOTwentyNine() {
+        Assert.assertTrue(checkBitActivated(0, 129));
     }
 
     @Test
-    public void testBitActivatedONe(){
-        SocketMessageParser parser = new SocketMessageParser();
-        Assert.assertTrue(parser.checkBitActivated(0, 1));
+    public void testBitActivatedONe() {
+        Assert.assertTrue(checkBitActivated(0, 1));
     }
 
     @Test
-    public void testBitActivatedONeTestWrong(){
-        SocketMessageParser parser = new SocketMessageParser();
-        Assert.assertFalse(parser.checkBitActivated(0, 4));
+    public void testBitActivatedONeTestWrong() {
+        Assert.assertFalse(checkBitActivated(0, 4));
     }
 
     @Test
-    public void testBitActivatedTwo(){
-        SocketMessageParser parser = new SocketMessageParser();
-        Assert.assertTrue(parser.checkBitActivated(1, 2));
+    public void testBitActivatedTwo() {
+        Assert.assertTrue(checkBitActivated(1, 2));
     }
 
     @Test
-    public void testBitActivatedFour(){
-        SocketMessageParser parser = new SocketMessageParser();
-        Assert.assertTrue(parser.checkBitActivated(2, 4));
+    public void testBitActivatedFour() {
+        Assert.assertTrue(checkBitActivated(2, 4));
     }
 
     @Test
-    public void testBitActivatedEight(){
-        SocketMessageParser parser = new SocketMessageParser();
-        Assert.assertTrue(parser.checkBitActivated(3, 8));
+    public void testBitActivatedEight() {
+        Assert.assertTrue(checkBitActivated(3, 8));
     }
 
     @Test
-    public void testBitActivatedSixteen(){
-        SocketMessageParser parser = new SocketMessageParser();
-        Assert.assertTrue(parser.checkBitActivated(4, 16));
+    public void testBitActivatedSixteen() {
+        Assert.assertTrue(checkBitActivated(4, 16));
     }
+
     @Test
-    public void testBitActivatedThirtyTwo(){
-        SocketMessageParser parser = new SocketMessageParser();
-        Assert.assertTrue(parser.checkBitActivated(5, 32));
+    public void testBitActivatedThirtyTwo() {
+        Assert.assertTrue(checkBitActivated(5, 32));
     }
+
     @Test
-    public void testBitActivatedSixtyFour(){
-        SocketMessageParser parser = new SocketMessageParser();
-        Assert.assertTrue(parser.checkBitActivated(6, 64));
+    public void testBitActivatedSixtyFour() {
+        Assert.assertTrue(checkBitActivated(6, 64));
     }
+
     @Test
-    public void testBitActivatedOneHundredTwentyEight(){
-        SocketMessageParser parser = new SocketMessageParser();
-        Assert.assertTrue(parser.checkBitActivated(7, 128));
+    public void testBitActivatedOneHundredTwentyEight() {
+        Assert.assertTrue(checkBitActivated(7, 128));
     }
 
 
     //9th bit?
     @Test
-    public void testBitActivatedTwoHundredFiftySix(){
-        SocketMessageParser parser = new SocketMessageParser();
-        Assert.assertTrue(parser.checkBitActivated(8, 256));
+    public void testBitActivatedTwoHundredFiftySix() {
+        Assert.assertTrue(checkBitActivated(8, 256));
     }
 }
 
