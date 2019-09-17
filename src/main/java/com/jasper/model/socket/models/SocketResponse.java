@@ -1,10 +1,16 @@
 package com.jasper.model.socket.models;
 
+import com.jasper.model.Client;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.annotation.Nonnull;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class SocketResponse {
+
+    private final static Logger LOG = LoggerFactory.getLogger(SocketResponse.class);
 
     /**
      * http://www.herongyang.com/Java/Bit-String-Stored-in-Byte-Array-Test-Program.html
@@ -48,7 +54,7 @@ public class SocketResponse {
             startBuffer[1] = 127;
 
             //offset because we have  Startbuffer already
-            longToByteArray(message.length(), startBuffer, 2);
+            longToByteArray(message.length(), startBuffer);
             OffsetBytes = 10;
         }
 
@@ -69,16 +75,16 @@ public class SocketResponse {
     }
 
     //to 8 bytes 64 bit unsigned.
-    private static void longToByteArray(long l, byte[] b, Integer offset) {
-
-        if (offset == null) {
-            offset = 0;
-        }
-
+    private static void longToByteArray(@Nonnull Integer l, byte[] b) {
         //make a 8 byte from the length back again.
-        for (int i = 7; i >= 0; i--) {
-            b[i + offset] = (byte) (l);
-            l >>>= 8;
+        if (b.length == 10) {
+            int preBytes = 2;
+            for (int i = 7; i >= 0; i--) {
+                b[i + preBytes] = (byte) (l.longValue());
+                l >>>= 8;
+            }
+        }else{
+            LOG.info("Byte array in Socket response should be 10 long. is now: {}", b.length);
         }
     }
 
