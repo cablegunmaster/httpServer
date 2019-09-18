@@ -12,16 +12,52 @@ import static com.jasper.model.socket.models.utils.ByteUtil.checkBitActivated;
 
 public class Frame {
 
+    //byte 1.
     private boolean isFinMessage = false;
-    private boolean isMaskSet = false;
+    private boolean rsv1 = false;
+    private boolean rsv2 = false;
+    private boolean rsv3 = false;
     private OpCode opCode;
-    private Long messageLength = 0L;
-    private SocketMessageState state = END_FRAME;
 
-    private StringBuffer message = new StringBuffer();
-    private List<Integer> lengthList = new ArrayList<>();
-    private List<Integer> content = new ArrayList<>();
-    private List<Integer> maskList = new ArrayList<>();
+    private boolean isMasked = false;
+    private Long payload_len = 0L;
+
+    private List<Integer> maskList = new ArrayList<>(); //max 4.
+    private List<Integer> payload = new ArrayList<>(); //content.
+    private StringBuffer decodedMessage = new StringBuffer();
+
+    //Finmessage
+    public void setFinBit(int inputFirstByte) {
+        isFinMessage = checkBitActivated(7, inputFirstByte);
+    }
+
+    public boolean isFinMessage() {
+        return isFinMessage;
+    }
+
+    public boolean isRsv1() {
+        return rsv1;
+    }
+
+    public void setRsv1(boolean rsv1) {
+        this.rsv1 = rsv1;
+    }
+
+    public boolean isRsv2() {
+        return rsv2;
+    }
+
+    public void setRsv2(boolean rsv2) {
+        this.rsv2 = rsv2;
+    }
+
+    public boolean isRsv3() {
+        return rsv3;
+    }
+
+    public void setRsv3(boolean rsv3) {
+        this.rsv3 = rsv3;
+    }
 
     //4 bit to hexadecimal.
     public void setOpcode(int value) {
@@ -41,6 +77,17 @@ public class Frame {
                         .toUpperCase());
     }
 
+    public OpCode getOpCode() {
+        return opCode;
+    }
+
+    public void setMasked(boolean b) {
+        isMasked = b;
+    }
+
+    public boolean isMasked() {
+        return isMasked;
+    }
         /*
     Payload length:  7 bits, 7+16 bits, or 7+64 bits
 
@@ -60,88 +107,35 @@ public class Frame {
      * Get unsigned byte from Integer.
      * https://android.jlelse.eu/java-when-to-use-n-8-0xff-and-when-to-use-byte-n-8-2efd82ae7dd7
      */
-    public void decodeMessage() {
-        byte[] decoded = new byte[content.size()];
+    private void decodeMessage() {
+        byte[] decoded = new byte[payload.size()];
 
-        for (int i = 0; i < content.size(); i++) {
-            decoded[i] = (byte) (content.get(i) ^ (maskList.get(i % 4)));
+        for (int i = 0; i < payload.size(); i++) {
+            decoded[i] = (byte) (payload.get(i) ^ (maskList.get(i % 4)));
         }
-        message.append(new String(decoded, StandardCharsets.UTF_8));
+        decodedMessage.append(new String(decoded, StandardCharsets.UTF_8));
     }
 
-    public void setFinBit(int inputFirstByte) {
-        isFinMessage = checkBitActivated(7, inputFirstByte);
+    public StringBuffer getDecodedMessage() {
+        if (isFinMessage()) {
+            decodeMessage();
+        }
+        return decodedMessage;
     }
 
-    public SocketMessageState getState() {
-        return state;
+    public Long getPayload_len() {
+        return payload_len;
     }
 
-    public Long getMessageLength() {
-        return messageLength;
+    public void setPayload_len(Long payload_len) {
+        this.payload_len = payload_len;
     }
 
-    public void setFinMessage(boolean finMessage) {
-        isFinMessage = finMessage;
-    }
-
-    public void setMaskSet(boolean b) {
-        isMaskSet = b;
-    }
-
-    public void setOpCode(OpCode opCode) {
-        this.opCode = opCode;
-    }
-
-    public void setMessageLength(Long messageLength) {
-        this.messageLength = messageLength;
-    }
-
-    public void setState(SocketMessageState state) {
-        this.state = state;
-    }
-
-    public boolean isFinMessage() {
-        return isFinMessage;
-    }
-
-    public boolean isMaskSet() {
-        return isMaskSet;
-    }
-
-    public OpCode getOpCode() {
-        return opCode;
-    }
-
-    public StringBuffer getMessage() {
-        return message;
-    }
-
-    public List<Integer> getLengthList() {
-        return lengthList;
-    }
-
-    public void setLengthList(List<Integer> lengthList) {
-        this.lengthList = lengthList;
-    }
-
-    public void setMessage(StringBuffer message) {
-        this.message = message;
-    }
-
-    public List<Integer> getContent() {
-        return content;
-    }
-
-    public void setContent(List<Integer> content) {
-        this.content = content;
+    public List<Integer> getPayload() {
+        return payload;
     }
 
     public List<Integer> getMaskList() {
         return maskList;
-    }
-
-    public void setMaskList(List<Integer> maskList) {
-        this.maskList = maskList;
     }
 }

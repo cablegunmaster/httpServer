@@ -20,6 +20,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.Stack;
 
+import static com.jasper.model.http.enums.SocketMessageState.END_FRAME;
 import static com.jasper.model.http.enums.StatusCode.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -117,7 +118,7 @@ public class Client implements Runnable {
         while ((i = in.read()) != -1) {
 
             messageParser.parseMessage(i);
-            if (messageParser.isFrameReady()) {
+            if (messageParser.getState() == END_FRAME) {
                 frameStack.add(messageParser.getFrame());
                 messageParser.reset();
 
@@ -126,14 +127,14 @@ public class Client implements Runnable {
                 //Text handling of Message.
                 if (f.isFinMessage() && f.getOpCode().isText()) {
                     Frame frame1 = frameStack.pop();
-                    messageBuffer.append(frame1.getMessage());
+                    messageBuffer.append(frame1.getDecodedMessage());
 
                     //has continuation frame.
                     if (!frameStack.isEmpty()) {
                         while (!frameStack.isEmpty() &&
                                 frameStack.peek().getOpCode().isContinuation()) {
                             Frame frame2 = frameStack.pop();
-                            messageBuffer.append(frame2.getMessage());
+                            messageBuffer.append(frame2.getDecodedMessage());
                         }
                     }
                 }
