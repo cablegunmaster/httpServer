@@ -17,6 +17,7 @@ public enum OpCode {
     TEXT("1"),
     BINARY("2"),
 
+    //Control Frames.
     CLOSE("8"),
     PING("9"),
     PONG("A"); //0xA
@@ -34,11 +35,28 @@ public enum OpCode {
                 .orElse(null);
     }
 
-    public boolean isText(){
+    //Hex to int.
+    public int getIntOpCode() {
+        return Integer.parseInt(this.value, 16);
+    }
+
+    public boolean isPing() {
+        return this.name().equals("PING");
+    }
+
+    public boolean isText() {
         return this.name().equals("TEXT");
     }
 
-    public boolean isContinuation(){
+    public boolean isContinuation() {
         return this.name().equals("CONTINUATION");
+    }
+
+    public boolean isControlFrame() {
+        return this.name().equals("CLOSE") || this.name().equals("PING") || this.name().equals("PONG");
+    }
+
+    public boolean isClose() {
+        return this.name().equals("CLOSE");
     }
 }

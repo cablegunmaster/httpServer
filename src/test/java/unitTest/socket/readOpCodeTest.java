@@ -12,14 +12,14 @@ public class readOpCodeTest {
     @Test
     public void testOpCode() {
         f = new Frame();
-        f.setOpcode(0);
+        f.setOpCode(0);
         Assert.assertEquals(OpCode.CONTINUATION, f.getOpCode());
     }
 
     @Test
     public void testOpCodeTwo() {
         f = new Frame();
-        f.setOpcode(10);
+        f.setOpCode(10);
         Assert.assertEquals(OpCode.PONG, f.getOpCode());
     }
 

@@ -1,13 +1,11 @@
 package com.jasper.model.socket.models.entity;
 
-import com.jasper.model.http.enums.SocketMessageState;
 import com.jasper.model.socket.enums.OpCode;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.jasper.model.http.enums.SocketMessageState.END_FRAME;
 import static com.jasper.model.socket.models.utils.ByteUtil.checkBitActivated;
 
 public class Frame {
@@ -59,8 +57,12 @@ public class Frame {
         this.rsv3 = rsv3;
     }
 
+    public void setOpCode(OpCode opCode) {
+        this.opCode = opCode;
+    }
+
     //4 bit to hexadecimal.
-    public void setOpcode(int value) {
+    public void setOpCode(int value) {
         StringBuilder bitRange = new StringBuilder();
 
         for (int i = 3; i >= 0; i--) {

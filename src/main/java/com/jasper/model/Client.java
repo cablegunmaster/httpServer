@@ -22,11 +22,9 @@ import java.util.Stack;
 
 import static com.jasper.model.http.enums.SocketMessageState.END_FRAME;
 import static com.jasper.model.http.enums.StatusCode.*;
+import static com.jasper.model.socket.enums.OpCode.PONG;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-/**
- * Created by Jasper Lankhorst on 20-11-2016.
- */
 public class Client implements Runnable {
 
     private final static Logger LOG = LoggerFactory.getLogger(Client.class);
@@ -39,6 +37,7 @@ public class Client implements Runnable {
     private HttpRequest request;
     private Stack<Frame> frameStack = new Stack<>();
     private StringBuffer messageBuffer = new StringBuffer();
+    private boolean keepConnected;
 
     public Client(Socket clientSocket, Controller controller) {
         this.clientSocket = clientSocket;
@@ -59,7 +58,7 @@ public class Client implements Runnable {
             if (request.getHeaders().containsKey("Connection")) {
                 if (request.isUpgradingConnection()) {
                     //do WS
-                    readSendSocket(in, out, clientSocket);
+                    readSendSocket(in);
                 }
             }
 
@@ -99,14 +98,13 @@ public class Client implements Runnable {
     /**
      * Read Websocket connection.
      *
-     * @param in
-     * @param out
-     * @param clientSocket Read bits 9-15 (inclusive) and interpret that as an unsigned integer. If it's 125 or less, then that's the length; you're done. If it's 126, go to step 2. If it's 127, go to step 3.
-     *                     Read the next 16 bits and interpret those as an unsigned integer. You're done.
-     *                     Read the next 64 bits and interpret those as an unsigned integer (The most significant bit MUST be 0). You're done.
-     *                     https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_servers
+     * @param in stream
+     *           Read bits 9-15 (inclusive) and interpret that as an unsigned integer. If it's 125 or less, then that's the length; you're done. If it's 126, go to step 2. If it's 127, go to step 3.
+     *           Read the next 16 bits and interpret those as an unsigned integer. You're done.
+     *           Read the next 64 bits and interpret those as an unsigned integer (The most significant bit MUST be 0). You're done.
+     *           https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_servers
      */
-    private void readSendSocket(InputStream in, OutputStream out, Socket clientSocket) throws IOException {
+    private void readSendSocket(InputStream in) throws IOException {
 
 
 //        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -115,39 +113,51 @@ public class Client implements Runnable {
         SocketMessageParser messageParser = new SocketMessageParser();
 
         int i;
-        while ((i = in.read()) != -1) {
+        keepConnected = true;
+        while ((i = in.read()) != -1 && keepConnected) {
 
             messageParser.parseMessage(i);
             if (messageParser.getState() == END_FRAME) {
+                String message = null;
                 frameStack.add(messageParser.getFrame());
                 messageParser.reset();
-
                 Frame f = frameStack.peek();
 
-                //Text handling of Message.
-                if (f.isFinMessage() && f.getOpCode().isText()) {
-                    Frame frame1 = frameStack.pop();
-                    messageBuffer.append(frame1.getDecodedMessage());
+                if (f.isFinMessage()) {
 
-                    //has continuation frame.
-                    if (!frameStack.isEmpty()) {
-                        while (!frameStack.isEmpty() &&
-                                frameStack.peek().getOpCode().isContinuation()) {
-                            Frame frame2 = frameStack.pop();
-                            messageBuffer.append(frame2.getDecodedMessage());
+                    //Text handling of Message.
+                    if (f.getOpCode().isText() && !frameStack.isEmpty()) {
+
+                        while (!frameStack.isEmpty()) {
+                            messageBuffer.append(frameStack.pop().getDecodedMessage());
+                        }
+
+                        message = messageBuffer.toString();
+                        clear(messageBuffer);
+                    }
+
+                    if (f.getOpCode().isControlFrame() &&
+                            f.getOpCode().isClose()) {
+
+                        messageBuffer.append(frameStack.pop().getDecodedMessage());
+                        message = messageBuffer.toString();
+
+                        if (f.getOpCode().isPing()) {
+                            f.setOpCode(PONG);
                         }
                     }
-                }
 
-                String message = messageBuffer.toString();
-                if (message.equals("/c exit")) {
-                    break;
-                }
 
-                out.write(SocketResponse.createSocketResponse(messageBuffer.toString()));
-                clear(messageBuffer);
+                    if (message != null) {
+                        writeOutputStream(SocketResponse.createSocketResponse(message, f.getOpCode()));
+                    }
+
+                    //close connection should be with
+                    if ("/c exit".equals(message)) {
+                        setKeepConnected(false);
+                    }
+                }
             }
-            //keep in this loop until it needs to be ended, really test it thoroughly.
         }
     }
 
@@ -273,7 +283,20 @@ public class Client implements Runnable {
         return handler;
     }
 
+    //write by only 1 output at the time.
+    private synchronized void writeOutputStream(byte[] bytes) throws IOException {
+        if (out != null) {
+            out.write(bytes);
+            out.flush();
+        }
+    }
+
+    //empty stringBuffer.
     private void clear(StringBuffer s) {
         s.setLength(0);
+    }
+
+    private void setKeepConnected(boolean keepConnected) {
+        this.keepConnected = keepConnected;
     }
 }

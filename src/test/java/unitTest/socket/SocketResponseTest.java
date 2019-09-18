@@ -1,5 +1,6 @@
 package unitTest.socket;
 
+import com.jasper.model.socket.enums.OpCode;
 import com.jasper.model.socket.models.SocketResponse;
 import org.junit.Test;
 
@@ -9,7 +10,7 @@ public class SocketResponseTest {
 
     @Test
     public void testCreateSocket() {
-        byte[] byteArray = SocketResponse.createSocketResponse("Small Message");
+        byte[] byteArray = SocketResponse.createSocketResponse("Small Message", OpCode.TEXT);
         int[] intArray = new int[byteArray.length];
 
         // converting byteArray to intArray

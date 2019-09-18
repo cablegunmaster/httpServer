@@ -22,6 +22,8 @@ public class SocketMessageParser {
      */
     public void reset() {
         frame = new Frame();
+        state = END_FRAME;
+        byteLength.clear();
     }
 
     /**
@@ -34,7 +36,7 @@ public class SocketMessageParser {
         switch (getState()) {
             case END_FRAME:
                 frame.setFinBit(input);
-                frame.setOpcode(input);
+                frame.setOpCode(input);
                 setState(LENGTH);
                 break;
             case LENGTH:

@@ -1,6 +1,6 @@
 package com.jasper.model.socket.models;
 
-import com.jasper.model.Client;
+import com.jasper.model.socket.enums.OpCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,36 +25,33 @@ public class SocketResponse {
      * 242
      * 180
      */
-    public static byte[] createSocketResponse(@Nonnull String message) {
+    public static byte[] createSocketResponse(@Nonnull String message, OpCode opCode) {
         int length = message.length();
         byte[] destinationBuffer;
         byte[] startBuffer = new byte[2];
         byte lengthByte = (byte) message.length();
-        int OffsetBytes = 2;
+        int OffsetBytes = 0;
 
         if (length <= 125) {
             startBuffer = new byte[2];
-            startBuffer[0] = (byte) 129;
+            startBuffer[0] = (byte) (128 + opCode.getIntOpCode());
             startBuffer[1] = lengthByte;
+            OffsetBytes = 2;
         }
 
         if (message.length() > 125 && message.length() < 65535) {
             startBuffer = new byte[4];
-            startBuffer[0] = (byte) 129;
+            startBuffer[0] = (byte) (128 + opCode.getIntOpCode());
             startBuffer[1] = 126;
-
-            //load up other 2 bytes.
-            shortToByteArray(message.length(), startBuffer);
+            fill2ByteInteger(message.length(), startBuffer); //load up 2 bytes.
             OffsetBytes = 4;
         }
 
         if (message.length() > 65535 && message.length() < 2147483647) {
             startBuffer = new byte[10];
-            startBuffer[0] = (byte) 129;
+            startBuffer[0] = (byte) (128 + opCode.getIntOpCode());
             startBuffer[1] = 127;
-
-            //offset because we have  Startbuffer already
-            longToByteArray(message.length(), startBuffer);
+            fill8ByteArrayFromInteger(message.length(), startBuffer);
             OffsetBytes = 10;
         }
 
@@ -68,14 +65,14 @@ public class SocketResponse {
     }
 
     //unsigned 16 bit integer
-    public static void shortToByteArray(long l, byte[] startBuffer) {
+    public static void fill2ByteInteger(long l, byte[] startBuffer) {
         startBuffer[3] = (byte) (l); //smallest number goes in the back.
         l >>>= 8;
         startBuffer[2] = (byte) (l & 0xff);
     }
 
     //to 8 bytes 64 bit unsigned.
-    private static void longToByteArray(@Nonnull Integer l, byte[] b) {
+    private static void fill8ByteArrayFromInteger(@Nonnull Integer l, byte[] b) {
         //make a 8 byte from the length back again.
         if (b.length == 10) {
             int preBytes = 2;
@@ -83,7 +80,7 @@ public class SocketResponse {
                 b[i + preBytes] = (byte) (l.longValue());
                 l >>>= 8;
             }
-        }else{
+        } else {
             LOG.info("Byte array in Socket response should be 10 long. is now: {}", b.length);
         }
     }
