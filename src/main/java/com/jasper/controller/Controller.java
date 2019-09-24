@@ -1,9 +1,9 @@
 package com.jasper.controller;
 
 import com.jasper.model.Client;
-import com.jasper.model.connectionManager;
+import com.jasper.model.connection.ConnectionManager;
 import com.jasper.model.MultiThreadedServer;
-import com.jasper.model.RequestHandler;
+import com.jasper.model.IRequestHandler;
 import com.jasper.view.View;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,16 +24,16 @@ public class Controller {
     private static Boolean restartProcess = false;
     private Boolean guiVisible;
 
-    private connectionManager connectionManager;
+    private static ConnectionManager connectionManager;
     private View view;
 
     private MultiThreadedServer multiThreadedServer;
     private Thread multiThreadedServerThread;
     private int portNumber;
 
-    private Map<String, RequestHandler> getMap;
-    private Map<String, RequestHandler> postMap;
-    private Map<String, RequestHandler> socketMap;
+    private Map<String, IRequestHandler> getMap;
+    private Map<String, IRequestHandler> postMap;
+    private Map<String, IRequestHandler> socketMap;
 
     /**
      * Java.Controller class
@@ -41,9 +41,9 @@ public class Controller {
      * @param portNumber portNumber
      */
     public Controller(Integer portNumber,
-                      Map<String, RequestHandler> getMap,
-                      Map<String, RequestHandler> postMap,
-                      Map<String, RequestHandler> socketMap,
+                      Map<String, IRequestHandler> getMap,
+                      Map<String, IRequestHandler> postMap,
+                      Map<String, IRequestHandler> socketMap,
                       Boolean guiVisible) {
 
         this.guiVisible = guiVisible;
@@ -52,7 +52,7 @@ public class Controller {
             this.view = new View();
         }
 
-        this.connectionManager = new connectionManager();
+        connectionManager = new ConnectionManager(this);
         this.getMap = getMap;
         this.postMap = postMap;
         this.socketMap = socketMap;
@@ -145,7 +145,7 @@ public class Controller {
     private void stopMultiThreadedServer(MultiThreadedServer multiThreadedServer) {
         try {
             //end the server.
-            multiThreadedServer.setStopped(true);
+            multiThreadedServer.setRunning(false);
             if (multiThreadedServer.getServerSocket() != null) {
                 multiThreadedServer.getServerSocket().close();
             }
@@ -187,20 +187,20 @@ public class Controller {
     }
 
     @Nonnull
-    public connectionManager getConnectionManager() {
+    public ConnectionManager getConnectionManager() {
         return connectionManager;
     }
 
     @CheckForNull
-    public Map<String, RequestHandler> getGetMap() {
+    public Map<String, IRequestHandler> getGetMap() {
         return getMap;
     }
 
-    public Map<String, RequestHandler> getPostMap() {
+    public Map<String, IRequestHandler> getPostMap() {
         return postMap;
     }
 
-    public Map<String, RequestHandler> getSocketMap() {
+    public Map<String, IRequestHandler> getSocketMap() {
         return socketMap;
     }
 }

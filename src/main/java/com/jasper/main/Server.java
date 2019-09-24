@@ -1,16 +1,18 @@
 package com.jasper.main;
 
 import com.jasper.controller.Controller;
-import com.jasper.model.RequestHandler;
+import com.jasper.model.IRequestHandler;
+import com.jasper.model.connection.ConnectionManager;
+
 import java.util.HashMap;
 
 public class Server {
 
     private int port = 8081;
 
-    private HashMap<String, RequestHandler> getMap = new HashMap<>();
-    private HashMap<String, RequestHandler> postMap = new HashMap<>();
-    private HashMap<String, RequestHandler> socketMap = new HashMap<>();
+    private HashMap<String, IRequestHandler> getMap = new HashMap<>();
+    private HashMap<String, IRequestHandler> postMap = new HashMap<>();
+    private HashMap<String, IRequestHandler> socketMap = new HashMap<>();
     private Boolean guiVisible = false;
 
     public Server(int portNumber) {
@@ -29,15 +31,15 @@ public class Server {
         return port;
     }
 
-    public void get(String url, RequestHandler o) {
+    public void get(String url, IRequestHandler o) {
         getMap.put(url, o);
     }
 
-    public void post(String url, RequestHandler o) {
+    public void post(String url, IRequestHandler o) {
         postMap.put(url, o);
     }
 
-    public void socket(String url, RequestHandler o) {
+    public void socket(String url, IRequestHandler o) {
         socketMap.put(url, o);
     }
 
@@ -45,7 +47,7 @@ public class Server {
         this.guiVisible = guiVisible;
     }
 
-    public Boolean getGuiVisible(){
+    public Boolean getGuiVisible() {
         return guiVisible;
     }
 }

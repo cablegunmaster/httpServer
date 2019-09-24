@@ -3,11 +3,12 @@ package unitTest.http;
 import com.jasper.controller.Controller;
 import com.jasper.model.Client;
 import com.jasper.model.HttpRequest;
-import com.jasper.model.http.enums.RequestType;
-import com.jasper.model.http.enums.StatusCode;
-import com.jasper.model.RequestHandler;
+import com.jasper.model.IRequestHandler;
+import com.jasper.model.connection.RequestHandler;
 import com.jasper.model.http.HttpResponse;
 import com.jasper.model.http.HttpResponseHandler;
+import com.jasper.model.http.enums.RequestType;
+import com.jasper.model.http.enums.StatusCode;
 import com.jasper.model.http.upgrade.UpgradeHttpResponse;
 import org.junit.Test;
 
@@ -33,14 +34,20 @@ public class ChoosingHandlerTest {
         request.setStatusCode(StatusCode.SWITCHING_PROTOCOL);
         request.setRequestMethod(RequestType.GET);
 
-        Map<String, RequestHandler> socketMap = new HashMap<>();
+        Map<String, IRequestHandler> socketMap = new HashMap<>();
         socketMap.put("/path", (req, res) -> {
             //read out request.
             //send back with response?
         });
 
-        Client client = new Client(null, new Controller(8080, new HashMap<>(), new HashMap<>(), socketMap, false));
-        HttpResponseHandler responseHandler = client.handleRequestHandlers(request);
+        HttpResponseHandler responseHandler = new RequestHandler(new Controller(
+                9999,
+                new HashMap<>(),
+                new HashMap<>(),
+                socketMap,
+                false))
+                .handleRequest(request);
+
         assertEquals(UpgradeHttpResponse.class, responseHandler.getClass());
     }
 
@@ -57,14 +64,19 @@ public class ChoosingHandlerTest {
         request.setStatusCode(StatusCode.OK);
         request.setRequestMethod(RequestType.GET);
 
-        Map<String, RequestHandler> getMap = new HashMap<>();
+        Map<String, IRequestHandler> getMap = new HashMap<>();
         getMap.put("/index", (req, res) -> {
             //read out request.
             //send back with response?
         });
 
-        Client client = new Client(null, new Controller(8080, getMap, new HashMap<>(), new HashMap<>(), false));
-        HttpResponseHandler responseHandler = client.handleRequestHandlers(request);
+        HttpResponseHandler responseHandler = new RequestHandler(new Controller(
+                20801,
+                getMap,
+                new HashMap<>(),
+                new HashMap<>(),
+                false))
+                .handleRequest(request);
 
         assertEquals(HttpResponse.class, responseHandler.getClass());
     }

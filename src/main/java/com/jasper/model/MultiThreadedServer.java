@@ -1,6 +1,7 @@
 package com.jasper.model;
 
 import com.jasper.controller.Controller;
+import com.jasper.model.connection.ConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,13 +19,14 @@ public class MultiThreadedServer implements Runnable {
     private final static Logger LOG = LoggerFactory.getLogger(MultiThreadedServer.class);
 
     private int serverPort;
+    private static boolean isRunning = true;
     private ServerSocket serverSocket = null;
-    private static boolean isStopped = false;
     private Controller controller;
 
     public MultiThreadedServer(int port, Controller controller) {
         this.serverPort = port;
         this.controller = controller;
+        new Thread(new ConnectionManager(controller)).start();
     }
 
     public ServerSocket getServerSocket() {
@@ -34,12 +36,16 @@ public class MultiThreadedServer implements Runnable {
     @Override
     public void run() {
         openServerSocket();
-        while (!isStopped()) {
+
+        while (isRunning()) {
             Socket clientSocket = awaitIncomingConnection();
-            if (!isStopped() && clientSocket != null) {
-                sendRequest(clientSocket);
+
+            if (isRunning() && clientSocket != null) {
+                controller.addStringToLog("Connection made..");
+                controller.addConnection(new Client(clientSocket));
             }
         }
+
         controller.addStringToLog("[ OK ] Server Thread exiting....");
     }
 
@@ -51,42 +57,32 @@ public class MultiThreadedServer implements Runnable {
             this.serverSocket.setReuseAddress(true);
             clientSocket = this.serverSocket.accept();
         } catch (SocketException e) {
-            isStopped = true;
+            isRunning = true;
             LOG.warn("[ Error ] Socket exception happened", e);
         } catch (IOException e) {
-            isStopped = true;
+            isRunning = true;
             LOG.warn("[ Error ] accepting client connection", e);
         }
         return clientSocket;
     }
 
-    private void sendRequest(Socket clientSocket) {
-        if (clientSocket != null && controller != null) {
-            controller.addStringToLog("Connection made..");
-
-            Client client = new Client(clientSocket, controller);
-            controller.addConnection(client);
-            Thread t = new Thread(client);
-            t.start();
-        }
-    }
-
     private void openServerSocket() {
         if (serverSocket == null || serverSocket.isClosed()) {
-            isStopped = false;
+            isRunning = true;
             try {
                 serverSocket = new ServerSocket(this.serverPort);
             } catch (IOException e) {
-                isStopped = true;
+                LOG.warn("NOT STARTING WITH CURRENT PORT {}, {}", e, this.serverPort);
+                isRunning = false;
             }
         }
     }
 
-    private synchronized boolean isStopped() {
-        return isStopped;
+    private synchronized boolean isRunning() {
+        return isRunning;
     }
 
-    public void setStopped(boolean stopped) {
-        isStopped = stopped;
+    public void setRunning(boolean stopped) {
+        isRunning = stopped;
     }
 }
