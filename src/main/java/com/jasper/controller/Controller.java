@@ -118,6 +118,7 @@ public class Controller {
                 if (multiThreadedServer != null) {
                     stopMultiThreadedServer(multiThreadedServer);
                     multiThreadedServer = null; //reset the server as well.
+
                 }
 
                 stopMultiServerThread();
@@ -148,6 +149,7 @@ public class Controller {
             multiThreadedServer.setRunning(false);
             if (multiThreadedServer.getServerSocket() != null) {
                 multiThreadedServer.getServerSocket().close();
+                multiThreadedServer.ShutdownConnectionManager();
             }
 
         } catch (IOException e) {
@@ -174,21 +176,6 @@ public class Controller {
      */
     public void addConnection(Client client) {
         connectionManager.addConnection(client);
-    }
-
-    /**
-     * Remove a single connection from the Connection list.
-     *
-     * @param client Connection removal.
-     */
-    public void removeConnection(Client client) {
-        LOG.debug("removed connection.");
-        connectionManager.getConnections().remove(client);
-    }
-
-    @Nonnull
-    public ConnectionManager getConnectionManager() {
-        return connectionManager;
     }
 
     @CheckForNull

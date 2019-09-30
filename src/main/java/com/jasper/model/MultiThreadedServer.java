@@ -2,6 +2,8 @@ package com.jasper.model;
 
 import com.jasper.controller.Controller;
 import com.jasper.model.connection.ConnectionManager;
+import com.jasper.model.connection.objectPoolTest.ExportingProcess;
+import com.jasper.model.connection.objectPoolTest.ObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +12,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by Jasper Lankhorst on 19-11-2016.
@@ -22,11 +26,14 @@ public class MultiThreadedServer implements Runnable {
     private static boolean isRunning = true;
     private ServerSocket serverSocket = null;
     private Controller controller;
+    private ConnectionManager connectionManager;
+
+    private ObjectPool<ExportingProcess> pool;
 
     public MultiThreadedServer(int port, Controller controller) {
         this.serverPort = port;
         this.controller = controller;
-        new Thread(new ConnectionManager(controller)).start();
+        this.connectionManager = new ConnectionManager(controller);
     }
 
     public ServerSocket getServerSocket() {
@@ -41,8 +48,8 @@ public class MultiThreadedServer implements Runnable {
             Socket clientSocket = awaitIncomingConnection();
 
             if (isRunning() && clientSocket != null) {
-                controller.addStringToLog("Connection made..");
-                controller.addConnection(new Client(clientSocket));
+                controller.addStringToLog("Connection made.." + getTimeAsString());
+                controller.addConnection(new Client(clientSocket));// ADD JOB.
             }
         }
 
@@ -54,7 +61,7 @@ public class MultiThreadedServer implements Runnable {
         Socket clientSocket = null;
         try {
             controller.addStringToLog("[ OK ] Server is awaiting connections...");
-            this.serverSocket.setReuseAddress(true);
+            this.serverSocket.setReuseAddress(false);
             clientSocket = this.serverSocket.accept();
         } catch (SocketException e) {
             isRunning = true;
@@ -84,5 +91,16 @@ public class MultiThreadedServer implements Runnable {
 
     public void setRunning(boolean stopped) {
         isRunning = stopped;
+    }
+
+    private String getTimeAsString() {
+        long yourmilliseconds = System.currentTimeMillis();
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd,yyyy HH:mm");
+        Date resultdate = new Date(yourmilliseconds);
+        return sdf.format(resultdate);
+    }
+
+    public void ShutdownConnectionManager(){
+        connectionManager.tearDown();
     }
 }
