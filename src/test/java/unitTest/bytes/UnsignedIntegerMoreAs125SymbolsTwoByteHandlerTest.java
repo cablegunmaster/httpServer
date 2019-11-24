@@ -4,12 +4,9 @@ import com.jasper.model.socket.SocketResponse;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class UnsignedIntegerMoreAs125SymbolsTwobyteHandlerTest {
+public class UnsignedIntegerMoreAs125SymbolsTwoByteHandlerTest {
 
     private final String test = "testtesttetesttesttetesttesttetesttesttesttetesttesttesttetesttesttesttetesttesttesttetesttesttesttesttetesttesttesttesttetesttesttesttesttetesttesttesttesttetesttesttesttetestt";
-
-    //166 length
-    private final String testTwo = "abcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcacabcabcabcabcabcabcabcacabcabcabcabcabcabcabcacabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabca";
 
     @Test
     public void testLength(){
@@ -18,6 +15,8 @@ public class UnsignedIntegerMoreAs125SymbolsTwobyteHandlerTest {
 
     @Test
     public void testLengthTwo(){
+        //166 length
+        String testTwo = "abcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcacabcabcabcabcabcabcabcacabcabcabcabcabcabcabcacabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabca";
         Assert.assertEquals(testTwo.length(), 166);
     }
 

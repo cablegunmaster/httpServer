@@ -10,10 +10,9 @@ import java.util.List;
 public class readByteHandler {
 
     //aaaaa 5 char
-    List<Integer> oneByteList = Arrays.asList(
+    private List<Integer> oneByteList = Arrays.asList(
             129,
             133,
-
             8,
             25,
             234,
@@ -21,7 +20,7 @@ public class readByteHandler {
             105,
 
             120, 139, 23, 105);
-    List<Integer> secondByteList = Arrays.asList(
+    private List<Integer> secondByteList = Arrays.asList(
             129,
             129,
             231,
@@ -31,7 +30,7 @@ public class readByteHandler {
             134);
 
     //abDDDE
-    List<Integer> thirdByteList = Arrays.asList(
+    private List<Integer> thirdByteList = Arrays.asList(
             129,
             134,
             249,
@@ -45,7 +44,7 @@ public class readByteHandler {
             189,
             150);
 
-    List<Integer> fourthByteList = Arrays.asList(
+    private List<Integer> fourthByteList = Arrays.asList(
             129,
             131,
             219,
@@ -97,20 +96,20 @@ public class readByteHandler {
     public void maskHandleraBC() {
 
         //Stack?
-        /**
-         * 129
-         * 131
-         *
-         * 219 a
-         * 106 B
-         * 43  C
-         *
-         * //Mask  from M4 -> M1 to use instead of M1->M4.???WRONG
-         * 189 /m1
-         * 186 /m2
-         * 40  /m3
-         * 104 /m4
-         */
+//
+//          129
+//          131
+//
+//          219 a
+//          106 B
+//          43  C
+//
+//          //Mask  from M4 -> M1 to use instead of M1->M4.???WRONG
+//          189 /m1
+//          186 /m2
+//          40  /m3
+//          104 /m4
+//
 
         byte[] decoded = new byte[3];
         byte[] encoded = new byte[]{(byte) 43, (byte) 106, (byte) 219};

@@ -10,14 +10,14 @@ public class readByteUnsignedSixteenTest {
 
     //no content just test for length and size for length.
 
-    List<Integer> oneByteList = Arrays.asList(
+    private List<Integer> oneByteList = Arrays.asList(
             129,
             254,
 
             8,
             25);
 
-    List<Integer> twoByteList = Arrays.asList(
+    private List<Integer> twoByteList = Arrays.asList(
             129,
             255,
 

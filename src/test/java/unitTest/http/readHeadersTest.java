@@ -19,8 +19,6 @@ public class readHeadersTest {
 
     private HttpParser parser;
 
-    private final String LINE = "\r\n";
-
     @Before
     public void createParser() {
         parser = new HttpParser();
@@ -28,6 +26,7 @@ public class readHeadersTest {
 
     @Test
     public void requestHTTPISStillReading() {
+        String LINE = "\r\n";
         String stringToTest = "GET /tutorials/other/top-20-mysql-best-practices/ HTTP/1.1"+ LINE +
                 "Host: net.tutsplus.com"+ LINE +
                 "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR " +

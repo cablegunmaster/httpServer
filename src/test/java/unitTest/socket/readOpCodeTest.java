@@ -1,7 +1,7 @@
 package unitTest.socket;
 
-import com.jasper.model.socket.models.entity.Frame;
 import com.jasper.model.socket.enums.OpCode;
+import com.jasper.model.socket.models.entity.Frame;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -28,6 +28,4 @@ public class readOpCodeTest {
         Assert.assertEquals(OpCode.PONG, OpCode.findByValue("A"));
         Assert.assertEquals(OpCode.CONTINUATION, OpCode.findByValue("0"));
     }
-
-
 }

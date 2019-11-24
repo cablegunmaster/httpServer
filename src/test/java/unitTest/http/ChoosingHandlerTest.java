@@ -1,7 +1,6 @@
 package unitTest.http;
 
 import com.jasper.controller.Controller;
-import com.jasper.model.Client;
 import com.jasper.model.HttpRequest;
 import com.jasper.model.IRequestHandler;
 import com.jasper.model.connection.RequestHandler;
@@ -23,8 +22,6 @@ public class ChoosingHandlerTest {
     /**
      * Check if correct response is given.
      * Minimum to get a server running with a /path as socket.
-     *
-     * @throws UnsupportedEncodingException
      */
     @Test
     public void HttpGetSocketResponseHandlerNoSocketHandlerFoundTest() throws UnsupportedEncodingException {
@@ -54,8 +51,6 @@ public class ChoosingHandlerTest {
     /**
      * Check if correct HTTPResponse is given.
      * Minimum Server with a /index as path.
-     *
-     * @throws UnsupportedEncodingException
      */
     @Test
     public void HttpGetHttpResponseHandlerTest() throws UnsupportedEncodingException {

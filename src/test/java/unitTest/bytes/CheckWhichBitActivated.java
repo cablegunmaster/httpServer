@@ -1,6 +1,5 @@
 package unitTest.bytes;
 
-import com.jasper.model.socket.models.entity.Frame;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -10,8 +9,7 @@ import static com.jasper.model.socket.models.utils.ByteUtil.checkBitActivated;
  * Simple test to see where it read from.
  */
 public class CheckWhichBitActivated {
-
-
+    
     @Test
     public void testBitActivatedONeOTwentyNine() {
         Assert.assertTrue(checkBitActivated(0, 129));

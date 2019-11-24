@@ -1,7 +1,6 @@
 package unitTest.socket;
 
 import com.jasper.model.http.models.HttpParser;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -18,30 +17,29 @@ public class secWebsocketTestAcceptTest {
     }
 
     @Test
-    public void secTestValidKey(){
+    public void secTestValidKey() {
         String key = "LKF8lHGznbKGIgO1UzAOhg==";
         Assert.assertEquals("vxUU43EIDuR3gscJp2fMckI95cQ=", requestParser.encodeWebsocketAccept(key));
     }
 
     @Test
-    public void mozillaKeyExampleTest(){
+    public void mozillaKeyExampleTest() {
         String key = "dGhlIHNhbXBsZSBub25jZQ==";
         Assert.assertEquals("s3pPLMBiTxaQ9kYGzzhZRbK+xOo=", requestParser.encodeWebsocketAccept(key));
     }
 
     @Test
-    public void testStrLenSha1(){
+    public void testStrLenSha1() {
         String input = "LKF8lHGznbKGIgO1UzAOhg==";
         byte[] sha1 = DigestUtils.sha1(input + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
-        Assert.assertEquals(sha1.length ,20);
+        Assert.assertEquals(sha1.length, 20);
     }
 
     @Test
-    public void testEncodeBase(){
+    public void testEncodeBase() {
         String input = "LKF8lHGznbKGIgO1UzAOhg==";
         byte[] sha1 = DigestUtils.sha1(input + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
-        String output = new String(Base64.encodeBase64(sha1));
-        Assert.assertEquals(sha1.length ,20);
+        Assert.assertEquals(sha1.length, 20);
     }
 
 }
