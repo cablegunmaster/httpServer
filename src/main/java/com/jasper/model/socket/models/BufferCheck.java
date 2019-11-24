@@ -19,11 +19,6 @@ public class BufferCheck {
         return buffer[bufferIndex] == '\n';
     }
 
-    public boolean hasDoubleNewline() {
-        return buffer[bufferIndex] == '\n' && buffer[(bufferIndex + 3) % 4] == '\r' &&
-                buffer[(bufferIndex + 2) % 4] == '\n' && buffer[(bufferIndex + 1) % 4] == '\r';
-    }
-
     public boolean hasForwardSlash() {
         return buffer[bufferIndex] == '/';
     }

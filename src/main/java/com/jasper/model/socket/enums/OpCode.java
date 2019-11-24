@@ -48,6 +48,7 @@ public enum OpCode {
         return this.name().equals("TEXT");
     }
 
+    //TODO implement continuation?
     public boolean isContinuation() {
         return this.name().equals("CONTINUATION");
     }

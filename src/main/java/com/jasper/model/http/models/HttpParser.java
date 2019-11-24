@@ -23,16 +23,16 @@ import static com.jasper.model.http.enums.StatusCode.SWITCHING_PROTOCOL;
 public class HttpParser {
 
     private final static Logger LOG = LoggerFactory.getLogger(HttpParser.class);
+    private final static String VALID_URI_CHARACTERS =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=`.";
 
+    private final static Integer BUFFER_SIZE_CACHE = 8192;
     private PostState postState = PostState.READ_POST_NAME;
-
     private HttpRequest request = new HttpRequest();
-    private UriParser requestUriParser = new UriParser();
     private StringBuilder stateUrlBuilder = new StringBuilder();
     private StringBuilder stateBuilder = new StringBuilder();
     private BufferCheck bufferCheck = new BufferCheck();
 
-    private final static Integer BUFFER_SIZE_CACHE = 8192;
     private String headerName = null;
     private String postQueryKey = null;
     private int bufferSize = 0;
@@ -88,7 +88,6 @@ public class HttpParser {
         if (!bufferCheck.hasSpace()) {
             stateBuilder.append(c);
         } else if (bufferCheck.hasSpace()) {
-
             request.setState(HttpState.READ_URI);
 
             try {
@@ -106,7 +105,7 @@ public class HttpParser {
     private void readUri(char c) {
 
         if (bufferCheck.hasSpace()) {
-            requestUriParser.parseUri(request, bufferCheck, stateUrlBuilder, stateBuilder);
+            UriParser.parseUri(request, bufferCheck, stateUrlBuilder, stateBuilder);
             request.setState(HttpState.READ_HTTP);
             stateBuilder.setLength(0);
 
@@ -114,16 +113,14 @@ public class HttpParser {
                 request.setState(ERROR);
                 LOG.info("ERROR: reading path no path found: {}", HttpState.READ_HTTP);
             }
+
         } else {
 
-            String validUricharactersInGeneral = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()" +
-                    "*+,;=`.";
-
             //Check if character is valid in URI, general check.
-            if (validUricharactersInGeneral.contains(Character.toString(c))) {
+            if (VALID_URI_CHARACTERS.contains(Character.toString(c))) {
                 stateBuilder.append(c);
                 stateUrlBuilder.append(c);
-                requestUriParser.parseUri(request, bufferCheck, stateUrlBuilder, stateBuilder);
+                UriParser.parseUri(request, bufferCheck, stateUrlBuilder, stateBuilder);
             } else {
                 LOG.info("ERROR: invalid characters in path: {}, {}", c, HttpState.READ_HTTP);
                 request.setState(ERROR);
@@ -213,7 +210,7 @@ public class HttpParser {
     /**
      * All functions regarding "special" header value / names should be dealt here.
      *
-     * @param c
+     * @param c char
      */
     private void readHeaderValue(char c) {
         stateBuilder.append(c);
@@ -248,12 +245,11 @@ public class HttpParser {
 
     //TODO cutup in smaller functions.
     private void readBody(char c) {
+        String postQueryValue;
         stateBuilder.append(c);
         postSize++;
 
         if (totalBodySize == 0) {
-
-            //if header value is empty.
             if (request.getHeaders().get("Content-Length") == null) {
                 LOG.info("ERROR: reading Content-length , no size is found.");
                 request.setState(ERROR);
@@ -266,7 +262,6 @@ public class HttpParser {
             }
         }
 
-        String postQueryValue;
         if (postSize < totalBodySize) {
             if (postState.isPostValue()) {
                 if (bufferCheck.hasDelimiter()) {
@@ -293,7 +288,7 @@ public class HttpParser {
             bufferSize = 0;
             request.setState(HttpState.DONE);
 
-        } else if (postSize > totalBodySize) {
+        } else {
             LOG.info("ERROR: reading Body of post, larger as the payload is permitted per request.");
             request.setStatusCode(StatusCode.PAYLOAD_TO_LARGE);
             request.setState(ERROR);
@@ -312,8 +307,15 @@ public class HttpParser {
     /**
      * https://en.wikipedia.org/wiki/WebSocket
      *
-     * @param input
-     * @return the string.
+     * is base64 encoded, SHA-1 hashed value.
+     * You generate this value by concatenating the clients Sec-WebSocket-Key nounce
+     * and the static value 258EAFA5-E914-47DA-95CA-C5AB0DC85B11
+     * defined in RFC 6455. Although the Sec-WebSocket-Key and Sec-WebSocket-Accept` seem complicated,
+     * they exist so that both the client and the server can know that their counterpart supports WebSockets.
+     * Since the WebSocket re-uses the HTTP connection,
+     * there are potential security concerns if either side interprets WebSocket data as an HTTP request.
+     * @param input the Sec-WebSocket-Accept header
+     * @return the Sec-WebSocket-Accept value.
      */
     public String encodeWebsocketAccept(String input) {
         return new String(Base64.encodeBase64(DigestUtils.sha1(input.trim() + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11")));

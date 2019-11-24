@@ -1,7 +1,7 @@
 package unitTest.socket;
 
 import com.jasper.model.socket.enums.OpCode;
-import com.jasper.model.socket.models.SocketResponse;
+import com.jasper.model.socket.SocketResponse;
 import org.junit.Test;
 
 import java.util.Arrays;

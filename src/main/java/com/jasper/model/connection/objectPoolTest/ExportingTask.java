@@ -4,7 +4,7 @@ public class ExportingTask implements Runnable {
     private ObjectPool<ExportingProcess> pool;
     private int threadNo;
 
-    public ExportingTask(ObjectPool<ExportingProcess> pool, int threadNo) {
+    ExportingTask(ObjectPool<ExportingProcess> pool, int threadNo) {
         this.pool = pool;
         this.threadNo = threadNo;
     }

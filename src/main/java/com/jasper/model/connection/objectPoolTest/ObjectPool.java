@@ -28,13 +28,10 @@ public abstract class ObjectPool<T> {
      *
      * @param minObjects : the minimum number of objects residing in the pool
      */
-
-    public ObjectPool(final int minObjects) {
-        // initialize pool
-
-        initialize(minObjects);
-
-    }
+//    public ObjectPool(final int minObjects) {
+//        // initialize pool
+//        initialize(minObjects);
+//    }
 
     /*
       Creates the pool.
@@ -45,27 +42,24 @@ public abstract class ObjectPool<T> {
       When the number of objects is less than minObjects, missing instances will be created.
       When the number of objects is greater than maxObjects, too many instances will be removed.
     */
-    public ObjectPool(final int minObjects, final int maxObjects, final long validationInterval) {
+    ObjectPool(final int minObjects, final int maxObjects, final long validationInterval) {
         // initialize pool
         initialize(minObjects);
         // check pool conditions in a separate thread
         executorService = Executors.newSingleThreadScheduledExecutor();
-        executorService.scheduleWithFixedDelay(new Runnable()  // annonymous class
-        {
-            @Override
-            public void run() {
-                int size = pool.size();
+        // annonymous class
+        executorService.scheduleWithFixedDelay(() -> {
+            int size = pool.size();
 
-                if (size < minObjects) {
-                    int sizeToBeAdded = minObjects + size;
-                    for (int i = 0; i < sizeToBeAdded; i++) {
-                        pool.add(createObject());
-                    }
-                } else if (size > maxObjects) {
-                    int sizeToBeRemoved = size - maxObjects;
-                    for (int i = 0; i < sizeToBeRemoved; i++) {
-                        pool.poll();
-                    }
+            if (size < minObjects) {
+                int sizeToBeAdded = minObjects + size;
+                for (int i = 0; i < sizeToBeAdded; i++) {
+                    pool.add(createObject());
+                }
+            } else if (size > maxObjects) {
+                int sizeToBeRemoved = size - maxObjects;
+                for (int i = 0; i < sizeToBeRemoved; i++) {
+                    pool.poll();
                 }
             }
         }, validationInterval, validationInterval, TimeUnit.SECONDS);
@@ -77,7 +71,7 @@ public abstract class ObjectPool<T> {
 
         @return T borrowed object
     */
-    public T borrowObject() {
+    T borrowObject() {
         T object;
         if ((object = pool.poll()) == null) {
             object = createObject();
@@ -89,7 +83,7 @@ public abstract class ObjectPool<T> {
          Returns object back to the pool.
          @param object object to be returned
      */
-    public void returnObject(T object) {
+    void returnObject(T object) {
         if (object == null) {
             return;
         }
@@ -99,7 +93,7 @@ public abstract class ObjectPool<T> {
     /*
          Shutdown this pool.
      */
-    public void shutdown() {
+    void shutdown() {
         if (executorService != null) {
             executorService.shutdown();
         }
@@ -112,7 +106,7 @@ public abstract class ObjectPool<T> {
     protected abstract T createObject();
 
     private void initialize(final int minObjects) {
-        pool = new ConcurrentLinkedQueue<T>();
+        pool = new ConcurrentLinkedQueue<>();
         for (int i = 0; i < minObjects; i++) {
             pool.add(createObject());
         }

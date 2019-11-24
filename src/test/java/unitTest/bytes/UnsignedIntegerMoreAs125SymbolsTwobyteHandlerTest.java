@@ -1,6 +1,6 @@
 package unitTest.bytes;
 
-import com.jasper.model.socket.models.SocketResponse;
+import com.jasper.model.socket.SocketResponse;
 import org.junit.Assert;
 import org.junit.Test;
 

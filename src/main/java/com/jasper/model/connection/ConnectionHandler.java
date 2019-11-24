@@ -7,7 +7,7 @@ import com.jasper.model.http.HttpResponseHandler;
 import com.jasper.model.http.enums.HttpState;
 import com.jasper.model.http.models.HttpParser;
 import com.jasper.model.socket.models.SocketMessageParser;
-import com.jasper.model.socket.models.SocketResponse;
+import com.jasper.model.socket.SocketResponse;
 import com.jasper.model.socket.models.entity.Frame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ public class ConnectionHandler implements Runnable {
 
     private RequestHandler requestHandler;
 
-    public ConnectionHandler(Client client, Controller controller) {
+    ConnectionHandler(Client client, Controller controller) {
         this.requestHandler = new RequestHandler(controller);
         this.client = client;
     }
@@ -40,7 +40,7 @@ public class ConnectionHandler implements Runnable {
         processClient(client);
     }
 
-    public void processClient(Client client) {
+    private void processClient(Client client) {
         LOG.debug("Connecting on [" + Thread.currentThread().getName() + "]");
 
         OutputStream out = null;
@@ -121,13 +121,11 @@ public class ConnectionHandler implements Runnable {
                 String message = null;
                 client.getFrameStack().add(messageParser.getFrame());
                 messageParser.reset();
-                Frame f = frameStack.peek();
+                Frame frame = frameStack.peek();
 
-                if (f.isFinMessage()) {
+                if (frame.isFinMessage()) {
 
-                    //Text handling of Message.
-                    if (f.getOpCode().isText() && !frameStack.isEmpty()) {
-
+                    if (frame.getOpCode().isText() && !frameStack.isEmpty()) {
                         while (!frameStack.isEmpty()) {
                             messageBuffer.append(frameStack.pop().getDecodedMessage());
                         }
@@ -136,46 +134,39 @@ public class ConnectionHandler implements Runnable {
                         client.clear(messageBuffer);
                     }
 
-                    if (f.getOpCode().isControlFrame() &&
-                            f.getOpCode().isClose()) {
-
+                    if (frame.getOpCode().isControlFrame() && frame.getOpCode().isClose()) {
                         messageBuffer.append(frameStack.pop().getDecodedMessage());
                         message = messageBuffer.toString();
-
-                        if (f.getOpCode().isPing()) {
-                            f.setOpCode(PONG);
+                        if (frame.getOpCode().isPing()) {
+                            frame.setOpCode(PONG);
                         }
                     }
 
-
-                    if (message != null) {
-                        writeOutputStream(SocketResponse.createSocketResponse(message, f.getOpCode()), out);
-                    }
-
-                    //close connection should be with
                     if ("/c exit".equals(message)) {
                         client.setKeepConnected(false);
+                    } else if (message != null) {
+                        writeOutputStream(SocketResponse.createSocketResponse(message, frame.getOpCode()), out);
                     }
                 }
+
             }
         }
     }
 
     //write by only 1 output at the time.
-    public void writeOutputStream(byte[] bytes, OutputStream out) throws IOException {
+    private void writeOutputStream(byte[] bytes, OutputStream out) throws IOException {
         if (out != null) {
             out.write(bytes);
             out.flush();
         }
     }
 
-    public HttpRequest readSendRequest(Client client) throws IOException {
-        HttpResponseHandler responseHandler = null;
+    private HttpRequest readSendRequest(Client client) throws IOException {
 
         //Initial request.
         HttpRequest request = readInputStream(client.getClientSocket().getInputStream());
         requestHandler.handleSocketHandlers(request, client.getClientSocket());
-        responseHandler = requestHandler.handleRequest(request);
+        HttpResponseHandler responseHandler = requestHandler.handleRequest(request);
 
         if (responseHandler.getHttpVersion() != null &&
                 responseHandler.getHttpVersion().equals("1.1") &&

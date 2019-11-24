@@ -42,6 +42,8 @@ public class HttpRequest {
     private StringBuilder headerValue = new StringBuilder();
     private boolean upgradingConnection = false;
     private String upgradeSecureKeyAnswer = null;
+    private String queryName = null;
+
 
     //HttpVersion number.
     private String httpVersion;
@@ -225,5 +227,13 @@ public class HttpRequest {
 
     public void setUpgradeSecureKeyAnswer(String upgradeSecureKeyAnswer) {
         this.upgradeSecureKeyAnswer = upgradeSecureKeyAnswer;
+    }
+
+    public String getQueryName() {
+        return queryName;
+    }
+
+    public void setQueryName(String queryName) {
+        this.queryName = queryName;
     }
 }

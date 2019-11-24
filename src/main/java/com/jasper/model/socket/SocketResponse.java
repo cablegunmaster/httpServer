@@ -1,4 +1,4 @@
-package com.jasper.model.socket.models;
+package com.jasper.model.socket;
 
 import com.jasper.model.socket.enums.OpCode;
 import org.slf4j.Logger;
@@ -26,13 +26,13 @@ public class SocketResponse {
      * 180
      */
     public static byte[] createSocketResponse(@Nonnull String message, OpCode opCode) {
-        int length = message.length();
+        int messageSize = message.length();
         byte[] destinationBuffer;
         byte[] startBuffer = new byte[2];
         byte lengthByte = (byte) message.length();
         int OffsetBytes = 0;
 
-        if (length <= 125) {
+        if (messageSize <= 125) {
             startBuffer = new byte[2];
             startBuffer[0] = (byte) (128 + opCode.getIntOpCode());
             startBuffer[1] = lengthByte;

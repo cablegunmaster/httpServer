@@ -6,10 +6,7 @@ import com.jasper.model.IRequestHandler;
 import com.jasper.model.http.HttpResponse;
 import com.jasper.model.http.HttpResponseHandler;
 import com.jasper.model.http.enums.HttpState;
-import com.jasper.model.http.enums.RequestType;
 import com.jasper.model.http.upgrade.UpgradeHttpResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -20,8 +17,6 @@ import java.net.SocketException;
 import static com.jasper.model.http.enums.StatusCode.*;
 
 public class RequestHandler {
-
-    private final static Logger LOG = LoggerFactory.getLogger(RequestHandler.class);
 
     private Controller controller;
 
@@ -44,8 +39,7 @@ public class RequestHandler {
                 response.setWebsocketAcceptString(request.getUpgradeSecureKeyAnswer());
 
                 if (request.getHeaders().containsKey("Sec-WebSocket-Protocol")) {
-                    response.addHeader("Sec-WebSocket-Protocol",
-                            request.getHeaders().get("Sec-WebSocket-Protocol"));
+                    response.addHeader("Sec-WebSocket-Protocol", request.getHeaders().get("Sec-WebSocket-Protocol"));
                 }
             }
 
@@ -64,29 +58,31 @@ public class RequestHandler {
         IRequestHandler handler = null;
 
         if (request.getPath() != null) {
-            if (controller.getSocketMap() != null &&
-                    controller.getSocketMap().containsKey(request.getPath()) &&
-                    request.getStatusCode() == SWITCHING_PROTOCOL) {
-                handler = controller.getSocketMap().get(request.getPath());
-            }
+            String path = request.getPath();
 
-            if (request.getRequestMethod().equals(RequestType.GET) &&
-                    controller.getGetMap() != null &&
-                    controller.getGetMap().containsKey(request.getPath())) {
-                handler = controller.getGetMap().get(request.getPath());
-            }
-
-            if (request.getRequestMethod().equals(RequestType.POST) &&
-                    controller.getPostMap() != null &&
-                    controller.getPostMap().containsKey(request.getPath())) {
-                handler = controller.getPostMap().get(request.getPath());
+            switch (request.getRequestMethod()) {
+                case GET:
+                    if (request.getStatusCode() == SWITCHING_PROTOCOL &&
+                            controller.getSocketMap().containsKey(path)) {
+                        handler = controller.getSocketMap().get(path);
+                    } else if (controller.getGetMap().containsKey(path)) {
+                        handler = controller.getGetMap().get(path);
+                    }
+                    break;
+                case POST:
+                    if (controller.getPostMap().containsKey(path)) {
+                        handler = controller.getPostMap().get(path);
+                    }
+                    break;
+                default:
+                    return null;
             }
         }
         return handler;
     }
 
 
-    public void handleSocketHandlers(@Nonnull HttpRequest request, @Nonnull Socket clientSocket) throws SocketException {
+    void handleSocketHandlers(@Nonnull HttpRequest request, @Nonnull Socket clientSocket) throws SocketException {
         if (request.getStatusCode() == SWITCHING_PROTOCOL) {
             clientSocket.setSoTimeout(0); //timeout to make a clientsocket Idle.
         } else {
@@ -96,7 +92,7 @@ public class RequestHandler {
     }
 
     @Nonnull
-    public HttpResponseHandler getHandlerByRequest(@Nonnull HttpRequest request) {
+    private HttpResponseHandler getHandlerByRequest(@Nonnull HttpRequest request) {
         if (request.getStatusCode() == SWITCHING_PROTOCOL) {
             return new UpgradeHttpResponse();
         }

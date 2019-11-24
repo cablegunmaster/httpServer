@@ -8,22 +8,23 @@ import com.jasper.model.socket.models.BufferCheck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+
 import static com.jasper.model.http.enums.HttpState.ERROR;
 import static com.jasper.model.http.enums.StatusCode.BAD_REQUEST;
 
-public class UriParser {
+class UriParser {
 
     private final static Logger LOG = LoggerFactory.getLogger(UriParser.class);
 
-    private String getQueryKey = null;
-
     /**
-     * https://www.ietf.org/rfc/rfc3986.txt Supports for now a simplified version of the RFC. Not included IPV6. InputString it only the
-     * URI, should check if it has invalid characters in it. TODO entity checking %20 spaces and extra entitys.
+     * https://www.ietf.org/rfc/rfc3986.txt
+     * Supports for now a simplified version of the RFC.
+     * Not included IPV6. InputString it only the URI, should check if it has invalid characters in it.
      *
      * @param request the input of the String.
      */
-    public void parseUri(HttpRequest request,
+    static void parseUri(HttpRequest request,
                          BufferCheck bufferCheck,
                          StringBuilder stateUrlBuilder,
                          StringBuilder stateBuilder) {
@@ -120,7 +121,7 @@ public class UriParser {
                 break;
             case READ_QUERY_NAME:
                 if (bufferCheck.hasEqualsymbol()) {
-                    getQueryKey = stateUrlBuilder.toString();
+                    request.setQueryName(stateUrlBuilder.toString());
                     stateUrlBuilder.setLength(0); //re-use builder.
                     request.setStateUrl(StateUrl.READ_QUERY_VALUE);
                 }
@@ -131,18 +132,19 @@ public class UriParser {
                 break;
             case READ_QUERY_VALUE:
                 if (bufferCheck.hasDelimiter() || bufferCheck.hasSpace()) {
-                    if (getQueryKey != null) {
+                    if (request.getQueryName() != null) {
                         input = stateUrlBuilder.toString();
-                        request.getQueryGET().get(getQueryKey);
-                        request.getQueryGET().put(getQueryKey, input);
+                        request.getQueryGET().get(request.getQueryName());
+                        request.getQueryGET().put(request.getQueryName(), input);
 
                         request.setQuery(request.getQuery() == null
-                                ? getQueryKey + input :
-                                request.getQuery() + getQueryKey + input);
+                                ? request.getQueryName() + input :
+                                request.getQuery() + request.getQueryName() + input);
                     }
 
                     stateUrlBuilder.setLength(0); //re-use builder.
                     request.setStateUrl(StateUrl.READ_QUERY_NAME);
+                    request.setQueryName(null);
                 }
 
                 //End of line or hash
@@ -180,14 +182,10 @@ public class UriParser {
     /**
      * Checks if the buffer has a space or has Hash in the buffer.
      * Sets the state to read "Fragment" part of the url.
-     *
-     * @param request
-     * @param bufferCheck
-     * @param stateUrlBuilder
      */
-    private void checkEndOfLineOrHasHash(HttpRequest request,
-                                         BufferCheck bufferCheck,
-                                         StringBuilder stateUrlBuilder) {
+    private static void checkEndOfLineOrHasHash(@Nonnull HttpRequest request,
+                                                @Nonnull BufferCheck bufferCheck,
+                                                @Nonnull StringBuilder stateUrlBuilder) {
 
         if (bufferCheck.hasSpace() || bufferCheck.hasHash()) {
             request.setFilename(request.getPath() + request.getQuery()); //combine everything.

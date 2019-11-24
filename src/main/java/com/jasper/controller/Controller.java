@@ -1,14 +1,11 @@
 package com.jasper.controller;
 
 import com.jasper.model.Client;
-import com.jasper.model.connection.ConnectionManager;
-import com.jasper.model.MultiThreadedServer;
 import com.jasper.model.IRequestHandler;
+import com.jasper.model.MultiThreadedServer;
+import com.jasper.model.connection.ConnectionManager;
 import com.jasper.view.View;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -20,13 +17,6 @@ import java.util.Map;
  */
 public class Controller {
 
-    private final static Logger LOG = LoggerFactory.getLogger(Controller.class);
-    private static Boolean restartProcess = false;
-    private Boolean guiVisible;
-
-    private static ConnectionManager connectionManager;
-    private View view;
-
     private MultiThreadedServer multiThreadedServer;
     private Thread multiThreadedServerThread;
     private int portNumber;
@@ -35,20 +25,25 @@ public class Controller {
     private Map<String, IRequestHandler> postMap;
     private Map<String, IRequestHandler> socketMap;
 
+    private static Boolean isRestartProcessLocked = false;
+    private boolean guiVisible = false;
+
+    private static ConnectionManager connectionManager;
+    private View view;
+
     /**
      * Java.Controller class
      *
      * @param portNumber portNumber
      */
     public Controller(Integer portNumber,
-                      Map<String, IRequestHandler> getMap,
-                      Map<String, IRequestHandler> postMap,
-                      Map<String, IRequestHandler> socketMap,
-                      Boolean guiVisible) {
-
-        this.guiVisible = guiVisible;
+                      @Nonnull Map<String, IRequestHandler> getMap,
+                      @Nonnull Map<String, IRequestHandler> postMap,
+                      @Nonnull Map<String, IRequestHandler> socketMap,
+                      boolean guiVisible) {
 
         if (guiVisible) {
+            this.guiVisible = true;
             this.view = new View();
         }
 
@@ -82,9 +77,7 @@ public class Controller {
     public synchronized void addStringToLog(String line) {
         if (guiVisible) {
             view.getLogTextArea().append(line + "\r\n");
-            int len = view.getLogTextArea().getDocument().getLength();
-
-            view.getLogTextArea().setCaretPosition(len);
+            view.getLogTextArea().setCaretPosition(view.getLogTextArea().getDocument().getLength());
             view.refresh();
         }
     }
@@ -95,7 +88,6 @@ public class Controller {
      * @param portNumber Integer
      */
     private synchronized void startServer(Integer portNumber) {
-
         multiThreadedServer = new MultiThreadedServer(portNumber, this); //gets view to send log messages.
 
         if (multiThreadedServerThread == null) {
@@ -103,18 +95,16 @@ public class Controller {
             addStringToLog("Starting up server. PID: " + ManagementFactory.getRuntimeMXBean().getName());
             multiThreadedServerThread = new Thread(multiThreadedServer);
             multiThreadedServerThread.start();
-
             addStringToLog("[ OK ] Server is started on portNumber: " + this.portNumber);
         }
-
     }
 
     @Nonnull
     private ActionListener getRestartListener() {
         return actionEvent -> {
-            //lock to ensure only one proces can restart the server.
-            if (!restartProcess) {
-                restartProcess = true;
+
+            if (!isRestartProcessLocked) {
+                isRestartProcessLocked = true;
                 if (multiThreadedServer != null) {
                     stopMultiThreadedServer(multiThreadedServer);
                     multiThreadedServer = null; //reset the server as well.
@@ -122,17 +112,16 @@ public class Controller {
                 }
 
                 stopMultiServerThread();
-                restartProcess = false;
                 startServer(portNumber);
+                isRestartProcessLocked = false;
             }
         };
     }
 
     private void stopMultiServerThread() {
         try {
-            //deleting leftover variables.
-            multiThreadedServerThread.join(); // wait for the thread to stop
-            multiThreadedServerThread = null; //this should be the place to disconnect itself.
+            multiThreadedServerThread.join();
+            multiThreadedServerThread = null;
         } catch (InterruptedException e) {
             e.getStackTrace();
         }
@@ -141,7 +130,7 @@ public class Controller {
     /**
      * Stop the server.
      *
-     * @param multiThreadedServer
+     * @param multiThreadedServer server multithreaded object.
      */
     private void stopMultiThreadedServer(MultiThreadedServer multiThreadedServer) {
         try {
@@ -162,7 +151,7 @@ public class Controller {
     /**
      * Stop application.
      *
-     * @return
+     * @return Stop actinlistener
      */
     @Nonnull
     private ActionListener getStopListener() {
@@ -171,22 +160,20 @@ public class Controller {
 
     /**
      * Add 'clientWorkerRunnable' connections to the list.
-     *
-     * @param client
      */
-    public void addConnection(Client client) {
+    public void addConnection(@Nonnull Client client) {
         connectionManager.addConnection(client);
     }
 
-    @CheckForNull
-    public Map<String, IRequestHandler> getGetMap() {
-        return getMap;
-    }
+    @Nonnull
+    public Map<String, IRequestHandler> getGetMap() { return getMap; }
 
+    @Nonnull
     public Map<String, IRequestHandler> getPostMap() {
         return postMap;
     }
 
+    @Nonnull
     public Map<String, IRequestHandler> getSocketMap() {
         return socketMap;
     }

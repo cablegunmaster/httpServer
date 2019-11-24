@@ -2,8 +2,6 @@ package com.jasper.model;
 
 import com.jasper.controller.Controller;
 import com.jasper.model.connection.ConnectionManager;
-import com.jasper.model.connection.objectPoolTest.ExportingProcess;
-import com.jasper.model.connection.objectPoolTest.ObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +26,7 @@ public class MultiThreadedServer implements Runnable {
     private Controller controller;
     private ConnectionManager connectionManager;
 
-    private ObjectPool<ExportingProcess> pool;
+    //private ObjectPool<ExportingProcess> pool;
 
     public MultiThreadedServer(int port, Controller controller) {
         this.serverPort = port;

@@ -38,9 +38,7 @@ public class Main {
 
         });
 
-        server.get("/hello", (req, res) -> {
-            res.write("Hello World1@#$%&#@(%)@#&ëäï");
-        });
+        server.get("/hello", (req, res) -> res.write("Hello World1@#$%&#@(%)@#&ëäï"));
 
         //these 2 calls / and index.html should it be the same?
         server.get("/index.html", (req, res) -> {
@@ -48,17 +46,11 @@ public class Main {
             res.write("Hello World INDEX.html");
         });
 
-        server.get("/", (req, res) -> {
-            res.write("Hello World same as index.html This is a string.");
-        });
+        server.get("/", (req, res) -> res.write("Hello World same as index.html This is a string."));
 
-        server.get("/hello/test/*", (req, res) -> {
-            res.write("Hello World2!");
-        });
+        server.get("/hello/test/*", (req, res) -> res.write("Hello World2!"));
 
-        server.post("/store", (req, res) -> {
-            res.write("Hello World3");
-        });
+        server.post("/store", (req, res) -> res.write("Hello World3"));
 
         server.setGUIVisible(true);
 

@@ -36,7 +36,7 @@ public class ObjectPoolDemo {
         pool.shutdown();
     }
 
-    public void testObjectPool() {
+    private void testObjectPool() {
         ExecutorService executor = Executors.newFixedThreadPool(4);
 
         // execute 8 tasks in separate threads
@@ -58,7 +58,7 @@ public class ObjectPoolDemo {
         }
     }
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         ObjectPoolDemo op = new ObjectPoolDemo();
         op.setUp();
         op.tearDown();

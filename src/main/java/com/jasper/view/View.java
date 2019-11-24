@@ -112,7 +112,7 @@ public class View {
      * @return JScrollPane containing a new textarea 300x300 size.
      */
     @Nonnull
-    public JScrollPane setOutgoingTextArea() {
+    private JScrollPane setOutgoingTextArea() {
         JTextArea outgoingTextArea = new JTextArea();
         outgoingTextArea.setLineWrap(true); //makes sure no
         outgoingTextArea.setWrapStyleWord(true);
@@ -132,7 +132,7 @@ public class View {
      * @return JScrollPane containing a new textarea 300x300 size.
      */
     @Nonnull
-    public JScrollPane setReceivingLogTextArea() {
+    private JScrollPane setReceivingLogTextArea() {
         logtextArea = new JTextArea();
         logtextArea.setLineWrap(true); //makes sure no
         logtextArea.setWrapStyleWord(true);

@@ -9,6 +9,7 @@ import java.io.PushbackInputStream;
 /**
  * @author Lorber Sebastien <i>(lorber.sebastien@gmail.com)</i>
  */
+//TODO see if this class actually adds value or obstructs.
 public class NonEmptyInputStream extends FilterInputStream {
 
     /**

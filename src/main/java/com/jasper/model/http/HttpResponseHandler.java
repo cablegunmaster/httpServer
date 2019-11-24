@@ -12,9 +12,9 @@ import static com.jasper.model.http.enums.StatusCode.NOT_FOUND;
  */
 public abstract class HttpResponseHandler {
 
-    public final static String LINE_END = "\r\n";
-    public final static String DOUBLE_LINE_END = "\r\n\r\n";
-    public final static String SPACE = " ";
+    protected final static String LINE_END = "\r\n";
+    protected final static String SPACE = " ";
+    final static String DOUBLE_LINE_END = "\r\n\r\n";
 
     private StatusCode statusCode = NOT_FOUND; //status code of request.
     private StringBuilder body = new StringBuilder();
@@ -22,7 +22,7 @@ public abstract class HttpResponseHandler {
     private String webSocketAccept;
     private Map<String, String> headers = new HashMap<>();
 
-    public String getWebsocketAcceptString() {
+    protected String getWebsocketAcceptString() {
         return webSocketAccept;
     }
 
@@ -54,7 +54,7 @@ public abstract class HttpResponseHandler {
         this.httpVersion = httpVersion;
     }
 
-    public StringBuilder getHeaders() {
+    protected StringBuilder getHeaders() {
         StringBuilder response = new StringBuilder();
         for (String key : headers.keySet()) {
             response.append(key)
