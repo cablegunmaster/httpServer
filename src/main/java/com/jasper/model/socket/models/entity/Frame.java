@@ -90,23 +90,22 @@ public class Frame {
     public boolean isMasked() {
         return isMasked;
     }
-        /*
-    Payload length:  7 bits, 7+16 bits, or 7+64 bits
-
-    The length of the payload data, in bytes: if 0-125, that is the
-    payload length.  If 126, the following 2 bytes interpreted as a 16
-    bit unsigned integer are the payload length.  If 127, the
-    following 8 bytes interpreted as a 64-bit unsigned integer
-    (the most significant bit MUST be 0) are the payload length.  Multibyte
-    length quantities are expressed in network byte order.  The
-    payload length is the length of the extension data + the length of
-    the application data.  The length of the extension data may be
-    zero, in which case the payload length is the length of the
-    application data.
-    */
 
     /**
      * Get unsigned byte from Integer.
+     *
+     *     Payload length:  7 bits, 7+16 bits, or 7+64 bits
+     *
+     *     The length of the payload data, in bytes: if 0-125, that is the
+     *     payload length.  If 126, the following 2 bytes interpreted as a 16
+     *     bit unsigned integer are the payload length.  If 127, the
+     *     following 8 bytes interpreted as a 64-bit unsigned integer
+     *     (the most significant bit MUST be 0) are the payload length.  Multibyte
+     *     length quantities are expressed in network byte order.  The
+     *     payload length is the length of the extension data + the length of
+     *     the application data.  The length of the extension data may be
+     *     zero, in which case the payload length is the length of the
+     *     application data.
      * https://android.jlelse.eu/java-when-to-use-n-8-0xff-and-when-to-use-byte-n-8-2efd82ae7dd7
      */
     private void decodeMessage() {
