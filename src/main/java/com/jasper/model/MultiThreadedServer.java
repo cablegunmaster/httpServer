@@ -92,13 +92,12 @@ public class MultiThreadedServer implements Runnable {
     }
 
     private String getTimeAsString() {
-        long yourmilliseconds = System.currentTimeMillis();
         SimpleDateFormat sdf = new SimpleDateFormat("MMM dd,yyyy HH:mm");
-        Date resultdate = new Date(yourmilliseconds);
+        Date resultdate = new Date(System.currentTimeMillis());
         return sdf.format(resultdate);
     }
 
-    public void ShutdownConnectionManager(){
+    public void ShutdownConnectionManager() {
         connectionManager.tearDown();
     }
 }

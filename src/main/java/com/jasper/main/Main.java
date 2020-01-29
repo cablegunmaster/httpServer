@@ -1,14 +1,18 @@
 package com.jasper.main;
 
 
+import com.jasper.model.file.FileLoader;
+
+import java.io.InputStream;
+
 public class Main {
 
     public static void main(String[] args) {
 
         Server server = new Server(8081);
 
+        //TODO list.
         //headers lezen werken.
-
         //POST werkende maken.
 
         //server.serve("web");
@@ -17,7 +21,7 @@ public class Main {
         //eigen template engine.
         //feature scope JMustache (replace variabelen).
 
-        //context, uitdaging.
+        //Mustache context, eigen mustache compiler maken?
         //als externe pom includen.
         // {{#waarde}} {{value}} {{/waarde}}
         // {{waarde}} toString valueof Object.
@@ -30,12 +34,12 @@ public class Main {
         //render
 
         //Database bouwen.
-        //10 Request afhandelen met 1 thread, non blocking threads.
+        //10 Request afhandelen met 1 thread, non blocking threads?
 
+        //only does upgrade.
         server.socket("/chat", (req, res) -> {
             //read out request.
             //send back with response?
-
         });
 
         server.get("/hello", (req, res) -> res.write("Hello World1@#$%&#@(%)@#&ëäï"));
@@ -47,12 +51,16 @@ public class Main {
         });
 
         server.get("/", (req, res) -> res.write("Hello World same as index.html This is a string."));
-
         server.get("/hello/test/*", (req, res) -> res.write("Hello World2!"));
-
         server.post("/store", (req, res) -> res.write("Hello World3"));
 
-        server.setGUIVisible(true);
+        server.get("/game", (reg,res) -> res.write(
+                FileLoader.loadFile("header.html") +
+                FileLoader.loadFile("body.html") +
+                        FileLoader.loadFile("footer.html")
+        ));
+
+        server.setGUIVisible(false);
 
         server.start();
     }

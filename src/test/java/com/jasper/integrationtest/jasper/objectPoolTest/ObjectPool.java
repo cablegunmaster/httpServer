@@ -1,4 +1,4 @@
-package com.jasper.model.connection.objectPoolTest;
+package com.jasper.integrationtest.jasper.objectPoolTest;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;

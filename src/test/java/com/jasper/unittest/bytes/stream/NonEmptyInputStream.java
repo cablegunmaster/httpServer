@@ -1,4 +1,4 @@
-package com.jasper.model.socket.models.entity;
+package com.jasper.unittest.bytes.stream;
 
 import javax.annotation.Nonnull;
 import java.io.FilterInputStream;

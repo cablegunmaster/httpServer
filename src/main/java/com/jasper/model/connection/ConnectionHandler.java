@@ -6,14 +6,18 @@ import com.jasper.model.HttpRequest;
 import com.jasper.model.http.HttpResponseHandler;
 import com.jasper.model.http.enums.HttpState;
 import com.jasper.model.http.models.HttpParser;
-import com.jasper.model.socket.models.SocketMessageParser;
 import com.jasper.model.socket.SocketResponse;
+import com.jasper.model.socket.models.SocketMessageParser;
 import com.jasper.model.socket.models.entity.Frame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Stack;
@@ -54,6 +58,7 @@ public class ConnectionHandler implements Runnable {
 
             request = readSendRequest(client);
             if (request.getHeaders().containsKey("Connection")) {
+
                 if (request.isUpgradingConnection()) {
                     //do WS
                     readSendSocket(client);
@@ -106,23 +111,24 @@ public class ConnectionHandler implements Runnable {
      */
     private void readSendSocket(Client client) throws IOException {
         SocketMessageParser messageParser = new SocketMessageParser();
-
-        int i;
         client.setKeepConnected(true);
         OutputStream out = client.getClientSocket().getOutputStream();
         InputStream in = client.getClientSocket().getInputStream();
         Stack<Frame> frameStack = client.getFrameStack();
         StringBuffer messageBuffer = client.getMessageBuffer();
 
+
+        int i;
         while ((i = in.read()) != -1 && client.isKeepConnected()) {
 
             messageParser.parseMessage(i);
             if (messageParser.getState() == END_FRAME) {
                 String message = null;
+
                 client.getFrameStack().add(messageParser.getFrame());
                 messageParser.reset();
-                Frame frame = frameStack.peek();
 
+                Frame frame = frameStack.peek();
                 if (frame.isFinMessage()) {
 
                     if (frame.getOpCode().isText() && !frameStack.isEmpty()) {
@@ -145,6 +151,7 @@ public class ConnectionHandler implements Runnable {
                     if ("/c exit".equals(message)) {
                         client.setKeepConnected(false);
                     } else if (message != null) {
+                        //Echo writer, write the SAME message back.
                         writeOutputStream(SocketResponse.createSocketResponse(message, frame.getOpCode()), out);
                     }
                 }

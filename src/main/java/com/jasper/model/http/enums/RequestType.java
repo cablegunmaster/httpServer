@@ -5,7 +5,7 @@ package com.jasper.model.http.enums;
  * Enum for the request
  *
  * if not implemented get a statuscode 405 back meaning:(METHOD_NOT_ALLOWED),
- * The function is not yet implemented.
+ * Not all RequestType implemented.
  */
 public enum RequestType {
     GET,

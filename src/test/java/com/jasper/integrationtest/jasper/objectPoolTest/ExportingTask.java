@@ -1,4 +1,4 @@
-package com.jasper.model.connection.objectPoolTest;
+package com.jasper.integrationtest.jasper.objectPoolTest;
 
 public class ExportingTask implements Runnable {
     private ObjectPool<ExportingProcess> pool;

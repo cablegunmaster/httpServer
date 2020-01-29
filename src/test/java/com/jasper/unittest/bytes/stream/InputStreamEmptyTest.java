@@ -1,6 +1,5 @@
 package com.jasper.unittest.bytes.stream;
 
-import com.jasper.model.socket.models.entity.NonEmptyInputStream;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
