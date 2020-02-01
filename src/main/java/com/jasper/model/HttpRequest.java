@@ -8,7 +8,6 @@ import com.jasper.model.http.enums.StatusCode;
 import java.util.HashMap;
 import java.util.Map;
 
-import static jdk.nashorn.internal.objects.NativeString.trim;
 
 /**
  * Model for a request to be send / used.
@@ -165,7 +164,7 @@ public class HttpRequest {
     }
 
     public void addHeader(String headerName, String headerValue) {
-        this.headers.put(removeSemicolon(headerName), trim(removeRN(headerValue)));
+        this.headers.put(removeSemicolon(headerName), removeRN(headerValue).trim());
     }
 
     public StringBuilder getHeaderName() {
