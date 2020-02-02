@@ -1,4 +1,4 @@
-# httpServer
+# HttpServer - HTTPErath
 This project contains a HTTP server in beta state.
 Its not meant for production but purely made to learn how the http protocol works in a hands on approach, 
 by building unit tests seeing them fail and looking at the specs on how a HTTP Server should behave.
