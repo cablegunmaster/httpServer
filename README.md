@@ -12,6 +12,7 @@ Working:
 - retrieving files on resource location.
 
 Todo:
+- SEND Files which are required by a HTML page to be included to be send.
 - POST request with form data.
 - POST with binary data.
 - check if the single frame DROP is implemented in a good way
