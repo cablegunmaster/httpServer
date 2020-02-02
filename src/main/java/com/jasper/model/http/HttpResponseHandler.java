@@ -60,7 +60,8 @@ public abstract class HttpResponseHandler {
         for (String key : headers.keySet()) {
             response.append(key)
                     .append(":")
-                    .append(headers.get(key));
+                    .append(headers.get(key))
+                    .append(LINE_END);
         }
         return response;
     }
@@ -70,7 +71,7 @@ public abstract class HttpResponseHandler {
                 getStatusCode().getStatusCodeNumber() +
                 SPACE +
                 getStatusCode().getDescription() + LINE_END +
-                addHeaders() + LINE_END + //Add Additional Headers.
+                addHeaders() + //Add Additional Headers.
                 "Content-Length: " + getContentLength() + LINE_END +
                 "Content-Type: " + getContentType();
     }

@@ -10,6 +10,8 @@ import java.util.concurrent.Executors;
  * Created by Jasper Lankhorst on 17-11-2016.
  * All the operation done on the object.
  */
+
+//TODO implement this one if needed. not yet correctly implemented.
 public class ConnectionManager {
 
     private Controller controller;

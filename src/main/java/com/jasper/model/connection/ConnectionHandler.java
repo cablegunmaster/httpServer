@@ -23,6 +23,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Stack;
 
 import static com.jasper.model.http.enums.SocketMessageState.END_FRAME;
@@ -34,7 +37,7 @@ public class ConnectionHandler implements Runnable {
 
     private final static Logger LOG = LoggerFactory.getLogger(RequestHandler.class);
     private final Client client;
-    private MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
+    private static List<Client> clientList = Collections.synchronizedList(new ArrayList<Client>()); //threadsafe list.
 
     private RequestHandler requestHandler;
 
@@ -45,6 +48,7 @@ public class ConnectionHandler implements Runnable {
 
     @Override
     public void run() {
+        clientList.add(client);
         processClient(client);
     }
 
@@ -80,6 +84,8 @@ public class ConnectionHandler implements Runnable {
         } finally {
             LOG.info("End of request on [" + Thread.currentThread().getName() + "]");
 
+            clientList.remove(client);
+
             try {
 
                 if (in != null) {
@@ -113,14 +119,16 @@ public class ConnectionHandler implements Runnable {
      *               Read the next 64 bits and interpret those as an unsigned integer (The most significant bit MUST be 0). You're done.
      *               https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_servers
      */
-    private void readSendSocket(Client client) throws IOException {
+    private void readSendSocket(@Nonnull Client client) throws IOException {
         SocketMessageParser messageParser = new SocketMessageParser();
         client.setKeepConnected(true);
-        OutputStream out = client.getClientSocket().getOutputStream();
-        InputStream in = client.getClientSocket().getInputStream();
+
+        Socket socket = client.getClientSocket();
+        OutputStream out = socket.getOutputStream();
+        InputStream in = socket.getInputStream();
+
         Stack<Frame> frameStack = client.getFrameStack();
         StringBuffer messageBuffer = client.getMessageBuffer();
-
 
         int i;
         while ((i = in.read()) != -1 && client.isKeepConnected()) {
@@ -152,14 +160,20 @@ public class ConnectionHandler implements Runnable {
                         }
                     }
 
-                    if ("/c exit".equals(message)) {
+                    if ("disconnect".equals(message)) {
                         client.setKeepConnected(false);
                     } else if (message != null) {
                         //Echo writer, write the SAME message back.
-                        writeOutputStream(SocketResponse.createSocketResponse(message, frame.getOpCode()), out);
+
+                        for (Client chat : clientList) {
+
+                            //only send to other people
+                            if(!chat.getClientSocket().equals(socket)) {
+                                writeOutputStream(SocketResponse.createSocketResponse(message, frame.getOpCode()), chat.getClientSocket().getOutputStream());
+                            }
+                        }
                     }
                 }
-
             }
         }
     }

@@ -23,7 +23,7 @@ public class UpgradeHttpResponse extends HttpResponseHandler {
                 SPACE +
                 StatusCode.SWITCHING_PROTOCOL.getDescription() +
                 LINE_END +
-                addHeaders() + LINE_END +
+                addHeaders() +
                 "Upgrade: websocket" + LINE_END +
                 "Connection: Upgrade" + LINE_END +
                 "Sec-WebSocket-Accept: " + getWebsocketAcceptString() +
