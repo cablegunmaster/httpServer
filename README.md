@@ -14,3 +14,5 @@ Working:
 Todo:
 - POST request with form data.
 - POST with binary data.
+- check if the single frame DROP is implemented in a good way
+- check multiframe Socket requests. If 1 message exist of multiple frames, does it go back to 1 message and handles on a right way?
