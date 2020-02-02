@@ -3,8 +3,10 @@ package com.jasper.model.connection;
 import com.jasper.controller.Controller;
 import com.jasper.model.Client;
 import com.jasper.model.HttpRequest;
+import com.jasper.model.file.FileLoader;
 import com.jasper.model.http.HttpResponseHandler;
 import com.jasper.model.http.enums.HttpState;
+import com.jasper.model.http.enums.StatusCode;
 import com.jasper.model.http.models.HttpParser;
 import com.jasper.model.socket.SocketResponse;
 import com.jasper.model.socket.models.SocketMessageParser;
@@ -12,6 +14,7 @@ import com.jasper.model.socket.models.entity.Frame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.annotation.Nonnull;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,6 +34,7 @@ public class ConnectionHandler implements Runnable {
 
     private final static Logger LOG = LoggerFactory.getLogger(RequestHandler.class);
     private final Client client;
+    private MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
 
     private RequestHandler requestHandler;
 
@@ -169,22 +173,73 @@ public class ConnectionHandler implements Runnable {
     }
 
     private HttpRequest readSendRequest(Client client) throws IOException {
-
         //Initial request.
         HttpRequest request = readInputStream(client.getClientSocket().getInputStream());
+        OutputStream out = client.getClientSocket().getOutputStream();
+
         requestHandler.handleSocketHandlers(request, client.getClientSocket());
         HttpResponseHandler responseHandler = requestHandler.handleRequest(request);
-
         if (responseHandler.getHttpVersion() != null &&
                 responseHandler.getHttpVersion().equals("1.1") &&
                 request.getHeaders().get("Connection").equals("keep-alive")) {
             responseHandler.addHeader("Connection", "keep-alive");
         }
 
-        OutputStream out = client.getClientSocket().getOutputStream();
-        out.write(responseHandler.getResponse().getBytes(UTF_8));
+        //LOAD CSS AND JS Files.
+        if (isFileRequestToBeAttached(request)) {
+            String file = FileLoader.loadFile(request.getPath());
 
+            if (file.length() != 0) {
+                responseHandler.setStatusCode(StatusCode.OK);
+                responseHandler.setHeaders(request.getHeaders());
+                responseHandler.setContentType(getContentType(request.getPath()));
+                responseHandler.overWriteBody(file);
+            }
+        }
+
+
+        out.write(responseHandler.getResponse().getBytes(UTF_8));
         return request;
+    }
+
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types
+    @Nonnull
+    private String getContentType(String path) {
+        String mimeType = "";
+        switch (getExtension(path)) {
+            case "png":
+                mimeType = "image/png";
+                break;
+            case "css":
+                mimeType = "text/css";
+                break;
+            case "jpeg":
+            case "jpg":
+                mimeType = "image/jpeg";
+                break;
+            case "js":
+                mimeType = "text/javascript";
+                break;
+            case "html":
+                mimeType = "text/html; charset=utf-8";
+                break;
+            default:
+                //  is the default value for all other cases. An unknown file type should use this type.
+                //  Browsers pay a particular care when manipulating these files,
+                //  attempting to safeguard the user to prevent dangerous behaviors.
+                mimeType = "application/octet-stream";
+                break;
+        }
+        return mimeType;
+    }
+
+    public String getExtension(String path) {
+        String[] filesplit = path.split("\\.");
+        if (filesplit.length > 1) {
+            return filesplit[filesplit.length - 1];
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -212,6 +267,12 @@ public class ConnectionHandler implements Runnable {
         }
 
         return request;
+    }
+
+    public boolean isFileRequestToBeAttached(HttpRequest request) {
+        return !request.getPath().isEmpty() &&
+                !request.getPath().equals("/") &&
+                !request.isUpgradingConnection();
     }
 
 }

@@ -1,5 +1,32 @@
 <!DOCTYPE html>
 <head>
-    <title>Dit is mijn header</title>
+    <title>Mancala Game</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/style.css">
+
+    <script
+            src="https://code.jquery.com/jquery-3.4.1.min.js"
+            integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+            crossorigin="anonymous"></script>
 </head>
+
 <body>
+<div id="page-wrapper">
+    <h1>Mancala game</h1>
+
+    <div id="status">Conecting to the app…</div>
+
+    <div id="game-board"></div>
+
+    <label for="messages">Messages:</label>
+    <ul id="messages"></ul>
+
+    <form id="form-msg" action="#" method="post">
+
+        <label for="txtMsg">Messages:</label>
+        <textarea id="txtMsg" placeholder="Write your msg here!" required></textarea>
+
+        <button type="submit">Send msg</button>
+        <button type="button" id="close">Close connection</button>
+    </form>

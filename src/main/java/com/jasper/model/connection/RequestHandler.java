@@ -30,7 +30,6 @@ public class RequestHandler {
         IRequestHandler handler = getHandlerByRequestMethod(request);
 
         HttpState state = request.getState();
-
         if (handler != null) {
             handler.handle(request, response);
             response.setStatusCode(ACCEPTED);

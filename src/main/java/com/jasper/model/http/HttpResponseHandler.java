@@ -20,6 +20,7 @@ public abstract class HttpResponseHandler {
     private StringBuilder body = new StringBuilder();
     private String httpVersion;
     private String webSocketAccept;
+    private String contentType = "text/html; charset=utf-8";
     private Map<String, String> headers = new HashMap<>();
 
     protected String getWebsocketAcceptString() {
@@ -54,7 +55,7 @@ public abstract class HttpResponseHandler {
         this.httpVersion = httpVersion;
     }
 
-    protected StringBuilder getHeaders() {
+    protected StringBuilder addHeaders() {
         StringBuilder response = new StringBuilder();
         for (String key : headers.keySet()) {
             response.append(key)
@@ -64,8 +65,34 @@ public abstract class HttpResponseHandler {
         return response;
     }
 
+    protected String getHeaders() {
+        return "HTTP/1.1 " +
+                getStatusCode().getStatusCodeNumber() +
+                SPACE +
+                getStatusCode().getDescription() + LINE_END +
+                addHeaders() + LINE_END + //Add Additional Headers.
+                "Content-Length: " + getContentLength() + LINE_END +
+                "Content-Type: " + getContentType();
+    }
+
     public void addHeader(String key, String value) {
         this.headers.put(key, value);
+    }
+
+    public void setHeaders(Map<String, String> headers) {
+        this.headers = headers;
+    }
+
+    public void overWriteBody(String s) {
+        body = new StringBuilder(s);
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 
     public String getResponse() {
@@ -73,4 +100,6 @@ public abstract class HttpResponseHandler {
     }
 
     public abstract String toHttpResponse();
+
+    public abstract int getContentLength();
 }

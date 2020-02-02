@@ -21,23 +21,15 @@ public class HttpResponse extends HttpResponseHandler {
     @Override
     public String toHttpResponse() {
 
-        LOG.info("Create http response test length:{}", this.getContentLength());
-
-        return "HTTP/1.1 " +
-                getStatusCode().getStatusCodeNumber() +
-                SPACE +
-                getStatusCode().getDescription() + LINE_END +
-                getHeaders() + LINE_END + //Add Additional Headers.
-                "Content-Length: " + getContentLength() + LINE_END +
-                "Content-Type: text/html; charset=utf-8" +
+        LOG.debug("Create http response length: {} ", this.getContentLength());
+        return getHeaders() +
                 DOUBLE_LINE_END +
                 getBody() +
                 DOUBLE_LINE_END;
     }
 
     //get length of bytes.
-    @Nonnull
-    private Integer getContentLength() {
+    public int getContentLength() {
         return getBody().getBytes(StandardCharsets.UTF_8).length;
     }
 }

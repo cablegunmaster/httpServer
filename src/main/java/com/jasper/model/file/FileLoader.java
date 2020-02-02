@@ -13,6 +13,7 @@ import java.net.URL;
 public class FileLoader {
 
     private final static Logger LOG = LoggerFactory.getLogger(FileLoader.class);
+    private final static String NEW_LINE = "\n";
 
     @Nonnull
     //relative path from this location.
@@ -21,15 +22,18 @@ public class FileLoader {
         URL resource = FileLoader.class.getResource("../../../../" + inputFile);
         StringBuilder contentOfFile = new StringBuilder();
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.openStream()))) {
-            String line = null;
+        if(resource != null) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.openStream()))) {
+                String line = null;
 
-            while ((line = reader.readLine()) != null) {
-                contentOfFile.append(line);
+                while ((line = reader.readLine()) != null) {
+                    contentOfFile.append(line)
+                            .append(NEW_LINE);
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
         return contentOfFile.toString();

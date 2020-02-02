@@ -3,13 +3,11 @@ package com.jasper.main;
 
 import com.jasper.model.file.FileLoader;
 
-import java.io.InputStream;
-
 public class Main {
 
     public static void main(String[] args) {
 
-        Server server = new Server(8081);
+        Server server = new Server(8080);
 
         //TODO list.
         //headers lezen werken.
@@ -50,13 +48,13 @@ public class Main {
             res.write("Hello World INDEX.html");
         });
 
-        server.get("/", (req, res) -> res.write("Hello World same as index.html This is a string."));
+        //server.get("/", (req, res) -> res.write("Hello World same as index.html This is a string."));
         server.get("/hello/test/*", (req, res) -> res.write("Hello World2!"));
         server.post("/store", (req, res) -> res.write("Hello World3"));
 
-        server.get("/game", (reg,res) -> res.write(
+        server.get("/", (reg, res) -> res.write(
                 FileLoader.loadFile("header.html") +
-                FileLoader.loadFile("body.html") +
+                        FileLoader.loadFile("body.html") +
                         FileLoader.loadFile("footer.html")
         ));
 
