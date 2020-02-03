@@ -61,6 +61,7 @@ public abstract class HttpResponseHandler {
             response.append(key)
                     .append(":")
                     .append(headers.get(key))
+                    .append(";")
                     .append(LINE_END);
         }
         return response;
@@ -71,9 +72,9 @@ public abstract class HttpResponseHandler {
                 getStatusCode().getStatusCodeNumber() +
                 SPACE +
                 getStatusCode().getDescription() + LINE_END +
-                addHeaders() + //Add Additional Headers.
+                addHeaders() +
                 "Content-Length: " + getContentLength() + LINE_END +
-                "Content-Type: " + getContentType();
+                "Content-Type: " + getContentType() + LINE_END;
     }
 
     public void addHeader(String key, String value) {

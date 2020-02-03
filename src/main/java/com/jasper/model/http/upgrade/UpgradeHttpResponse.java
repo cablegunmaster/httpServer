@@ -23,13 +23,14 @@ public class UpgradeHttpResponse extends HttpResponseHandler {
                 SPACE +
                 StatusCode.SWITCHING_PROTOCOL.getDescription() +
                 LINE_END +
-                addHeaders() +
+                "Sec-WebSocket-Protocol: chat" + LINE_END +
                 "Upgrade: websocket" + LINE_END +
                 "Connection: Upgrade" + LINE_END +
                 "Sec-WebSocket-Accept: " + getWebsocketAcceptString() +
                 LINE_END +
                 LINE_END;
     }
+
 
     @Override
     public int getContentLength() {

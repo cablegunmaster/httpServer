@@ -192,12 +192,12 @@ public class Board {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < playingField.length; i++) {
             if (isMancalaStore(i)) {
-                sb.append("\r\n");
-                sb.append("M").append(i);
+                sb.append("<br/>");
+                sb.append("Pit").append(i);
             }else{
-                sb.append(" - ").append(i);
+                sb.append(" - Mov").append(i);
             }
-            sb.append("(").append(getPlayingField()[i]).append(")");
+            sb.append("(S").append(getPlayingField()[i]).append(")");
         }
         return sb.toString();
     }

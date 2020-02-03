@@ -1,6 +1,8 @@
 package com.jasper.model.connection;
 
 import com.jasper.controller.Controller;
+import com.jasper.mancala.controller.MancalaControllerActivePlayer;
+import com.jasper.mancala.controller.MancalaControllerPassivePlayer;
 import com.jasper.model.Client;
 import com.jasper.model.HttpRequest;
 import com.jasper.model.file.FileLoader;
@@ -14,7 +16,6 @@ import com.jasper.model.socket.models.entity.Frame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.activation.MimetypesFileTypeMap;
 import javax.annotation.Nonnull;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -40,6 +41,8 @@ public class ConnectionHandler implements Runnable {
     private static List<Client> clientList = Collections.synchronizedList(new ArrayList<Client>()); //threadsafe list.
 
     private RequestHandler requestHandler;
+    private MancalaControllerActivePlayer mancalaControllerCurrentPlayer = new MancalaControllerActivePlayer();
+    private MancalaControllerPassivePlayer mancalaControllerOtherPlayer = new MancalaControllerPassivePlayer();
 
     ConnectionHandler(Client client, Controller controller) {
         this.requestHandler = new RequestHandler(controller);
@@ -164,13 +167,32 @@ public class ConnectionHandler implements Runnable {
                         client.setKeepConnected(false);
                     } else if (message != null) {
                         //Echo writer, write the SAME message back.
+                        String output = "general error";
 
-                        for (Client chat : clientList) {
+                        //STATE PATTERN vs Strategy pattern.
 
-                            //only send to other people
-                            if(!chat.getClientSocket().equals(socket)) {
-                                writeOutputStream(SocketResponse.createSocketResponse(message, frame.getOpCode()), chat.getClientSocket().getOutputStream());
+                        try {
+                            if (message.startsWith("!")) {
+                                output = mancalaControllerCurrentPlayer.actionController("!", message.split(" "), client);
+                                writeOutputStream(SocketResponse.createSocketResponse(output, frame.getOpCode()), out);
                             }
+
+                            for (Client chat : clientList) {
+
+                                //only send to other people
+                                if (message.startsWith("!") && !chat.equals(client)) {
+                                    //send message to others.
+                                    output = mancalaControllerOtherPlayer.actionController("!", message.split(" "), chat);
+                                    writeOutputStream(SocketResponse.createSocketResponse(output, frame.getOpCode()), chat.getClientSocket().getOutputStream());
+                                }
+
+                                //Chat msgs to go for everyone.
+                                if (!chat.getClientSocket().equals(socket) && !message.startsWith("!")) {
+                                    writeOutputStream(SocketResponse.createSocketResponse(message, frame.getOpCode()), chat.getClientSocket().getOutputStream());
+                                }
+                            }
+                        }catch (IllegalArgumentException ex){
+                            LOG.info("wrong argument entered");
                         }
                     }
                 }
@@ -199,7 +221,11 @@ public class ConnectionHandler implements Runnable {
             responseHandler.addHeader("Connection", "keep-alive");
         }
 
-        //LOAD CSS AND JS Files.
+
+        //TODO check why CSS has issues loading, header issues.
+        //LOAD CSS AND
+        //LOAD CSS has an issue with some header for some weird reason.
+        // JS File seems okay.
         if (isFileRequestToBeAttached(request)) {
             String file = FileLoader.loadFile(request.getPath());
 
@@ -208,6 +234,10 @@ public class ConnectionHandler implements Runnable {
                 responseHandler.setHeaders(request.getHeaders());
                 responseHandler.setContentType(getContentType(request.getPath()));
                 responseHandler.overWriteBody(file);
+
+                //TODO have to be better fixed.
+                responseHandler.addHeader("Pragma", "no-cache");
+                responseHandler.addHeader("Cache-Control", "no-cache");
             }
         }
 

@@ -1,18 +1,18 @@
 //inspired by Diogo Souza: https://www.htmlgoodies.com/html5/getting-started-with-websockets.html
 
-//TODO close socket properly from server when socket.close is called.
-//TODO add board to display the game.
-
 //aaanpak eerst backend
 // test als het moeilijke stukken komt.
 // frontend verder toen ik op backend vastliep qua communicatie.
 //mooie echo server is het nu.
+//Commando's bijna klaar.
 
+//TODO needs nullchecks if all element are there, big assumption they are, for now it can be but it breaks too easily.
 var form = document.getElementById('form-msg');
 var txtMsg = document.getElementById('txtMsg');
 var listMsgs = document.getElementById('messages');
 var socketStatus = document.getElementById('status');
 var btnDisconnect = document.getElementById('close');
+var btnSubmit = document.getElementById("submit-message");
 var socket;
 
 function init() {
@@ -36,6 +36,7 @@ function init() {
         if (socket.readyState === WebSocket.OPEN) {
             var msg = event.data;
             listMsgs.innerHTML += '<li class="received"><span>Received:</span>' + msg + '</li>';
+            setScrollbarDown();
         }
     };
 
@@ -44,14 +45,15 @@ function init() {
 
 form.onsubmit = function (e) {
     e.preventDefault();
+    sendMessage();
+};
 
-    if (socket.readyState === WebSocket.OPEN) {
-        var msg = txtMsg.value;
-        socket.send(msg);
-        listMsgs.innerHTML += '<li class="sent"><span>Sent:</span>' + msg + '</li>';
+txtMsg.onkeydown = function (e) {
+    if (e.keyCode == 13) {
+        // submit
+        e.preventDefault();
+        sendMessage();
     }
-    txtMsg.value = '';
-    return false;
 };
 
 btnDisconnect.onclick = function (e) {
@@ -73,16 +75,30 @@ window.onbeforeunload = function () {
     }
 };
 
-
 function displayCloseStatus() {
     socketStatus.innerHTML = 'Disconnected from the WebSocket.';
     socketStatus.className = 'closed';
 }
 
 function displayOpenStatus() {
-    socketStatus.innerHTML = 'Connected to: /chat';
+    socketStatus.innerHTML = 'Connected to: Websocket HTTPserver - Mancala';
     socketStatus.className = 'open';
 }
 
+function sendMessage() {
+    if (socket.readyState === WebSocket.OPEN && txtMsg.value.length > 0) {
+        var msg = txtMsg.value;
+        socket.send(msg);
+        listMsgs.innerHTML += '<li class="sent"><span>Sent:</span>' + msg + '</li>';
+    }
+    txtMsg.value = '';
+    setScrollbarDown();
+    return false;
+}
+
+function setScrollbarDown() {
+    //Keep scrollbar always down.
+    listMsgs.scrollTop = listMsgs.scrollHeight;
+}
 
 init();

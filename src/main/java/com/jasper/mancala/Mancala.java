@@ -1,7 +1,10 @@
 package com.jasper.mancala;
 
+import com.jasper.model.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.CheckForNull;
 
 public class Mancala {
 
@@ -18,8 +21,8 @@ public class Mancala {
 
     private Board board;
 
-    private Player player1;
-    private Player player2;
+    private static Player player1;
+    private static Player player2;
 
     //When game starts get default values.
     public Mancala() {
@@ -36,7 +39,7 @@ public class Mancala {
             startGame(getPlayer1(), getPlayer2());
             return getPlayer2().playerNumber;
         }
-        throw new IllegalArgumentException("Game is already running");
+        return -1;
     }
 
     public void startGame(Player playerOne, Player playerTwo) {
@@ -51,7 +54,7 @@ public class Mancala {
         scorePlayer2 = 0;
     }
 
-    public void setMove(int move, int playerNumber) {
+    public String setMove(int move, int playerNumber) {
         Board board = getBoard();
 
         if (checkMoveIsValid(move, playerNumber) && !isGameFinished()) {
@@ -76,17 +79,18 @@ public class Mancala {
                     stones++;
                 }
 
-
                 field = goOneFieldBack(field);
             }
 
         } else if (!isMoveValidOnBoard(move, playerNumber)) {
-            throw new IllegalArgumentException("Illegal move: " + move);
+            return "Illegal move: " + move;
         } else if (playerTurn != playerNumber) {
-            throw new IllegalArgumentException("Its not your turn its player" + playerNumber + " turn");
+            return "Its not your turn its player" + playerNumber + " turn";
         } else if (isGameFinished()) {
-            throw new IllegalArgumentException("Game is already finished");
+            return "Game is finished Player:"+ playerWinning + "has won the game! congrats.";
         }
+        return board.toString() + "<br/>" +
+                "Turn of player "+ playerTurn;
     }
 
     private void addCapturedStonesToMancala(int field) {
@@ -221,5 +225,15 @@ public class Mancala {
 
     public String getName(){
         return "Mancala";
+    }
+
+    @CheckForNull
+    public Player getPlayerByClient(Client client) {
+        if(getPlayer1().getClient().equals(client)){
+            return getPlayer1();
+        }else if(getPlayer2().getClient().equals(client)){
+            return getPlayer2();
+        }
+        return null;
     }
 }
