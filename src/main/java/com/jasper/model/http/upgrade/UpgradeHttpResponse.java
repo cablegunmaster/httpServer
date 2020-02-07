@@ -1,6 +1,6 @@
 package com.jasper.model.http.upgrade;
 
-import com.jasper.model.http.HttpResponseHandler;
+import com.jasper.model.http.HttpResponseBuilder;
 import com.jasper.model.http.enums.StatusCode;
 
 import javax.annotation.Nonnull;
@@ -9,7 +9,7 @@ import javax.annotation.Nonnull;
  * Response for the Socket switching when the upgrade is requested Going from HTTP to websocket protocol,
  * bidirectioneel binair protcol.
  */
-public class UpgradeHttpResponse extends HttpResponseHandler {
+public class UpgradeHttpResponse extends HttpResponseBuilder {
 
     /**
      * Output of the socket response. To send back an socket response??

@@ -1,6 +1,7 @@
 package com.jasper.model.socket.enums;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * %x0 denotes a continuation frame
@@ -12,7 +13,7 @@ import java.util.Arrays;
  * %xA denotes a pong
  * %xB-F are reserved for further control frames
  */
-public enum OpCode {
+public enum OPCode {
     CONTINUATION("0"),
     TEXT("1"),
     BINARY("2"),
@@ -24,11 +25,11 @@ public enum OpCode {
 
     private final String value;
 
-    OpCode(String value) {
+    OPCode(String value) {
         this.value = value;
     }
 
-    public static OpCode findByValue(final String inputString) {
+    public static OPCode findByValue(final String inputString) {
         return Arrays.stream(values())
                 .filter(value -> value.value.equals(inputString))
                 .findFirst()
@@ -40,24 +41,24 @@ public enum OpCode {
         return Integer.parseInt(this.value, 16);
     }
 
+    public boolean isTypeOfControlFrame() {
+        return Objects.equals(this, CLOSE) ||
+                Objects.equals(this, PING) ||
+                Objects.equals(this, PONG);
+    }
     public boolean isPing() {
-        return this.name().equals("PING");
+        return Objects.equals(this, PING);
     }
 
     public boolean isText() {
-        return this.name().equals("TEXT");
+        return Objects.equals(this, TEXT);
     }
 
-    //TODO implement continuation?
     public boolean isContinuation() {
-        return this.name().equals("CONTINUATION");
-    }
-
-    public boolean isControlFrame() {
-        return this.name().equals("CLOSE") || this.name().equals("PING") || this.name().equals("PONG");
+        return Objects.equals(this, CONTINUATION);
     }
 
     public boolean isClose() {
-        return this.name().equals("CLOSE");
+        return Objects.equals(this, CLOSE);
     }
 }

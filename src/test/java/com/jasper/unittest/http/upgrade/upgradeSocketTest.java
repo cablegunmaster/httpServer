@@ -3,7 +3,7 @@ package com.jasper.unittest.http.upgrade;
 import com.jasper.model.HttpRequest;
 import com.jasper.model.http.enums.HttpState;
 import com.jasper.model.http.enums.StateUrl;
-import com.jasper.model.http.models.HttpParser;
+import com.jasper.model.http.models.HttpRequestParser;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -12,13 +12,13 @@ import static org.junit.Assert.assertTrue;
 
 public class upgradeSocketTest {
 
-    private HttpParser parser;
+    private HttpRequestParser parser;
 
     private final String LINE = "\r\n";
 
     @Before
     public void createParser() {
-        parser = new HttpParser();
+        parser = new HttpRequestParser();
     }
 
     @Test

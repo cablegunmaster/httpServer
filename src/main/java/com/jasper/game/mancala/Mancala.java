@@ -1,96 +1,60 @@
-package com.jasper.mancala;
+package com.jasper.game.mancala;
 
-import com.jasper.model.Client;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.jasper.game.IGame;
+import com.jasper.game.Player;
+import com.jasper.model.Request;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
-public class Mancala {
-
-    private final static Logger LOG = LoggerFactory.getLogger(Mancala.class);
+public class Mancala implements IGame {
 
     final static int PLAYER_ONE = 1;
     final static int PLAYER_TWO = 2;
-
-    private int scorePlayer1 = 0;
-    private int scorePlayer2 = 0;
 
     private int playerTurn = 1; //1 always start.
     private int playerWinning;
 
     private Board board;
+    private Player player1;
+    private Player player2;
 
-    private static Player player1;
-    private static Player player2;
+    private boolean gameStarted = false;
 
-    //When game starts get default values.
     public Mancala() {
-        reset();
         setBoard(new Board(6));
     }
 
-    public int addPlayer(Player player) {
-        if (getPlayer1() == null) {
-            setPlayer1(player);
-            return getPlayer1().playerNumber;
-        } else if (getPlayer2() == null) {
-            setPlayer2(player);
-            startGame(getPlayer1(), getPlayer2());
-            return getPlayer2().playerNumber;
-        }
-        return -1;
+    public String getName() {
+        return Object.class.getName();
     }
 
-    public void startGame(Player playerOne, Player playerTwo) {
-        playerOne.setPlayerNumber(1);
-        playerTwo.setPlayerNumber(2);
-        player1 = playerOne;
-        player2 = playerTwo;
-    }
-
-    public void reset() {
-        scorePlayer1 = 0;
-        scorePlayer2 = 0;
-    }
-
-    public String setMove(int move, int playerNumber) {
+    @Override
+    public void setMove(int move, Player player) {
         Board board = getBoard();
 
-        if (checkMoveIsValid(move, playerNumber) && !isGameFinished()) {
+        if (checkMoveIsValid(move, player.getPlayerNumber()) && !isGameFinished()) {
             int amount = board.getFromPit(move);
             int field = goOneFieldBack(move);
 
             for (int stones = amount; stones > 0; stones--) {
 
-                if (canAddStoneOnCurrentField(field, playerNumber)) {
+
+                if (canAddStoneOnCurrentField(field, player.getPlayerNumber()) &&
+                        stones == 1 && !isFieldOnMancalaStore(field, player.getPlayerNumber())) {
                     board.addStoneOnField(field, 1);
-
-                    if (stones == 1 && !isFieldOnMancalaStore(field, playerNumber)) {
-                        if (board.getStoneAmountFromField(field) == 1) {
-                            addCapturedStonesToMancala(field);
-                            board.addStoneOnField(field, -1);
-                        }
-                        switchTurn();
+                    if (board.getStoneAmountFromField(field) == 1) {
+                        addCapturedStonesToMancala(field);
+                        board.addStoneOnField(field, -1);
                     }
-
+                    switchTurn();
                 } else {
                     //ifOnOtherPlayerMancaladontdrop.
                     stones++;
                 }
-
                 field = goOneFieldBack(field);
             }
-
-        } else if (!isMoveValidOnBoard(move, playerNumber)) {
-            return "Illegal move: " + move;
-        } else if (playerTurn != playerNumber) {
-            return "Its not your turn its player" + playerNumber + " turn";
-        } else if (isGameFinished()) {
-            return "Game is finished Player:"+ playerWinning + "has won the game! congrats.";
         }
-        return board.toString() + "<br/>" +
-                "Turn of player "+ playerTurn;
     }
 
     private void addCapturedStonesToMancala(int field) {
@@ -157,27 +121,11 @@ public class Mancala {
                 && board.fieldHasStones(move);
     }
 
-    public int getScorePlayer1() {
-        return scorePlayer1;
-    }
-
-    public void setScorePlayer1(int scorePlayer1) {
-        this.scorePlayer1 = scorePlayer1;
-    }
-
-    public int getScorePlayer2() {
-        return scorePlayer2;
-    }
-
-    public void setScorePlayer2(int scorePlayer2) {
-        this.scorePlayer2 = scorePlayer2;
-    }
-
     public boolean isGameFinished() {
         Board board = getBoard();
 
         if (board.isOneSideEmpty()) {
-            if (board.getPlayerWinning() == PLAYER_ONE && getScorePlayer1() >= getScorePlayer2()) {
+            if (board.getPlayerWinning() == PLAYER_ONE) {
                 setPlayerWinning(PLAYER_ONE);
             } else {
                 setPlayerWinning(PLAYER_TWO);
@@ -191,6 +139,7 @@ public class Mancala {
         return playerWinning;
     }
 
+    @Nonnull
     public Board getBoard() {
         return board;
     }
@@ -207,6 +156,66 @@ public class Mancala {
         this.playerTurn = playerTurn;
     }
 
+    @Override
+    public void startGame() {
+       gameStarted = true;
+    }
+
+    @CheckForNull
+    public Player getPlayerByRequest(Request client) {
+        if (getPlayer1() != null &&
+                getPlayer1().getClient().equals(client)) {
+            return getPlayer1();
+        } else {
+            if (getPlayer2() != null &&
+                    getPlayer2().getClient().equals(client)) {
+                return getPlayer2();
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean isGameFull() {
+        return getPlayer1() != null && getPlayer2() != null;
+    }
+
+    @Override
+    public boolean isStarted() {
+        return !isGameFinished() && isGameStarted();
+    }
+
+    @Override
+    public String getHelpMessage() {
+        return "command list overview: <br/>" +
+                "!list - shows all games <br/>" +
+                "!create - create new game <br/>" +
+                "!join 'number' - join a game <br/>" +
+                "!move 'number' - make a move in game<br/>" +
+                "!show - return list of valid moves" +
+                "!turn - return which turn it is";
+    }
+
+    @Override
+    public void addPlayer(Player player) {
+        if (getPlayer1() == null) {
+            setPlayer1(player);
+        } else if (getPlayer2() == null) {
+            setPlayer2(player);
+        }
+    }
+
+    @Override
+    public boolean contains(Player player) {
+        return player.equals(player1) || player.equals(player2);
+    }
+
+    @Override
+    public String getBoardContent() {
+        return board.toString();
+    }
+
+    @CheckForNull
     public Player getPlayer1() {
         return player1;
     }
@@ -215,6 +224,7 @@ public class Mancala {
         this.player1 = player1;
     }
 
+    @CheckForNull
     public Player getPlayer2() {
         return player2;
     }
@@ -223,17 +233,7 @@ public class Mancala {
         this.player2 = player2;
     }
 
-    public String getName(){
-        return "Mancala";
-    }
-
-    @CheckForNull
-    public Player getPlayerByClient(Client client) {
-        if(getPlayer1().getClient().equals(client)){
-            return getPlayer1();
-        }else if(getPlayer2().getClient().equals(client)){
-            return getPlayer2();
-        }
-        return null;
+    public boolean isGameStarted() {
+        return gameStarted;
     }
 }

@@ -1,7 +1,7 @@
 package com.jasper.unittest.mancala;
 
-import com.jasper.mancala.Board;
-import com.jasper.mancala.Mancala;
+import com.jasper.game.mancala.Board;
+import com.jasper.game.mancala.Mancala;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -13,29 +13,6 @@ public class MancalaTest {
     public void InitBoardConditionTurn() {
         mancala = new Mancala();
         Assert.assertEquals(mancala.getPlayerTurn(), 1); //p1 always begins.
-    }
-
-    @Test
-    public void InitBoardConditionStonesDefault() {
-        mancala = new Mancala();
-        Assert.assertEquals(mancala.getScorePlayer1(), 0);
-        Assert.assertEquals(mancala.getScorePlayer2(), 0);
-    }
-
-    @Test
-    public void player1CheckScore() {
-        mancala = new Mancala();
-        mancala.setScorePlayer1(200);
-        mancala.setScorePlayer2(100);
-        Assert.assertTrue("Player 1 wins ", mancala.getScorePlayer1() > mancala.getScorePlayer2());
-    }
-
-    @Test
-    public void player2CheckScore() {
-        mancala = new Mancala();
-        mancala.setScorePlayer1(100);
-        mancala.setScorePlayer2(200);
-        Assert.assertTrue("Player 2 wins ", mancala.getScorePlayer2() > mancala.getScorePlayer1());
     }
 
     @Test

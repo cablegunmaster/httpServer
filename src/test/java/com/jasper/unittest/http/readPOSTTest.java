@@ -2,7 +2,7 @@ package com.jasper.unittest.http;
 
 import com.jasper.model.HttpRequest;
 import com.jasper.model.http.enums.HttpState;
-import com.jasper.model.http.models.HttpParser;
+import com.jasper.model.http.models.HttpRequestParser;
 import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,17 +14,17 @@ import static org.junit.Assert.assertTrue;
 
 public class readPOSTTest {
 
-    private HttpParser parser;
+    private HttpRequestParser parser;
 
     private final String LINE = "\r\n";
 
     @Before
     public void createParser() {
-        parser = new HttpParser();
+        parser = new HttpRequestParser();
     }
 
     @Test
-    public void HttpPOSTVariableTest() {
+    public void testHTTPRequestParserIsValid() {
         String stringToTest = "POST /foo.php HTTP/1.1"+ LINE +
                 "Host: localhost"+ LINE +
                 "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)"+ LINE +
@@ -55,7 +55,7 @@ public class readPOSTTest {
     }
 
     @Test
-    public void httpPOSTMultipleVariableTest() {
+    public void testMultipleVariableTest() {
         String stringToTest = "POST /foo.php HTTP/1.1"+ LINE +
                 "Host: localhost"+ LINE +
                 "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)"+ LINE +
@@ -88,7 +88,7 @@ public class readPOSTTest {
     }
 
     @Test
-    public void httpPOSTTooShortTest() {
+    public void testHttpPOSTIsTooShort() {
         String stringToTest = "POST /foo.php HTTP/1.1"+ LINE +
                 "Host: localhost"+ LINE +
                 "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)"+ LINE +

@@ -1,7 +1,7 @@
 package com.jasper.controller;
 
-import com.jasper.model.Client;
-import com.jasper.model.IRequestHandler;
+import com.jasper.model.Request;
+import com.jasper.model.IRequestBuilder;
 import com.jasper.model.MultiThreadedServer;
 import com.jasper.model.connection.ConnectionManager;
 import com.jasper.view.View;
@@ -17,19 +17,19 @@ import java.util.Map;
  */
 public class Controller {
 
+    private View view;
+
     private MultiThreadedServer multiThreadedServer;
     private Thread multiThreadedServerThread;
     private int portNumber;
 
-    private Map<String, IRequestHandler> getMap;
-    private Map<String, IRequestHandler> postMap;
-    private Map<String, IRequestHandler> socketMap;
+    private Map<String, IRequestBuilder> getMap;
+    private Map<String, IRequestBuilder> postMap;
+    private Map<String, IRequestBuilder> socketMap;
 
-    private static Boolean isRestartProcessLocked = false;
     private boolean guiVisible = false;
-
+    private static Boolean isRestartProcessLocked = false;
     private static ConnectionManager connectionManager;
-    private View view;
 
     /**
      * Java.Controller class
@@ -37,9 +37,9 @@ public class Controller {
      * @param portNumber portNumber
      */
     public Controller(Integer portNumber,
-                      @Nonnull Map<String, IRequestHandler> getMap,
-                      @Nonnull Map<String, IRequestHandler> postMap,
-                      @Nonnull Map<String, IRequestHandler> socketMap,
+                      @Nonnull Map<String, IRequestBuilder> getMap,
+                      @Nonnull Map<String, IRequestBuilder> postMap,
+                      @Nonnull Map<String, IRequestBuilder> socketMap,
                       boolean guiVisible) {
 
         if (guiVisible) {
@@ -161,20 +161,20 @@ public class Controller {
     /**
      * Add 'clientWorkerRunnable' connections to the list.
      */
-    public void addConnection(@Nonnull Client client) {
+    public void addConnection(@Nonnull Request client) {
         connectionManager.addConnection(client);
     }
 
     @Nonnull
-    public Map<String, IRequestHandler> getGetMap() { return getMap; }
+    public Map<String, IRequestBuilder> getGetMap() { return getMap; }
 
     @Nonnull
-    public Map<String, IRequestHandler> getPostMap() {
+    public Map<String, IRequestBuilder> getPostMap() {
         return postMap;
     }
 
     @Nonnull
-    public Map<String, IRequestHandler> getSocketMap() {
+    public Map<String, IRequestBuilder> getSocketMap() {
         return socketMap;
     }
 }

@@ -5,6 +5,8 @@ import com.jasper.model.http.enums.Protocol;
 import com.jasper.model.http.enums.RequestType;
 import com.jasper.model.http.enums.StateUrl;
 import com.jasper.model.http.enums.StatusCode;
+
+import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,7 +14,7 @@ import java.util.Map;
 /**
  * Model for a request to be send / used.
  */
-public class HttpRequest {
+public class HttpRequest extends Request {
 
     private HttpState state = HttpState.READ_METHOD;
     private StringBuilder stateBuilder = new StringBuilder();
@@ -23,10 +25,10 @@ public class HttpRequest {
 
     //URL variables.
     private StateUrl stateUrl = StateUrl.READ_PROTOCOL;
+    private Integer port = 80; //80 is default port.
     private Protocol protocol = null;
     private String authority = null; //is host +":" +  port
     private String host = null; //name of website, minus Protocol or port
-    private Integer port = 80; //80 is default port.
     private String path = null;
     private String query = null; //everything behind the question mark on GET request
     private String filename = null; //path + query.
@@ -39,13 +41,16 @@ public class HttpRequest {
     private Map<String, String> headers = new HashMap<>();
     private StringBuilder headerName = new StringBuilder();
     private StringBuilder headerValue = new StringBuilder();
-    private boolean upgradingConnection = false;
+
     private String upgradeSecureKeyAnswer = null;
     private String queryName = null;
 
-
-    //HttpVersion number.
+    private boolean upgradingConnection = false;
     private String httpVersion;
+
+    public HttpRequest(Socket socket) {
+        super(socket);
+    }
 
     public void setRequestMethod(RequestType requestMethod) {
         this.requestMethod = requestMethod;
@@ -159,6 +164,10 @@ public class HttpRequest {
         this.httpVersion = httpVersion;
     }
 
+    public boolean hasHeader(String key) {
+        return headers != null && headers.containsKey(key);
+    }
+
     public Map<String, String> getHeaders() {
         return headers;
     }
@@ -209,7 +218,7 @@ public class HttpRequest {
     }
 
     public boolean isUpgradingConnection() {
-        return upgradingConnection;
+        return upgradingConnection && this.hasHeader("Connection");
     }
 
     public void setUpgradingConnection(boolean upgradingConnection) {

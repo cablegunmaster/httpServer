@@ -9,9 +9,9 @@ import java.nio.charset.StandardCharsets;
 /**
  * Http response object for sending back a HTTP response for GET or POST.
  */
-public class HttpResponse extends HttpResponseHandler {
+public class HttpResponse extends HttpResponseBuilder {
 
-    private final static Logger LOG = LoggerFactory.getLogger(HttpResponseHandler.class);
+    private final static Logger LOG = LoggerFactory.getLogger(HttpResponseBuilder.class);
 
     /**
      * Output of the whole file, the full request as a String to be send back to the client. TODO improve this toString function to be able
@@ -20,7 +20,6 @@ public class HttpResponse extends HttpResponseHandler {
     @Nonnull
     @Override
     public String toHttpResponse() {
-
         LOG.debug("Create http response length: {} ", this.getContentLength());
         return getHeaders() +
                 DOUBLE_LINE_END +

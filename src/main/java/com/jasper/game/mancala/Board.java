@@ -1,19 +1,16 @@
-package com.jasper.mancala;
-
-import javax.annotation.Nonnull;
-
+package com.jasper.game.mancala;
 
 public class Board {
 
     private int boardLength = 6;
     private int stonesPerPit = 6;
-    private int[] playingField = new int[6];
+    private int[] playingField = new int[14];
 
     public Board() {
         initBoard(6, 6);
     }
 
-    public Board(@Nonnull Integer boardLength, int stonesPerPit) {
+    public Board(int boardLength, int stonesPerPit) {
         initBoard(boardLength, stonesPerPit);
     }
 
@@ -21,17 +18,9 @@ public class Board {
         initBoard(boardLength, stonesPerPit);
     }
 
-    private void initBoard(Integer boardLength, int stonesPerPit) {
-        if (boardLength <= 0) {
-            throw new IllegalArgumentException("Size of the Mancala board should be bigger as 0");
-        }
-
-        if (stonesPerPit <= 0) {
-            throw new IllegalArgumentException("Stones per mancala Pit cannot be empty, needs to be higher value as 0");
-        }
-
-        setBoardLength(boardLength);
-        setStonesPerPit(stonesPerPit);
+    private void initBoard(int boardLength, int stonesPerPit) {
+        this.boardLength = boardLength;
+        this.stonesPerPit = stonesPerPit;
     }
 
     public void setBoardLength(int boardLength) {
@@ -153,11 +142,11 @@ public class Board {
         return currentField == 0;
     }
 
-    public int getMancalaStorePlayerOne(){
+    public int getMancalaStorePlayerOne() {
         return 0;
     }
 
-    public int getMancalaStorePlayerTwo(){
+    public int getMancalaStorePlayerTwo() {
         return (boardLength + 1);
     }
 
@@ -177,13 +166,13 @@ public class Board {
      * @param field which Players grabs from.
      * @return stones from pit
      */
-    public int getFromPit(int field){
+    public int getFromPit(int field) {
         int amount = playingField[field];
         playingField[field] = 0;
         return amount;
     }
 
-    public int getStoneAmountFromField(int field){
+    public int getStoneAmountFromField(int field) {
         return playingField[field];
     }
 
@@ -194,7 +183,7 @@ public class Board {
             if (isMancalaStore(i)) {
                 sb.append("<br/>");
                 sb.append("Pit").append(i);
-            }else{
+            } else {
                 sb.append(" - Mov").append(i);
             }
             sb.append("(S").append(getPlayingField()[i]).append(")");

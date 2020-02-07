@@ -2,6 +2,7 @@ package com.jasper.model.http;
 
 import com.jasper.model.http.enums.StatusCode;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,18 +11,20 @@ import static com.jasper.model.http.enums.StatusCode.NOT_FOUND;
 /**
  * All variables and functions shared for the HTTP protocol
  */
-public abstract class HttpResponseHandler {
+public abstract class HttpResponseBuilder {
 
-    protected final static String LINE_END = "\r\n";
-    protected final static String SPACE = " ";
-    final static String DOUBLE_LINE_END = "\r\n\r\n";
-
+    protected final String LINE_END = "\r\n";
+    protected final String SPACE = " ";
+    final String DOUBLE_LINE_END = "\r\n\r\n";
     private StatusCode statusCode = NOT_FOUND; //status code of request.
+
+    private Map<String, String> headers = new HashMap<>();
+
     private StringBuilder body = new StringBuilder();
     private String httpVersion;
     private String webSocketAccept;
     private String contentType = "text/html; charset=utf-8";
-    private Map<String, String> headers = new HashMap<>();
+
 
     protected String getWebsocketAcceptString() {
         return webSocketAccept;
@@ -85,6 +88,10 @@ public abstract class HttpResponseHandler {
         this.headers = headers;
     }
 
+    public boolean hasHeader(String key) {
+        return this.headers != null && this.headers.containsKey(key);
+    }
+
     public void overWriteBody(String s) {
         body = new StringBuilder(s);
     }
@@ -97,10 +104,12 @@ public abstract class HttpResponseHandler {
         this.contentType = contentType;
     }
 
+    @Nonnull
     public String getResponse() {
         return toHttpResponse();
     }
 
+    @Nonnull
     public abstract String toHttpResponse();
 
     public abstract int getContentLength();

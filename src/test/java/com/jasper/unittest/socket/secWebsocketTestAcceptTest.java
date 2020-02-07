@@ -1,13 +1,13 @@
 package com.jasper.unittest.socket;
 
-import com.jasper.model.http.models.HttpParser;
+import com.jasper.model.http.models.HttpRequestParser;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class secWebsocketTestAcceptTest {
 
-    private HttpParser requestParser = new HttpParser();
+    private HttpRequestParser requestParser = new HttpRequestParser();
 
     @Test
     public void secSha1EncodeBase64Test() {

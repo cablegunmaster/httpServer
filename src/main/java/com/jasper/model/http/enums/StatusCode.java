@@ -104,4 +104,8 @@ public enum StatusCode {
     public String getStatusCodeNumber() {
         return statusCodeNumber;
     }
+
+    public boolean isSwitchingProtocol() {
+        return this == StatusCode.UPGRADE_REQUIRED;
+    }
 }

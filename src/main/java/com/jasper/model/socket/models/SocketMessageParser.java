@@ -2,16 +2,20 @@ package com.jasper.model.socket.models;
 
 import com.jasper.model.http.enums.SocketMessageState;
 import com.jasper.model.socket.models.entity.Frame;
+import com.jasper.model.socket.models.entity.FrameHandler;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.jasper.model.http.enums.SocketMessageState.*;
+import static com.jasper.model.http.enums.SocketMessageState.CONTENT;
+import static com.jasper.model.http.enums.SocketMessageState.END_FRAME;
+import static com.jasper.model.http.enums.SocketMessageState.LENGTH;
+import static com.jasper.model.http.enums.SocketMessageState.LENGTH_SIXTEEN_BIT;
+import static com.jasper.model.http.enums.SocketMessageState.LENGTH_SIXTY_FOUR_BIT;
+import static com.jasper.model.http.enums.SocketMessageState.MASK;
 import static com.jasper.model.socket.models.utils.ByteUtil.checkBitActivated;
 
 public class SocketMessageParser {
-
-    private final static int MASK_SIZE = 4;
 
     private Frame frame = new Frame();
     private SocketMessageState state = END_FRAME;
@@ -63,7 +67,6 @@ public class SocketMessageParser {
                     //  the following 8 bytes interpreted as a 64-bit unsigned integer (the
                     //   most significant bit MUST be 0
                 }
-
                 break;
 
             case LENGTH_SIXTEEN_BIT:
@@ -88,10 +91,9 @@ public class SocketMessageParser {
                 }
                 break;
             case MASK:
-                if (frame.getMaskList().size() < MASK_SIZE) {
-                    List<Integer> maskList = frame.getMaskList();
-                    maskList.add(input);
-                    if (maskList.size() == MASK_SIZE) {
+                if (frame.getMask().length < FrameHandler.MASK_SIZE) {
+                    frame.addToMask(input);
+                    if (frame.getMask().length == FrameHandler.MASK_SIZE) {
                         setState(CONTENT);
                     }
                 }

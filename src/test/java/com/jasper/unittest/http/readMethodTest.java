@@ -2,7 +2,7 @@ package com.jasper.unittest.http;
 
 import com.jasper.model.HttpRequest;
 import com.jasper.model.http.enums.HttpState;
-import com.jasper.model.http.models.HttpParser;
+import com.jasper.model.http.models.HttpRequestParser;
 import com.jasper.model.http.enums.RequestType;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,15 +24,15 @@ import static org.junit.Assert.assertTrue;
  */
 public class readMethodTest {
 
-    private HttpParser parser;
+    private HttpRequestParser parser;
 
     @Before
     public void createParser() {
-        parser = new HttpParser();
+        parser = new HttpRequestParser();
     }
 
     @Test
-    public void requestMethodIsNotSetAndStillReading() {
+    public void testRequestMethodIsNotSetAndStillReading() {
         String stringToTest = "GE";
 
         for (int i = 0; i < stringToTest.length(); i++){
@@ -48,7 +48,7 @@ public class readMethodTest {
     }
 
     @Test
-    public void requestMethodIsSetTestAlmost() {
+    public void testRequestMethodIsSetTestAlmost() {
         String stringToTest = "GET";
 
         for (int i = 0; i < stringToTest.length(); i++){
@@ -64,7 +64,7 @@ public class readMethodTest {
     }
 
     @Test
-    public void stillReading1LetterTest() {
+    public void testStillReading1Letter() {
         String stringToTest = "O";
 
         for (int i = 0; i < stringToTest.length(); i++){
@@ -81,7 +81,7 @@ public class readMethodTest {
 
 
     @Test
-    public void requestMethodIsSetWithGETTest() {
+    public void testRequestMethodIsSetWithGETTest() {
         String stringToTest = "GET /";
 
         for (int i = 0; i < stringToTest.length(); i++){
@@ -113,7 +113,7 @@ public class readMethodTest {
     }
 
     @Test
-    public void invalidOneLetterRequestMethod() {
+    public void testInvalidOneLetterRequestMethod() {
         String stringToTest = "Z";
 
         for (int i = 0; i < stringToTest.length(); i++){
@@ -129,7 +129,7 @@ public class readMethodTest {
     }
 
     @Test
-    public void invalidRequestMethod() {
+    public void testInvalidRequestMethod() {
         String stringToTest = "OMG ";
 
         for (int i = 0; i < stringToTest.length(); i++){

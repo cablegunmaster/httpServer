@@ -3,7 +3,7 @@ package com.jasper.unittest.http;
 import com.jasper.model.HttpRequest;
 import com.jasper.model.http.enums.HttpState;
 import com.jasper.model.http.enums.RequestType;
-import com.jasper.model.http.models.HttpParser;
+import com.jasper.model.http.models.HttpRequestParser;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -12,17 +12,17 @@ import static org.junit.Assert.assertTrue;
 
 public class readHTTPTest {
 
-    private HttpParser parser;
+    private HttpRequestParser parser;
 
     private final String LINE = "\r\n";
 
     @Before
     public void createParser() {
-        parser = new HttpParser();
+        parser = new HttpRequestParser();
     }
 
     @Test
-    public void requestHTTPStartReading() {
+    public void testRequestHTTPStartReading() {
         String stringToTest = "GET /index.html H";
 
         for (int i = 0; i < stringToTest.length(); i++) {
@@ -39,7 +39,7 @@ public class readHTTPTest {
     }
 
     @Test
-    public void setHttpRequestWithNoPathHTTPVersionOnePointOne() {
+    public void testSetHttpRequestWithNoPathHTTPVersionOnePointOne() {
         String stringToTest = "GET http://localhost:8080/ HTTP/1.1"+ LINE;
 
         for (int i = 0; i < stringToTest.length(); i++) {
@@ -55,7 +55,7 @@ public class readHTTPTest {
     }
 
     @Test
-    public void requestHTTPISStillReading() {
+    public void testRequestHTTPISStillReading() {
         String stringToTest = "GET /index.html HTTP/1.1";
 
         for (int i = 0; i < stringToTest.length(); i++) {
@@ -72,7 +72,7 @@ public class readHTTPTest {
     }
 
     @Test
-    public void requestHTTPIsStartingToReadHeader() {
+    public void testRequestHTTPIsStartingToReadHeader() {
         String stringToTest = "GET /index.html HTTP/1.1 ";
 
         for (int i = 0; i < stringToTest.length(); i++) {
@@ -90,7 +90,7 @@ public class readHTTPTest {
 
 
     @Test
-    public void requestLocalHost() {
+    public void testRequestLocalHost() {
         String stringToTest = "GET http://localhost:8080/index.html HTTP/1.1"+ LINE;
 
         for (int i = 0; i < stringToTest.length(); i++) {

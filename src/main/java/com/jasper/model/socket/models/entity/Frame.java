@@ -1,6 +1,6 @@
 package com.jasper.model.socket.models.entity;
 
-import com.jasper.model.socket.enums.OpCode;
+import com.jasper.model.socket.enums.OPCode;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -11,26 +11,33 @@ import static com.jasper.model.socket.models.utils.ByteUtil.checkBitActivated;
 public class Frame {
 
     //byte 1.
-    private boolean isFinMessage = false;
+    private boolean isEndMessage = false;
     private boolean rsv1 = false;
     private boolean rsv2 = false;
     private boolean rsv3 = false;
-    private OpCode opCode;
+    private OPCode opCode = OPCode.CLOSE;
 
     private boolean isMasked = false;
     private Long payload_len = 0L;
 
-    private List<Integer> maskList = new ArrayList<>(); //max 4.
+    private Integer[] maskArray = new Integer[4];
     private List<Integer> payload = new ArrayList<>(); //content.
     private StringBuffer decodedMessage = new StringBuffer();
 
-    //Finmessage
-    public void setFinBit(int inputFirstByte) {
-        isFinMessage = checkBitActivated(7, inputFirstByte);
+    public StringBuffer getDecodedMessage() {
+        if (isEndMessage()) {
+            decodeMessage();
+        }
+        return decodedMessage;
     }
 
-    public boolean isFinMessage() {
-        return isFinMessage;
+    //Finmessage
+    public void setFinBit(int inputFirstByte) {
+        isEndMessage = checkBitActivated(7, inputFirstByte);
+    }
+
+    public boolean isEndMessage() {
+        return isEndMessage;
     }
 
     public boolean isRsv1() {
@@ -57,7 +64,7 @@ public class Frame {
         this.rsv3 = rsv3;
     }
 
-    public void setOpCode(OpCode opCode) {
+    public void setOpCode(OPCode opCode) {
         this.opCode = opCode;
     }
 
@@ -73,13 +80,13 @@ public class Frame {
             }
         }
 
-        opCode = OpCode.findByValue(
+        opCode = OPCode.findByValue(
                 Long.toHexString(
                         Long.parseLong(bitRange.toString(), 2))
                         .toUpperCase());
     }
 
-    public OpCode getOpCode() {
+    public OPCode getOpCode() {
         return opCode;
     }
 
@@ -93,35 +100,28 @@ public class Frame {
 
     /**
      * Get unsigned byte from Integer.
-     *
-     *     Payload length:  7 bits, 7+16 bits, or 7+64 bits
-     *
-     *     The length of the payload data, in bytes: if 0-125, that is the
-     *     payload length.  If 126, the following 2 bytes interpreted as a 16
-     *     bit unsigned integer are the payload length.  If 127, the
-     *     following 8 bytes interpreted as a 64-bit unsigned integer
-     *     (the most significant bit MUST be 0) are the payload length.  Multibyte
-     *     length quantities are expressed in network byte order.  The
-     *     payload length is the length of the extension data + the length of
-     *     the application data.  The length of the extension data may be
-     *     zero, in which case the payload length is the length of the
-     *     application data.
+     * <p>
+     * Payload length:  7 bits, 7+16 bits, or 7+64 bits
+     * <p>
+     * The length of the payload data, in bytes: if 0-125, that is the
+     * payload length.  If 126, the following 2 bytes interpreted as a 16
+     * bit unsigned integer are the payload length.  If 127, the
+     * following 8 bytes interpreted as a 64-bit unsigned integer
+     * (the most significant bit MUST be 0) are the payload length.  Multibyte
+     * length quantities are expressed in network byte order.  The
+     * payload length is the length of the extension data + the length of
+     * the application data.  The length of the extension data may be
+     * zero, in which case the payload length is the length of the
+     * application data.
      * https://android.jlelse.eu/java-when-to-use-n-8-0xff-and-when-to-use-byte-n-8-2efd82ae7dd7
      */
     private void decodeMessage() {
         byte[] decoded = new byte[payload.size()];
 
         for (int i = 0; i < payload.size(); i++) {
-            decoded[i] = (byte) (payload.get(i) ^ (maskList.get(i % 4)));
+            decoded[i] = (byte) (payload.get(i) ^ (maskArray[i % 4]));
         }
         decodedMessage.append(new String(decoded, StandardCharsets.UTF_8));
-    }
-
-    public StringBuffer getDecodedMessage() {
-        if (isFinMessage()) {
-            decodeMessage();
-        }
-        return decodedMessage;
     }
 
     public Long getPayload_len() {
@@ -136,7 +136,17 @@ public class Frame {
         return payload;
     }
 
-    public List<Integer> getMaskList() {
-        return maskList;
+    public Integer[] getMask() {
+        return maskArray;
     }
+
+    public void addToMask(int mask) {
+        for (int i = 0; i < maskArray.length; i++) {
+            if (maskArray[i] == null) {
+                maskArray[i] = mask;
+                break;
+            }
+        }
+    }
+
 }

@@ -8,4 +8,8 @@ public enum SocketMessageState {
     CONTENT_TO_STRING,
     LENGTH_SIXTEEN_BIT,
     LENGTH_SIXTY_FOUR_BIT;
+
+    public boolean isEndFrame() {
+        return this == SocketMessageState.END_FRAME;
+    }
 }

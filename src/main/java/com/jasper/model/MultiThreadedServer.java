@@ -44,10 +44,9 @@ public class MultiThreadedServer implements Runnable {
 
         while (isRunning()) {
             Socket clientSocket = awaitIncomingConnection();
-
-            if (isRunning() && clientSocket != null) {
+            if (clientSocket != null) {
                 controller.addStringToLog("Connection made.." + getTimeAsString());
-                controller.addConnection(new Client(clientSocket));// ADD JOB.
+                controller.addConnection(new SocketRequest(clientSocket));// ADD JOB.
             }
         }
 

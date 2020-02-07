@@ -20,15 +20,15 @@ import static com.jasper.model.http.enums.StatusCode.SWITCHING_PROTOCOL;
 /**
  * Created by jasper wil.lankhorst on 12-3-2017.
  */
-public class HttpParser {
+public class HttpRequestParser {
 
-    private final static Logger LOG = LoggerFactory.getLogger(HttpParser.class);
+    private final static Logger LOG = LoggerFactory.getLogger(HttpRequestParser.class);
     private final static String VALID_URI_CHARACTERS =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=`.";
 
     private final static Integer BUFFER_SIZE_CACHE = 8192;
     private PostState postState = PostState.READ_POST_NAME;
-    private HttpRequest request = new HttpRequest();
+    private HttpRequest request = new HttpRequest(null);
     private StringBuilder stateUrlBuilder = new StringBuilder();
     private StringBuilder stateBuilder = new StringBuilder();
     private BufferCheck bufferCheck = new BufferCheck();
@@ -225,7 +225,6 @@ public class HttpParser {
                 headerName = headerName.replace(":", "");
                 switch (headerName) {
                     case "Upgrade":
-                        request.setUpgradingConnection(true);
                         request.setStatusCode(StatusCode.SWITCHING_PROTOCOL);
                         break;
                     case "Sec-WebSocket-Key":

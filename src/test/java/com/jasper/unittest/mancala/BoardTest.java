@@ -1,7 +1,8 @@
 package com.jasper.unittest.mancala;
 
-import com.jasper.mancala.Board;
-import com.jasper.mancala.Mancala;
+import com.jasper.game.Player;
+import com.jasper.game.mancala.Board;
+import com.jasper.game.mancala.Mancala;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -22,6 +23,9 @@ import org.junit.Test;
  */
 public class BoardTest {
 
+    Player pl = new Player(null,1);
+    Player p2 = new Player(null,2);
+
     @Test
     public void boardSizeTest() {
         Mancala mancala = new Mancala();
@@ -31,11 +35,13 @@ public class BoardTest {
 
     /**
      * Can only move the 6 places on P1 side.
+     * P1 till P6
      */
     @Test
     public void moveValidOnStandardBoardPlayer1() {
         //Default 14 length board Mancala store on 0 and 7.
         Mancala mancala = new Mancala();
+        mancala.getBoard().fillBoard();
 
         Assert.assertFalse(mancala.isMoveValidOnBoard(-1, 1));
         Assert.assertFalse(mancala.isMoveValidOnBoard(0, 1)); //mancala store P1
@@ -48,11 +54,14 @@ public class BoardTest {
     }
 
     /**
-     * Can only move the 6 place on P2 side.
+     * Can only move the 6 place on the P2 side.
+     * P8 till P13
      */
     @Test
     public void moveValidOnStandardBoardPlayer2() {
         Mancala mancala = new Mancala();
+        mancala.getBoard().fillBoard();
+
         Assert.assertFalse(mancala.isMoveValidOnBoard(-1, 2));
         Assert.assertFalse(mancala.isMoveValidOnBoard(0, 2)); //mancala store P1
         Assert.assertFalse(mancala.isMoveValidOnBoard(1, 2));
@@ -70,7 +79,7 @@ public class BoardTest {
     }
 
     @Test
-    public void checkBoard() {
+    public void checkBoardIsFilled() {
         Board b = new Board(6, 6);
         b.fillBoard();
 
@@ -147,22 +156,24 @@ public class BoardTest {
     public void testMoveIsCorrectlyDropped() {
         Mancala m = new Mancala();
 
+
+
         System.out.println(m.getBoard().toString());
         System.out.println("turn player" + m.getPlayerTurn());
 
-        m.setMove(6, 1);
+        m.setMove(6, pl);
         System.out.println(m.getBoard().toString());
         System.out.println("turn player" + m.getPlayerTurn());
 
-        m.setMove(5, 1);
+        m.setMove(5, pl);
         System.out.println(m.getBoard().toString());
         System.out.println("turn player" + m.getPlayerTurn());
 
-        m.setMove(8, 2);
+        m.setMove(8, p2);
         System.out.println(m.getBoard().toString());
         System.out.println("turn player" + m.getPlayerTurn());
 
-        m.setMove(1, 1);
+        m.setMove(1, pl);
         System.out.println(m.getBoard().toString());
         System.out.println("turn player" + m.getPlayerTurn());
     }
@@ -172,7 +183,7 @@ public class BoardTest {
         Mancala m = new Mancala();
         Assert.assertEquals(1, m.getPlayerTurn());
 
-        m.setMove(6, 1);
+        m.setMove(6, p2);
         Assert.assertEquals(1, m.getPlayerTurn());
     }
 
