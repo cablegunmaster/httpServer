@@ -6,7 +6,7 @@ public interface IGame {
 
     String getName();
 
-    void startGame();
+    void startGame(); //TODO is this needed?
 
     int getPlayerTurn();
 

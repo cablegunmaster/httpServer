@@ -5,19 +5,7 @@ import com.jasper.game.mancala.Mancala;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static com.jasper.game.mancala.Mancala.PLAYER_TWO;
-
 /**
- * boardLength  the distance from Player1 Mancala to Player 2 Mancala.
- * Ex. 1 equals a board size of
- * P1 - Pit - P2
- * Pit
- * <p>
- * Ex 2.
- * P1 - Pit - Pit - P2
- * Pit - Pit
- * stonesPerPit amount of stones per pit.
- * <p>
  * Board example for 14 fielded Mancala.
  * P1 M0 - 1 - 2 - 3 - 4 - 5 - 6 -
  * P2 M7 - 8 - 9 - 10- 11- 12 -13
@@ -43,11 +31,15 @@ public class BoardTest {
             }
         }
 
-        System.out.println(b.toString());
-
         //Check if Mancala store are on the expected fields.
         Assert.assertEquals(0, b.getPlayingField()[0]);
         Assert.assertEquals(0, b.getPlayingField()[7]);
+
+        for (int i = 0; i < b.getPlayingField().length; i++) {
+            if (i != 0 && i != 7) {
+                Assert.assertEquals(6, b.getPlayingField()[i]);
+            }
+        }
     }
 
     /**
@@ -70,23 +62,27 @@ public class BoardTest {
         Assert.assertFalse(mancala.isMoveValidOnBoard(13, 1));
     }
 
-    /**
-     * Can only move the 6 place on the P2 side.
-     * P8 till P13
-     */
     @Test
     public void checkIsMoveValidOnStandardBoardForPlayer2() {
         mancala = new Mancala();
         mancala.getBoard().fillBoard();
 
         Assert.assertFalse(mancala.isMoveValidOnBoard(-1, 2));
-        Assert.assertFalse(mancala.isMoveValidOnBoard(0, 2)); //mancala store P1
         Assert.assertFalse(mancala.isMoveValidOnBoard(1, 2));
-        Assert.assertFalse(mancala.isMoveValidOnBoard(7, 2)); //mancala store P2
 
-        Assert.assertTrue(mancala.isMoveValidOnBoard(11, 2));
-        Assert.assertTrue(mancala.isMoveValidOnBoard(12, 2));
-        Assert.assertTrue(mancala.isMoveValidOnBoard(13, 2));
+        for (int move = 8; move <= 13; move++) {
+            Assert.assertTrue(mancala.isMoveValidOnBoard(8, 2));
+        }
+    }
+
+    @Test
+    public void checkPlayerCannotEnterMancalaMove() {
+        //0 & 7 are mancala positions.
+        mancala = new Mancala();
+        Assert.assertFalse(mancala.isMoveValidOnBoard(7, 2));
+        Assert.assertFalse(mancala.isMoveValidOnBoard(7, 1));
+        Assert.assertFalse(mancala.isMoveValidOnBoard(0, 1));
+        Assert.assertFalse(mancala.isMoveValidOnBoard(0, 2));
     }
 
     @Test
@@ -146,7 +142,7 @@ public class BoardTest {
     }
 
     @Test
-    public void checkBoardGoesCounterClockwise() {
+    public void checkBoardMoveGoesCounterClockwise() {
         Mancala m = new Mancala();
         Assert.assertEquals(12, m.getCounterClockWiseField(13));
     }
