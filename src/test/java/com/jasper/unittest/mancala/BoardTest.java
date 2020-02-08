@@ -1,10 +1,11 @@
 package com.jasper.unittest.mancala;
 
-import com.jasper.game.Player;
 import com.jasper.game.mancala.Board;
 import com.jasper.game.mancala.Mancala;
 import org.junit.Assert;
 import org.junit.Test;
+
+import static com.jasper.game.mancala.Mancala.PLAYER_TWO;
 
 /**
  * boardLength  the distance from Player1 Mancala to Player 2 Mancala.
@@ -23,14 +24,30 @@ import org.junit.Test;
  */
 public class BoardTest {
 
-    Player pl = new Player(null,1);
-    Player p2 = new Player(null,2);
+    Mancala mancala = new Mancala();
 
     @Test
-    public void boardSizeTest() {
-        Mancala mancala = new Mancala();
-        Board board = mancala.getBoard();
-        Assert.assertEquals(6, board.getBoardLength());
+    public void setupRulesCheckBoardIsCorrectSize() {
+        Board b = new Board(6, 6);
+        Assert.assertEquals(14, b.getPlayingField().length);
+    }
+
+    @Test
+    public void setupRulesCheckBoardIsFilledCorrectly() {
+        Board b = new Board(6, 6);
+        b.fillBoard();
+
+        for (int i = 0; i < b.getPlayingField().length; i++) {
+            if (i != 0 && i != 7) {
+                Assert.assertEquals(6, b.getPlayingField()[i]);
+            }
+        }
+
+        System.out.println(b.toString());
+
+        //Check if Mancala store are on the expected fields.
+        Assert.assertEquals(0, b.getPlayingField()[0]);
+        Assert.assertEquals(0, b.getPlayingField()[7]);
     }
 
     /**
@@ -38,9 +55,9 @@ public class BoardTest {
      * P1 till P6
      */
     @Test
-    public void moveValidOnStandardBoardPlayer1() {
+    public void checkIsMoveValidOnStandardBoardForPlayer1() {
         //Default 14 length board Mancala store on 0 and 7.
-        Mancala mancala = new Mancala();
+        mancala = new Mancala();
         mancala.getBoard().fillBoard();
 
         Assert.assertFalse(mancala.isMoveValidOnBoard(-1, 1));
@@ -58,8 +75,8 @@ public class BoardTest {
      * P8 till P13
      */
     @Test
-    public void moveValidOnStandardBoardPlayer2() {
-        Mancala mancala = new Mancala();
+    public void checkIsMoveValidOnStandardBoardForPlayer2() {
+        mancala = new Mancala();
         mancala.getBoard().fillBoard();
 
         Assert.assertFalse(mancala.isMoveValidOnBoard(-1, 2));
@@ -73,135 +90,70 @@ public class BoardTest {
     }
 
     @Test
-    public void checkFieldSize() {
-        Board b = new Board(6, 6);
-        Assert.assertEquals(14, b.getPlayingField().length);
-    }
-
-    @Test
-    public void checkBoardIsFilled() {
-        Board b = new Board(6, 6);
-        b.fillBoard();
-
-        for (int i = 0; i < b.getPlayingField().length; i++) {
-            if (i != 0 && i != 7) {
-                Assert.assertEquals(6, b.getPlayingField()[i]);
-            }
-        }
-
-        System.out.println(b.toString());
-
-        //Mancala store are on these fields.
-        Assert.assertEquals(0, b.getPlayingField()[0]);
-        Assert.assertEquals(0, b.getPlayingField()[7]);
-    }
-
-    @Test
-    public void checkOneSideEmptyIsFalse() {
-        Board b = new Board();
-        b.fillBoard();
-        Assert.assertFalse(b.isOneSideEmpty());
-    }
-
-    @Test
-    public void checkOneSideEmptyIsTrue() {
+    public void checkIsBoardEmpty() {
         Board b = new Board();
         b.setBoardLength(6);
-        Assert.assertTrue(b.isOneSideEmpty());
+        Assert.assertEquals(2, b.getPlayerWinning());
     }
 
     @Test
-    public void checkP1SideIsEmpty() {
-        Board b = new Board();
-        b.setBoardLength(6);
-
-        b.addStoneOnField(3, 1);
-
-        Assert.assertTrue(b.isOneSideEmpty());
-    }
-
-    @Test
-    public void checkP2SideIsEmpty() {
-        Board b = new Board();
-        b.setBoardLength(6);
-
-        b.addStoneOnField(9, 1);
-
-        Assert.assertTrue(b.isOneSideEmpty());
-    }
-
-    @Test
-    public void checkOneSideIsEmptyWhenBothSidesAreStillFilled() {
-        Board b = new Board();
-        b.setBoardLength(6);
-
-        b.addStoneOnField(3, 1);
-        b.addStoneOnField(9, 1);
-
-        Assert.assertFalse(b.isOneSideEmpty());
-    }
-
-    @Test
-    public void emptyCheckSkipsMancalaStoreWhenFieldHasStonesFilledIn() {
+    public void checkIsBoardEmptyAndSkipMancalaStore() {
         Board b = new Board();
         b.setBoardLength(6);
 
         b.addStoneOnField(0, 1);
         b.addStoneOnField(7, 1);
 
-        Assert.assertTrue(b.isOneSideEmpty());
+        Assert.assertEquals(2, b.getPlayerWinning());
     }
 
     @Test
-    public void testMoveIsCorrectlyDropped() {
-        Mancala m = new Mancala();
-
-
-
-        System.out.println(m.getBoard().toString());
-        System.out.println("turn player" + m.getPlayerTurn());
-
-        m.setMove(6, pl);
-        System.out.println(m.getBoard().toString());
-        System.out.println("turn player" + m.getPlayerTurn());
-
-        m.setMove(5, pl);
-        System.out.println(m.getBoard().toString());
-        System.out.println("turn player" + m.getPlayerTurn());
-
-        m.setMove(8, p2);
-        System.out.println(m.getBoard().toString());
-        System.out.println("turn player" + m.getPlayerTurn());
-
-        m.setMove(1, pl);
-        System.out.println(m.getBoard().toString());
-        System.out.println("turn player" + m.getPlayerTurn());
+    public void checkIsBoardNotEmptyAfterFilling() {
+        Board b = new Board();
+        b.fillBoard();
+        Assert.assertEquals(0, b.getPlayerWinning());
     }
 
     @Test
-    public void testMoveIsDroppedOnMancalaStoreToPlayer1() {
-        Mancala m = new Mancala();
-        Assert.assertEquals(1, m.getPlayerTurn());
+    public void checkBoardOnPlayerOneSideIsEmpty() {
+        Board b = new Board();
+        b.setBoardLength(6);
 
-        m.setMove(6, p2);
-        Assert.assertEquals(1, m.getPlayerTurn());
+        b.addStoneOnField(3, 1);
+
+        Assert.assertEquals(Mancala.PLAYER_ONE, b.getPlayerWinning());
     }
 
     @Test
-    public void testReverseClockMove() {
-        Mancala m = new Mancala();
+    public void checkBoardOnPlayerTwoSideIsEmpty() {
+        Board b = new Board();
+        b.setBoardLength(6);
 
-        Assert.assertEquals(12, m.goOneFieldBack(13));
-        Assert.assertEquals(13, m.goOneFieldBack(0));
+        b.addStoneOnField(9, 1);
+
+        Assert.assertEquals(Mancala.PLAYER_TWO, b.getPlayerWinning());
     }
 
     @Test
-    public void isLastMoveOnMancalaStoreTest() {
-        Mancala m = new Mancala();
+    public void checkBoardIsNotEmptyWhenBothSidesAreStillFilledWithOneStone() {
+        Board b = new Board();
+        b.setBoardLength(6);
 
-        Assert.assertTrue(m.isFieldOnMancalaStore(0, 1));
-        Assert.assertFalse(m.isFieldOnMancalaStore(0, 2));
-        Assert.assertFalse(m.isFieldOnMancalaStore(7, 1));
-        Assert.assertTrue(m.isFieldOnMancalaStore(7, 2));
+        b.addStoneOnField(3, 1);
+        b.addStoneOnField(9, 1);
+
+        Assert.assertEquals(0, b.getPlayerWinning());
+    }
+
+    @Test
+    public void checkBoardGoesCounterClockwise() {
+        Mancala m = new Mancala();
+        Assert.assertEquals(12, m.getCounterClockWiseField(13));
+    }
+
+    @Test
+    public void checkBoardGoesMinusOne() {
+        Mancala m = new Mancala();
+        Assert.assertEquals(13, m.getCounterClockWiseField(0));
     }
 }

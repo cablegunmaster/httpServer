@@ -1,5 +1,6 @@
 package com.jasper.game.mancala;
 
+//following rules: https://endlessgames.com/wp-content/uploads/Mancala_Instructions.pdf
 public class Board {
 
     private int boardLength = 6;
@@ -39,44 +40,14 @@ public class Board {
         }
     }
 
-    public void setStonesPerPit(int stonesPerPit) {
-        this.stonesPerPit = stonesPerPit;
-
-        if (getPlayingField() != null) {
-            fillBoard();
-        }
-    }
-
     /**
      * Checks if length is empty
      *
-     * @return if 6 consequtive of array are empty.
+     * @return a number who is winning
      */
-    public boolean isOneSideEmpty() {
-        int j = 0;
-
-        for (int field = 0; field < getPlayingField().length; field++) {
-
-            if (isMancalaStore(field)) {
-                continue;
-            }
-
-            if (getPlayingField()[field] == 0) {
-                j++;
-            } else {
-                j = 0;
-            }
-
-            if (j == boardLength) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     public int getPlayerWinning() {
-        int j = 0;
+        int emptyField = 0;
+
         for (int field = 0; field < getPlayingField().length; field++) {
 
             if (isMancalaStore(field)) {
@@ -84,15 +55,15 @@ public class Board {
             }
 
             if (getPlayingField()[field] == 0) {
-                j++;
+                emptyField++;
             } else {
-                j = 0;
+                emptyField = 0;
             }
 
-            if (j == boardLength) {
+            if (emptyField == boardLength) {
                 if (isPlayerOneField(field)) {
                     return Mancala.PLAYER_TWO;
-                } else {
+                } else if (isPlayerTwoField(field)) {
                     return Mancala.PLAYER_ONE;
                 }
             }
@@ -166,7 +137,7 @@ public class Board {
      * @param field which Players grabs from.
      * @return stones from pit
      */
-    public int getFromPit(int field) {
+    public int grabStonesFromPit(int field) {
         int amount = playingField[field];
         playingField[field] = 0;
         return amount;

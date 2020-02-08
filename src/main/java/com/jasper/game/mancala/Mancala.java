@@ -9,11 +9,11 @@ import javax.annotation.Nonnull;
 
 public class Mancala implements IGame {
 
-    final static int PLAYER_ONE = 1;
-    final static int PLAYER_TWO = 2;
+    public final static int PLAYER_ONE = 1;
+    public final static int PLAYER_TWO = 2;
 
     private int playerTurn = 1; //1 always start.
-    private int playerWinning;
+    private int playerWinning  = 0;
 
     private Board board;
     private Player player1;
@@ -33,40 +33,48 @@ public class Mancala implements IGame {
     public void setMove(int move, Player player) {
         Board board = getBoard();
 
-        if (checkMoveIsValid(move, player.getPlayerNumber()) && !isGameFinished()) {
-            int amount = board.getFromPit(move);
-            int field = goOneFieldBack(move);
+        if (checkPlayerMoveIsValid(move, player.getPlayerNumber()) && !isGameFinished()) {
+            int stonesInHand = board.grabStonesFromPit(move);
+            int field = getCounterClockWiseField(move);
 
-            for (int stones = amount; stones > 0; stones--) {
-
-
-                if (canAddStoneOnCurrentField(field, player.getPlayerNumber()) &&
-                        stones == 1 && !isFieldOnMancalaStore(field, player.getPlayerNumber())) {
-                    board.addStoneOnField(field, 1);
-                    if (board.getStoneAmountFromField(field) == 1) {
-                        addCapturedStonesToMancala(field);
-                        board.addStoneOnField(field, -1);
-                    }
-                    switchTurn();
-                } else {
-                    //ifOnOtherPlayerMancaladontdrop.
-                    stones++;
-                }
-                field = goOneFieldBack(field);
+            for (int stonesLeftInHand = stonesInHand; stonesLeftInHand > 0; stonesLeftInHand--) {
+                stonesLeftInHand = dropStoneOnBoard(field, stonesLeftInHand);
+                field = getCounterClockWiseField(field);
             }
         }
     }
 
+    public int dropStoneOnBoard(int field, int stonesLeftInHand) {
+        if (canAddStoneOnCurrentField(field, playerTurn) &&
+                stonesLeftInHand == 1) {
+
+            board.addStoneOnField(field, 1);
+
+            if (board.getStoneAmountFromField(field) == 1) {
+                addCapturedStonesToMancala(field);
+                board.addStoneOnField(field, -1);
+            }
+
+            switchTurn();
+        } else {
+            stonesLeftInHand++;
+        }
+        return stonesLeftInHand;
+    }
+
     private void addCapturedStonesToMancala(int field) {
         int collectedStones = board.getStoneAmountFromField(getOppositeBoardField(field));
+        int storeLocationP1 = board.getMancalaStorePlayerOne();
+        int storeLocationP2 = board.getMancalaStorePlayerTwo();
+
         if (playerTurn == 1) {
-            board.addStoneOnField(board.getMancalaStorePlayerOne(), collectedStones + 1);
+            board.addStoneOnField(storeLocationP1, collectedStones + 1);
         } else {
-            board.addStoneOnField(board.getMancalaStorePlayerTwo(), collectedStones + 1);
+            board.addStoneOnField(storeLocationP2, collectedStones + 1);
         }
     }
 
-    public boolean checkMoveIsValid(int move, int playerNumber) {
+    public boolean checkPlayerMoveIsValid(int move, int playerNumber) {
         return isMoveValidOnBoard(move, playerNumber) &&
                 playerTurn == playerNumber;
     }
@@ -82,7 +90,7 @@ public class Mancala implements IGame {
                 playerNumber == PLAYER_TWO && board.isMancalaStoreForPlayerTwo(field));
     }
 
-    public int goOneFieldBack(int field) {
+    public int getCounterClockWiseField(int field) {
         if (field == 0) {
             return board.getBoardLength() * 2 + 1;
         }
@@ -107,9 +115,6 @@ public class Mancala implements IGame {
         }
     }
 
-    public int getPlayerTurn() {
-        return playerTurn;
-    }
 
     public void switchTurn() {
         setPlayerTurn(PLAYER_ONE == getPlayerTurn() ? PLAYER_TWO : PLAYER_ONE);
@@ -122,44 +127,10 @@ public class Mancala implements IGame {
     }
 
     public boolean isGameFinished() {
-        Board board = getBoard();
-
-        if (board.isOneSideEmpty()) {
-            if (board.getPlayerWinning() == PLAYER_ONE) {
-                setPlayerWinning(PLAYER_ONE);
-            } else {
-                setPlayerWinning(PLAYER_TWO);
-            }
-            return true;
-        }
-        return false;
+        playerWinning = getBoard().getPlayerWinning();
+        return getBoard().getPlayerWinning() > 0;
     }
 
-    public int getPlayerWinning() {
-        return playerWinning;
-    }
-
-    @Nonnull
-    public Board getBoard() {
-        return board;
-    }
-
-    public void setBoard(Board board) {
-        this.board = board;
-    }
-
-    public void setPlayerWinning(int playerWinning) {
-        this.playerWinning = playerWinning;
-    }
-
-    public void setPlayerTurn(int playerTurn) {
-        this.playerTurn = playerTurn;
-    }
-
-    @Override
-    public void startGame() {
-       gameStarted = true;
-    }
 
     @CheckForNull
     public Player getPlayerByRequest(Request client) {
@@ -210,6 +181,28 @@ public class Mancala implements IGame {
         return player.equals(player1) || player.equals(player2);
     }
 
+    @Nonnull
+    public Board getBoard() {
+        return board;
+    }
+
+    public void setBoard(Board board) {
+        this.board = board;
+    }
+
+    public void setPlayerTurn(int playerTurn) {
+        this.playerTurn = playerTurn;
+    }
+
+    @Override
+    public void startGame() {
+        gameStarted = true;
+    }
+
+    public int getPlayerTurn() {
+        return playerTurn;
+    }
+
     @Override
     public String getBoardContent() {
         return board.toString();
@@ -235,5 +228,13 @@ public class Mancala implements IGame {
 
     public boolean isGameStarted() {
         return gameStarted;
+    }
+
+    public int getPlayerWinning() {
+        return playerWinning;
+    }
+
+    public void setPlayerWinning(int playerWinning) {
+        this.playerWinning = playerWinning;
     }
 }

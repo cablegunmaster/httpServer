@@ -5,7 +5,6 @@ import com.jasper.model.HttpRequest;
 import com.jasper.model.Request;
 import com.jasper.model.SocketRequest;
 import com.jasper.model.http.HttpResponseBuilder;
-import com.jasper.model.socket.SocketResponse;
 import com.jasper.model.socket.enums.OPCode;
 import com.jasper.model.socket.models.SocketMessageParser;
 import com.jasper.model.socket.models.entity.Frame;

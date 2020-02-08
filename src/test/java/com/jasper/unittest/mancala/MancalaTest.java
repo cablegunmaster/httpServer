@@ -1,5 +1,6 @@
 package com.jasper.unittest.mancala;
 
+import com.jasper.game.Player;
 import com.jasper.game.mancala.Board;
 import com.jasper.game.mancala.Mancala;
 import org.junit.Assert;
@@ -7,12 +8,34 @@ import org.junit.Test;
 
 public class MancalaTest {
 
-    private Mancala mancala;
+    private Mancala mancala = new Mancala();
+    private Player pl = new Player(null, 1);
+    private Player p2 = new Player(null, 2);
+
 
     @Test
     public void InitBoardConditionTurn() {
         mancala = new Mancala();
         Assert.assertEquals(mancala.getPlayerTurn(), 1); //p1 always begins.
+    }
+
+    @Test
+    public void checkSwitchingTurnPlayerOneToPlayerTwoIsDoneCorrectly() {
+        Mancala m = new Mancala();
+        Assert.assertEquals(1, m.getPlayerTurn());
+
+        m.setMove(6, p2);
+        Assert.assertEquals(1, m.getPlayerTurn());
+    }
+
+    @Test
+    public void isLastMoveSetOnMancalaStore() {
+        Mancala m = new Mancala();
+
+        Assert.assertTrue(m.isFieldOnMancalaStore(0, 1));
+        Assert.assertFalse(m.isFieldOnMancalaStore(0, 2));
+        Assert.assertFalse(m.isFieldOnMancalaStore(7, 1));
+        Assert.assertTrue(m.isFieldOnMancalaStore(7, 2));
     }
 
     @Test
@@ -29,7 +52,7 @@ public class MancalaTest {
 
         mancala.isGameFinished();
 
-        Assert.assertEquals("Player 2 wins", 2, mancala.getPlayerWinning());
+        Assert.assertEquals("Player 2 wins", 2, mancala.getBoard().getPlayerWinning());
     }
 
     @Test
@@ -50,7 +73,7 @@ public class MancalaTest {
     }
 
     @Test
-    public void reflectBoard(){
+    public void checkOppositeLocation(){
         Mancala m = new Mancala();
 
         // P1 M0 - 1 - 2 - 3 - 4 - 5 - 6 -

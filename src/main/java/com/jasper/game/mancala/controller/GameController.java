@@ -45,7 +45,7 @@ public class GameController {
                   int move) {
         IGame sessionGame = gameMap.get(player);
         if (sessionGame.isStarted() &&
-            game.getPlayerTurn() == player.getPlayerNumber()) {
+                game.getPlayerTurn() == player.getPlayerNumber()) {
             game.setMove(move, player);
         }
     }

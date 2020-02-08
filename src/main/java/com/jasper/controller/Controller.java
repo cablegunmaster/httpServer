@@ -1,8 +1,8 @@
 package com.jasper.controller;
 
-import com.jasper.model.Request;
 import com.jasper.model.IRequestBuilder;
 import com.jasper.model.MultiThreadedServer;
+import com.jasper.model.Request;
 import com.jasper.model.connection.ConnectionManager;
 import com.jasper.view.View;
 
@@ -166,7 +166,9 @@ public class Controller {
     }
 
     @Nonnull
-    public Map<String, IRequestBuilder> getGetMap() { return getMap; }
+    public Map<String, IRequestBuilder> getGetMap() {
+        return getMap;
+    }
 
     @Nonnull
     public Map<String, IRequestBuilder> getPostMap() {

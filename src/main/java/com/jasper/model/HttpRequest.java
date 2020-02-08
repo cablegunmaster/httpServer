@@ -12,7 +12,7 @@ import java.util.Map;
 
 
 /**
- * Model for a request to be send / used.
+ * Model for a request to be received.
  */
 public class HttpRequest extends Request {
 
